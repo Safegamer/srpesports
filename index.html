@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRP-ESPORTS Season 2 Leaderboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #020617; /* Solid background fallback */
+            background-image: radial-gradient(circle at top, #0f172a, #020617);
+            color: white;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- HARDWARE-ACCELERATED ANIMATIONS (60FPS) --- */
+        :root {
+            --smooth-spring: cubic-bezier(0.16, 1, 0.3, 1); /* Faster, lighter spring */
+            --bouncy-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Nav Links */
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            margin: 8px 0;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #cbd5f5;
+            /* Only transition specific GPU-friendly properties */
+            transition: transform 0.25s var(--smooth-spring), background-color 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+            will-change: transform;
+        }
+
+        .nav-link:hover {
+            transform: translateX(6px);
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .nav-link.active {
+            background: rgba(59, 130, 246, 0.25);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.2);
+            color: white;
+        }
+
+        /* Optimized Cards (Removed heavy backdrop filters for performance) */
+        .custom-card {
+            background: rgba(15, 23, 42, 0.6); /* Solid slate background instead of laggy blur */
+            padding: 25px;
+            border-radius: 18px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            /* Strictly animate GPU properties */
+            transition: transform 0.3s var(--smooth-spring), box-shadow 0.3s var(--smooth-spring), border-color 0.3s ease;
+            animation: fadeUp 0.6s var(--smooth-spring) forwards;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            opacity: 0;
+            transform: translateY(20px);
+            will-change: transform, opacity;
+        }
+
+        .custom-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 45px rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glow-title { 
+            transition: transform 0.3s var(--smooth-spring), color 0.3s ease, text-shadow 0.3s ease; 
+            will-change: transform;
+        }
+        .glow-title:hover {
+            color: #60a5fa;
+            text-shadow: 0 0 12px rgba(96, 165, 250, 0.5);
+            transform: scale(1.01);
+            transform-origin: left;
+        }
+
+        /* --- SMOOTH & LIGHTWEIGHT TABLE ROWS --- */
+        .custom-tr {
+            background: rgba(255, 255, 255, 0.01);
+            opacity: 0;
+            transform: translateY(15px);
+            animation: rowEnter 0.5s var(--smooth-spring) forwards;
+            transition: transform 0.25s var(--smooth-spring), background-color 0.2s ease, box-shadow 0.25s var(--smooth-spring);
+            will-change: transform, opacity;
+        }
+
+        @keyframes rowEnter {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .custom-tr:hover {
+            transform: translateY(-2px) scale(1.008);
+            background-color: rgba(59, 130, 246, 0.12);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
+            position: relative;
+            z-index: 5;
+        }
+
+        .custom-tr td {
+            transition: border-radius 0.25s ease;
+        }
+
+        .custom-tr:hover td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+        .custom-tr:hover td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+
+        .top1 { border-left: 4px solid gold; background: linear-gradient(90deg, rgba(255,215,0,0.08), transparent); }
+        .top2 { border-left: 4px solid silver; background: linear-gradient(90deg, rgba(192,192,192,0.08), transparent); }
+        .top3 { border-left: 4px solid #cd7f32; background: linear-gradient(90deg, rgba(205,127,50,0.08), transparent); }
+
+        /* --- OPTIMIZED SOCIALS --- */
+        .socials { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 14px; z-index: 100; }
+        .socials a {
+            position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+            border-radius: 14px; background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255,255,255,0.06); 
+            transition: transform 0.25s var(--smooth-spring), box-shadow 0.25s var(--smooth-spring);
+            color: white; font-size: 20px; text-decoration: none;
+            will-change: transform;
+        }
+
+        .socials a:hover {
+            transform: translateY(-6px) scale(1.1);
+        }
+
+        .discord:hover { box-shadow: 0 0 20px rgba(88,101,242,0.5); color: #5865F2;}
+        .youtube:hover { box-shadow: 0 0 20px rgba(255,0,0,0.5); color: #FF0000;}
+
+        /* --- INPUT & BUTTONS --- */
+        .custom-input {
+            padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);
+            background: #020617; color: white; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease; width: 100%;
+        }
+        .custom-input:focus { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); transform: translateY(-1px); }
+
+        .custom-btn {
+            padding: 11px 18px; border: none; border-radius: 10px; background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white; cursor: pointer; transition: transform 0.25s var(--bouncy-spring), box-shadow 0.25s ease; font-weight: 600;
+            will-change: transform;
+        }
+        .custom-btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 16px rgba(59, 130, 246, 0.4); }
+        .custom-btn:active { transform: translateY(0) scale(0.97); }
+        
+        .custom-btn.delete { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .custom-btn.delete:hover { box-shadow: 0 8px 16px rgba(239, 68, 68, 0.4); }
+
+        .custom-btn.secondary { background: rgba(255,255,255,0.08); }
+        .custom-btn.secondary:hover { background: rgba(255,255,255,0.15); box-shadow: 0 8px 16px rgba(255,255,255,0.05); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
+
+        .modal-overlay {
+            background: rgba(2, 6, 23, 0.7);
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+        .modal-content { animation: popIn 0.35s var(--bouncy-spring) forwards; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.92) translateY(15px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-slate-200">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden fixed top-0 w-full z-50 flex justify-between items-center p-4 bg-slate-950 border-b border-slate-900">
+        <h1 class="text-xl font-bold text-blue-400 flex items-center gap-2">
+            SRP-ESPORTS 
+            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 border border-blue-500/20">S2</span>
+        </h1>
+        <button onclick="toggleMobileMenu()" class="text-2xl text-slate-300 hover:text-white transition-transform active:scale-90">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed md:static inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 var(--smooth-spring) z-40 w-64 bg-[#020617] border-r border-slate-900 p-5 pt-20 md:pt-8 shadow-2xl flex flex-col justify-between">
+        <div>
+            <h2 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-200 mb-8 tracking-wider uppercase hidden md:block px-2 glow-title leading-tight">
+                SRP-ESPORTS
+                <span class="block text-sm text-blue-500 mt-1 tracking-widest font-bold drop-shadow-sm">SEASON 2</span>
+            </h2>
+            <nav class="space-y-2">
+                <a onclick="switchTab('leaderboard')" id="nav-leaderboard" class="nav-link active">
+                    <i class="fas fa-trophy w-8 text-center text-xl"></i> <span class="font-semibold text-lg">Leaderboard</span>
+                </a>
+                <a onclick="switchTab('admin')" id="nav-admin" class="nav-link">
+                    <i class="fas fa-cog w-8 text-center text-xl"></i> <span class="font-semibold text-lg">Admin Panel</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto pt-20 md:pt-0 p-4 md:p-10 relative" id="main-scroll">
+        
+        <!-- Alerts Container -->
+        <div id="alerts-container" class="fixed top-24 md:top-8 right-4 z-[200] flex flex-col gap-3"></div>
+
+        <!-- ============================== -->
+        <!-- 1. LEADERBOARD & RECENT MATCHES-->
+        <!-- ============================== -->
+        <div id="view-leaderboard" class="max-w-5xl mx-auto block">
+            <h1 class="text-4xl font-bold tracking-tight mb-8 glow-title text-white">Leaderboard</h1>
+
+            <!-- Leaderboard Table -->
+            <div class="custom-card !p-0 overflow-hidden overflow-x-auto">
+                <table class="w-full text-left border-collapse whitespace-nowrap">
+                    <thead>
+                        <tr class="text-[#94a3b8] text-sm uppercase tracking-wider bg-white/5 border-b border-white/10">
+                            <th class="p-5 font-semibold">Rank</th>
+                            <th class="p-5 font-semibold">Team Name</th>
+                            <th class="p-5 font-semibold text-center">M</th>
+                            <th class="p-5 font-semibold text-center text-green-400">W</th>
+                            <th class="p-5 font-semibold text-center text-red-400">L</th>
+                            <th class="p-5 font-semibold text-center">D</th>
+                            <th class="p-5 font-semibold text-center">RD</th>
+                            <th class="p-5 font-semibold text-center text-blue-400 text-lg">Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-tbody" class="divide-y divide-white/5">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Recent Matches Section -->
+            <div class="mt-12 mb-20">
+                <h2 class="text-3xl font-bold tracking-tight mb-6 glow-title text-white flex items-center gap-3">
+                    <i class="fas fa-fire text-orange-500 animate-pulse"></i> Recent Matches
+                </h2>
+                <div id="recent-matches-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================== -->
+        <!-- 2. LOGIN VIEW (Security Wall)  -->
+        <!-- ============================== -->
+        <div id="view-login" class="max-w-sm mx-auto hidden mt-20">
+            <div class="custom-card">
+                <div class="text-center mb-6">
+                    <i class="fas fa-shield-alt text-4xl text-blue-500 mb-3"></i>
+                    <h2 class="text-3xl font-bold glow-title text-white">Admin Login</h2>
+                </div>
+                <form onsubmit="handleLogin(event)" class="space-y-5">
+                    <div>
+                        <input type="text" id="login-username" placeholder="Username" required class="custom-input">
+                    </div>
+                    <div>
+                        <input type="password" id="login-password" placeholder="Password (Hint: 1234)" required class="custom-input">
+                    </div>
+                    <button type="submit" class="custom-btn w-full mt-2 text-lg py-3">Access Dashboard</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ============================== -->
+        <!-- 3. ADMIN VIEW                  -->
+        <!-- ============================== -->
+        <div id="view-admin" class="max-w-6xl mx-auto hidden pb-20">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <h1 class="text-4xl font-bold tracking-tight glow-title text-white">Admin Dashboard</h1>
+                <button onclick="handleLogout()" class="custom-btn secondary">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </button>
+            </div>
+            
+            <!-- TEAM MANAGEMENT -->
+            <h2 class="text-2xl font-bold mb-4 text-blue-400 flex items-center gap-2">
+                <i class="fas fa-users"></i> Manage Teams
+            </h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <div class="custom-card lg:col-span-1 h-fit">
+                    <h3 class="text-xl font-bold mb-5 text-white">Register Team</h3>
+                    <form id="add-team-form" onsubmit="addTeam(event)" class="space-y-4">
+                        <input type="text" id="new-team-name" required placeholder="Team Name" class="custom-input">
+                        <button type="submit" class="custom-btn w-full"><i class="fas fa-plus mr-2"></i> Add Team</button>
+                    </form>
+                </div>
+
+                <div class="custom-card !p-0 lg:col-span-2 overflow-x-auto">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                            <tr class="text-[#94a3b8] text-sm uppercase tracking-wider bg-white/5">
+                                <th class="p-5 font-semibold">Team</th>
+                                <th class="p-5 font-semibold text-center">W-D-L</th>
+                                <th class="p-5 font-semibold text-center">RD</th>
+                                <th class="p-5 font-semibold text-center">Pts</th>
+                                <th class="p-5 font-semibold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-tbody" class="divide-y divide-white/5">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MATCH MANAGEMENT -->
+            <h2 class="text-2xl font-bold mb-4 text-orange-400 flex items-center gap-2">
+                <i class="fas fa-gamepad"></i> Manage Matches (Stats)
+            </h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="custom-card lg:col-span-1 h-fit">
+                    <h3 class="text-xl font-bold mb-5 text-white">Create Match</h3>
+                    <form id="add-match-form" onsubmit="addMatch(event)" class="space-y-4">
+                        <input type="text" id="new-match-title" required placeholder="e.g. Map 1 - Bermuda" class="custom-input">
+                        <button type="submit" class="custom-btn w-full bg-orange-600 hover:bg-orange-500"><i class="fas fa-plus mr-2"></i> Create Match</button>
+                    </form>
+                </div>
+
+                <div class="custom-card !p-0 lg:col-span-2 overflow-x-auto">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                            <tr class="text-[#94a3b8] text-sm uppercase tracking-wider bg-white/5">
+                                <th class="p-5 font-semibold">Match Title</th>
+                                <th class="p-5 font-semibold text-center">Date</th>
+                                <th class="p-5 font-semibold text-center">Players Logged</th>
+                                <th class="p-5 font-semibold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-matches-tbody" class="divide-y divide-white/5">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODALS                         -->
+    <!-- ============================== -->
+
+    <!-- Edit Team Modal -->
+    <div id="edit-modal" class="fixed inset-0 modal-overlay z-[100] hidden flex items-center justify-center p-4">
+        <div class="custom-card w-full max-w-md modal-content relative !m-0">
+            <button onclick="closeEditModal()" class="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors text-2xl">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-6 glow-title text-white" id="edit-modal-title">Edit Team</h2>
+            
+            <form id="edit-team-form" onsubmit="saveTeamEdits(event)" class="space-y-4">
+                <input type="hidden" id="edit-team-index">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 font-bold text-[#94a3b8]">Name</span>
+                    <input type="text" id="edit-name" required class="custom-input flex-1">
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="w-10 font-bold text-[#94a3b8]">M</span>
+                    <input type="number" id="edit-m" required class="custom-input flex-1">
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="w-10 font-bold text-green-400">W</span>
+                    <input type="number" id="edit-w" required class="custom-input flex-1">
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="w-10 font-bold text-[#94a3b8]">D</span>
+                    <input type="number" id="edit-d" required class="custom-input flex-1">
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="w-10 font-bold text-red-400">L</span>
+                    <input type="number" id="edit-l" required class="custom-input flex-1">
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="w-10 font-bold text-blue-400">RD</span>
+                    <input type="number" id="edit-rd" required class="custom-input flex-1">
+                </div>
+                <button type="submit" class="custom-btn w-full mt-6 py-3 text-lg">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Public Stats Modal -->
+    <div id="stats-modal" class="fixed inset-0 modal-overlay z-[100] hidden flex items-center justify-center p-4">
+        <div class="custom-card w-full max-w-2xl modal-content relative !m-0 max-h-[80vh] flex flex-col">
+            <button onclick="closeStatsModal()" class="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors text-2xl z-10">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-3xl font-bold mb-2 text-white glow-title pr-10" id="stats-modal-title">Match Stats</h2>
+            <p class="text-slate-400 mb-6" id="stats-modal-date"></p>
+            
+            <div class="overflow-y-auto overflow-x-auto flex-1 pr-2 rounded-xl border border-white/5">
+                <table class="w-full text-left border-collapse whitespace-nowrap">
+                    <thead class="sticky top-0 bg-[#020617] z-10">
+                        <tr class="text-[#94a3b8] text-sm uppercase tracking-wider border-b border-white/10">
+                            <th class="p-4 font-semibold">#</th>
+                            <th class="p-4 font-semibold">Player</th>
+                            <th class="p-4 font-semibold">Team</th>
+                            <th class="p-4 font-semibold text-center text-blue-400">Kills</th>
+                            <th class="p-4 font-semibold text-center text-red-400">Deaths</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-modal-tbody" class="divide-y divide-white/5 bg-white/5">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Manage Match Stats Modal -->
+    <div id="admin-match-modal" class="fixed inset-0 modal-overlay z-[100] hidden flex items-center justify-center p-4">
+        <div class="custom-card w-full max-w-3xl modal-content relative !m-0 max-h-[90vh] flex flex-col">
+            <button onclick="closeAdminMatchModal()" class="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors text-2xl z-10">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-6 text-white glow-title" id="admin-match-modal-title">Edit Match Stats</h2>
+            
+            <!-- Add Player Form -->
+            <div class="bg-black/20 p-4 rounded-xl border border-white/10 mb-6">
+                <h4 class="font-semibold text-blue-300 mb-3 text-sm uppercase tracking-wider">Log Player Performance</h4>
+                <form id="add-stat-form" onsubmit="addPlayerStat(event)" class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <input type="hidden" id="stat-match-id">
+                    <input type="text" id="stat-player" required placeholder="Player IGN" class="custom-input md:col-span-2">
+                    <input type="text" id="stat-team" required placeholder="Team Name" class="custom-input md:col-span-1">
+                    <input type="number" id="stat-kills" required placeholder="Kills" min="0" class="custom-input">
+                    <input type="number" id="stat-deaths" required placeholder="Deaths" min="0" class="custom-input">
+                    <button type="submit" class="custom-btn md:col-span-5 py-2"><i class="fas fa-check mr-2"></i> Save Player Stat</button>
+                </form>
+            </div>
+
+            <!-- Current Logged Players -->
+            <div class="overflow-y-auto flex-1 border border-white/10 rounded-xl">
+                <table class="w-full text-left border-collapse whitespace-nowrap">
+                    <thead class="sticky top-0 bg-[#0f172a] z-10 shadow-md">
+                        <tr class="text-[#94a3b8] text-xs uppercase tracking-wider">
+                            <th class="p-3 font-semibold">Player</th>
+                            <th class="p-3 font-semibold text-center">Kills</th>
+                            <th class="p-3 font-semibold text-center">Deaths</th>
+                            <th class="p-3 font-semibold text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-match-stats-tbody" class="divide-y divide-white/5 bg-white/5">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Sandbox-Safe Confirm Modal -->
+    <div id="confirm-modal" class="fixed inset-0 modal-overlay z-[300] hidden flex items-center justify-center p-4">
+        <div class="custom-card w-full max-w-sm modal-content relative !m-0 text-center border border-red-500/30">
+            <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4 animate-pulse"></i>
+            <h2 class="text-2xl font-bold mb-2 text-white">Are you sure?</h2>
+            <p id="confirm-message" class="text-slate-400 mb-6"></p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirm()" class="custom-btn secondary flex-1">Cancel</button>
+                <button onclick="executeConfirm()" class="custom-btn delete flex-1">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Socials Floating links -->
+    <div class="socials">
+        <a href="https://discord.gg/FG2UEmq64f" target="_blank" class="discord" data-name="Join Discord">
+            <i class="fab fa-discord"></i>
+        </a>
+        <a href="https://www.youtube.com/@srpriyanshuyt" target="_blank" class="youtube" data-name="YouTube Channel">
+            <i class="fab fa-youtube"></i>
+        </a>
+    </div>
+
+    <!-- Firebase App Configuration Scripts -->
+    <script>
+        // --- ⚙️ PASTE YOUR FIREBASE CONFIG HERE TO USE ON GITHUB PAGES ---
+        // Create your project on console.firebase.google.com and grab this config!
+        let firebaseConfig = {
+            apiKey: "AIzaSyAhRbTO_-3s8VLKqBwisO1lMHn-FZAQR28",
+            authDomain: "sresports-592a7.firebaseapp.com",
+            projectId: "sresports-592a7",
+            storageBucket: "sresports-592a7.firebasestorage.app",
+            messagingSenderId: "989857650043",
+            appId: "1:989857650043:web:c6fdb766412a5dfcebd9de"
+        };
+
+        // Initialize Firebase with fallback prevention
+        if (firebaseConfig.apiKey.includes("Replace")) {
+            console.warn("⚠️ Firebase credentials not customized! Running in Offline Sandbox Demo mode.");
+        } else {
+            firebase.initializeApp(firebaseConfig);
+            var db = firebase.firestore();
+        }
+
+        // --- OFFLINE FALLBACK DEMO DATA (Used if Firebase Config isn't entered) ---
+        let offlineTeams = [
+            { name: "Total Gaming", M: 5, W: 4, L: 1, D: 0, RD: 15 },
+            { name: "Desi Gamers", M: 5, W: 3, L: 1, D: 1, RD: 8 },
+            { name: "Gyan Gaming", M: 5, W: 3, L: 2, D: 0, RD: 2 },
+            { name: "Two Side Gamers", M: 4, W: 1, L: 3, D: 0, RD: -5 }
+        ];
+
+        let offlineMatches = [
+            {
+                id: 1,
+                title: "Match 1 - Bermuda",
+                date: "Oct 12, 2026",
+                stats: [
+                    { player: "Ajjubhai94", team: "Total Gaming", kills: 8, deaths: 1 },
+                    { player: "Amitbhai", team: "Desi Gamers", kills: 5, deaths: 2 },
+                    { player: "GyanSujan", team: "Gyan Gaming", kills: 3, deaths: 4 }
+                ]
+            },
+            {
+                id: 2,
+                title: "Match 2 - Purgatory",
+                date: "Oct 14, 2026",
+                stats: [
+                    { player: "TSG_Jash", team: "Two Side Gamers", kills: 7, deaths: 0 },
+                    { player: "Ajjubhai94", team: "Total Gaming", kills: 6, deaths: 2 },
+                    { player: "RomeoGamer", team: "Desi Gamers", kills: 2, deaths: 3 }
+                ]
+            }
+        ];
+
+        // --- GLOBAL RUNTIME STATE ---
+        let teams = [];
+        let matches = [];
+        let isAuthenticated = false;
+        let isUsingFirebase = !firebaseConfig.apiKey.includes("Replace");
+
+        // --- CUSTOM SANDBOX-SAFE CONFIRM SYSTEM ---
+        let pendingConfirmCallback = null;
+
+        function showConfirm(message, callback) {
+            document.getElementById('confirm-message').innerText = message;
+            document.getElementById('confirm-modal').classList.remove('hidden');
+            pendingConfirmCallback = callback;
+        }
+
+        function closeConfirm() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            pendingConfirmCallback = null;
+        }
+
+        function executeConfirm() {
+            if (pendingConfirmCallback) pendingConfirmCallback();
+            closeConfirm();
+        }
+
+        // --- AUTH ACTION LOGIC ---
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('login-username').value;
+            const pass = document.getElementById('login-password').value;
+
+            if (user === "admin" && pass === "1234") {
+                isAuthenticated = true;
+                showToast("Access Granted. Welcome Admin!", "success");
+                document.getElementById('login-password').value = '';
+                
+                document.getElementById('view-login').classList.add('hidden');
+                document.getElementById('view-admin').classList.remove('hidden');
+                updateUI();
+            } else {
+                showToast("Invalid credentials ❌", "error");
+            }
+        }
+
+        function handleLogout() {
+            isAuthenticated = false;
+            showToast("Session closed successfully.");
+            switchTab('leaderboard');
+        }
+
+        // --- DATABASE SYNCING ---
+        async function fetchState() {
+            if (!isUsingFirebase) {
+                // If demo mode, read from memory arrays
+                teams = [...offlineTeams];
+                matches = [...offlineMatches];
+                updateUI();
+                return;
+            }
+
+            // Real-Time Firebase Listeners
+            db.collection("tournament").doc("state").onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    teams = data.teams || [];
+                    matches = data.matches || [];
+                    updateUI();
+                } else {
+                    // Seed initial data if blank
+                    saveToServer();
+                }
+            }, (error) => {
+                console.error("Firebase read error: ", error);
+                showToast("Connection to Firebase lost ❌", "error");
+            });
+        }
+
+        async function saveToServer() {
+            if (!isUsingFirebase) {
+                updateUI();
+                return;
+            }
+
+            try {
+                await db.collection("tournament").doc("state").set({
+                    teams: teams,
+                    matches: matches
+                });
+            } catch (err) {
+                console.error("Firebase write error: ", err);
+                showToast("Error saving database updates.", "error");
+            }
+        }
+
+        // --- UTILITIES ---
+        function calculatePoints(w, d) { return (parseInt(w) * 3) + parseInt(d); }
+        function getSortedTeams() {
+            return teams.map((t, index) => ({...t, originalIndex: index, P: calculatePoints(t.W, t.D)}))
+                .sort((a, b) => {
+                    if (b.P !== a.P) return b.P - a.P;
+                    return b.RD - a.RD;
+                });
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('alerts-container');
+            const alert = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-[#3b82f6]/20 border border-[#3b82f6]/50' : 'bg-red-500/20 border border-red-500/50';
+            const icon = type === 'success' ? 'fa-check-circle text-blue-400' : 'fa-exclamation-circle text-red-400';
+            
+            alert.className = `flex items-center gap-3 px-5 py-3 rounded-xl backdrop-blur-md shadow-2xl text-white modal-content ${bgClass}`;
+            alert.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+            
+            container.appendChild(alert);
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                alert.style.transform = 'scale(0.9) translateY(-20px)';
+                alert.style.transition = 'all 0.3s var(--smooth-spring)';
+                setTimeout(() => alert.remove(), 400);
+            }, 3000);
+        }
+
+        // --- UI COMPONENT RENDERERS ---
+        function updateUI() {
+            renderLeaderboard();
+            renderRecentMatches();
+            if (isAuthenticated) {
+                renderAdminTeams();
+                renderAdminMatches();
+            }
+        }
+
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboard-tbody');
+            const sorted = getSortedTeams();
+            
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-[#94a3b8] italic custom-tr">No teams registered yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sorted.map((team, index) => {
+                const rankClass = index === 0 ? 'top1' : index === 1 ? 'top2' : index === 2 ? 'top3' : '';
+                const medal = index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                
+                return `
+                <tr class="custom-tr ${rankClass}" style="animation-delay: ${index * 0.05}s">
+                    <td class="p-5 font-bold text-lg text-[#94a3b8]">${index + 1}</td>
+                    <td class="p-5 font-bold text-white flex items-center gap-2">${team.name} <span class="text-xl">${medal}</span></td>
+                    <td class="p-5 text-center text-white">${team.M}</td>
+                    <td class="p-5 text-center text-green-400 font-bold">${team.W}</td>
+                    <td class="p-5 text-center text-red-400">${team.L}</td>
+                    <td class="p-5 text-center text-white">${team.D}</td>
+                    <td class="p-5 text-center font-bold ${team.RD > 0 ? 'text-blue-400' : team.RD < 0 ? 'text-orange-400' : 'text-slate-400'}">
+                        ${team.RD > 0 ? '+' : ''}${team.RD}
+                    </td>
+                    <td class="p-5 text-center text-blue-400 font-black text-2xl drop-shadow-md">${team.P}</td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function renderRecentMatches() {
+            const container = document.getElementById('recent-matches-container');
+            const recentMatches = matches.slice(-2).reverse(); 
+
+            if(recentMatches.length === 0) {
+                container.innerHTML = `<p class="text-slate-500 italic col-span-2">No matches played yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = recentMatches.map((match, i) => `
+                <div class="custom-card !mb-0 flex flex-col justify-between" style="animation-delay: ${i * 0.15}s">
+                    <div>
+                        <div class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-1">${match.date}</div>
+                        <h3 class="text-2xl font-bold text-white mb-2">${match.title}</h3>
+                        <p class="text-sm text-slate-400 mb-6"><i class="fas fa-users mr-1"></i> ${match.stats.length} players tracked</p>
+                    </div>
+                    <button onclick="openStatsModal(${match.id})" class="custom-btn w-full flex items-center justify-center gap-2">
+                        <i class="fas fa-chart-bar"></i> View Detailed Stats
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminTeams() {
+            const tbody = document.getElementById('admin-tbody');
+            const sorted = getSortedTeams();
+            
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-[#94a3b8] italic custom-tr">No teams to manage.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sorted.map((team, index) => `
+                <tr class="custom-tr" style="animation-delay: ${index * 0.05}s">
+                    <td class="p-5 font-bold text-white">${team.name}</td>
+                    <td class="p-5 text-center text-sm font-medium">
+                        <span class="text-green-400">${team.W}</span> - <span class="text-[#94a3b8]">${team.D}</span> - <span class="text-red-400">${team.L}</span>
+                    </td>
+                    <td class="p-5 text-center text-white font-medium">${team.RD}</td>
+                    <td class="p-5 text-center font-bold text-blue-400 text-lg">${team.P}</td>
+                    <td class="p-5 text-right space-x-2">
+                        <button onclick="openEditModal(${team.originalIndex})" class="custom-btn secondary py-1.5 px-3 text-sm"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteTeam(${team.originalIndex})" class="custom-btn delete py-1.5 px-3 text-sm"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderAdminMatches() {
+            const tbody = document.getElementById('admin-matches-tbody');
+            const reversedMatches = [...matches].reverse(); 
+
+            if(reversedMatches.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-[#94a3b8] italic custom-tr">No matches created yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = reversedMatches.map((m, i) => `
+                <tr class="custom-tr" style="animation-delay: ${i * 0.05}s">
+                    <td class="p-5 font-bold text-white">${m.title}</td>
+                    <td class="p-5 text-center text-slate-300 text-sm">${m.date}</td>
+                    <td class="p-5 text-center font-bold text-orange-400">${m.stats.length} <i class="fas fa-user-ninja text-xs"></i></td>
+                    <td class="p-5 text-right space-x-2">
+                        <button onclick="openAdminMatchModal(${m.id})" class="custom-btn py-1.5 px-3 text-sm bg-orange-600 hover:bg-orange-500 font-semibold">Manage Stats</button>
+                        <button onclick="deleteMatch(${m.id})" class="custom-btn delete py-1.5 px-3 text-sm"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- WRITE ACTIONS ---
+        async function addTeam(e) {
+            e.preventDefault();
+            const input = document.getElementById('new-team-name');
+            const name = input.value.trim();
+            if (teams.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+                showToast('Team name already exists!', 'error'); return;
+            }
+            teams.push({ name, M: 0, W: 0, L: 0, D: 0, RD: 0 });
+            input.value = '';
+            await saveToServer();
+            showToast('Team added successfully!');
+        }
+
+        function deleteTeam(index) {
+            showConfirm(`Delete team "${teams[index].name}"?`, async () => {
+                teams.splice(index, 1);
+                await saveToServer();
+                showToast(`Team deleted!`, 'error');
+            });
+        }
+
+        async function addMatch(e) {
+            e.preventDefault();
+            const titleInput = document.getElementById('new-match-title');
+            const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            
+            matches.push({
+                id: Date.now(), 
+                title: titleInput.value.trim(),
+                date: dateStr,
+                stats: []
+            });
+            titleInput.value = '';
+            await saveToServer();
+            showToast('Match created!');
+        }
+
+        function deleteMatch(id) {
+            showConfirm('Delete this match and all its stats?', async () => {
+                matches = matches.filter(m => m.id !== id);
+                await saveToServer();
+                showToast('Match deleted!', 'error');
+            });
+        }
+
+        async function addPlayerStat(e) {
+            e.preventDefault();
+            const matchId = parseInt(document.getElementById('stat-match-id').value);
+            const match = matches.find(m => m.id === matchId);
+            
+            if(match) {
+                match.stats.push({
+                    player: document.getElementById('stat-player').value.trim(),
+                    team: document.getElementById('stat-team').value.trim(),
+                    kills: parseInt(document.getElementById('stat-kills').value),
+                    deaths: parseInt(document.getElementById('stat-deaths').value)
+                });
+                
+                document.getElementById('stat-player').value = '';
+                document.getElementById('stat-team').value = '';
+                document.getElementById('stat-kills').value = '';
+                document.getElementById('stat-deaths').value = '';
+                
+                renderAdminMatchStatsList(match);
+                showToast('Player stat logged!');
+                await saveToServer();
+            }
+        }
+
+        async function deletePlayerStat(matchId, statIndex) {
+            const match = matches.find(m => m.id === matchId);
+            if(match) {
+                match.stats.splice(statIndex, 1);
+                renderAdminMatchStatsList(match);
+                await saveToServer();
+            }
+        }
+
+        // --- TEAM MODAL CONTROLS ---
+        function openEditModal(index) {
+            const team = teams[index];
+            document.getElementById('edit-modal-title').innerText = `Edit: ${team.name}`;
+            document.getElementById('edit-team-index').value = index;
+            document.getElementById('edit-name').value = team.name;
+            document.getElementById('edit-m').value = team.M;
+            document.getElementById('edit-w').value = team.W;
+            document.getElementById('edit-d').value = team.D;
+            document.getElementById('edit-l').value = team.L;
+            document.getElementById('edit-rd').value = team.RD;
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+
+        async function saveTeamEdits(e) {
+            e.preventDefault();
+            const index = parseInt(document.getElementById('edit-team-index').value);
+            const newName = document.getElementById('edit-name').value.trim();
+            
+            if (teams[index].name !== newName && teams.some(t => t.name.toLowerCase() === newName.toLowerCase())) {
+                showToast('A team with this name already exists!', 'error'); return;
+            }
+
+            teams[index] = {
+                name: newName,
+                M: parseInt(document.getElementById('edit-m').value) || 0,
+                W: parseInt(document.getElementById('edit-w').value) || 0,
+                D: parseInt(document.getElementById('edit-d').value) || 0,
+                L: parseInt(document.getElementById('edit-l').value) || 0,
+                RD: parseInt(document.getElementById('edit-rd').value) || 0
+            };
+            closeEditModal();
+            await saveToServer();
+            showToast('Team updated successfully!');
+        }
+
+        // --- MATCH MODAL CONTROLS ---
+        function openStatsModal(matchId) {
+            const match = matches.find(m => m.id === matchId);
+            if(!match) return;
+
+            document.getElementById('stats-modal-title').innerText = match.title;
+            document.getElementById('stats-modal-date').innerText = `Played on ${match.date}`;
+            
+            const tbody = document.getElementById('stats-modal-tbody');
+            const sortedStats = [...match.stats].sort((a,b) => b.kills - a.kills);
+
+            if(sortedStats.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 italic">No player stats logged yet.</td></tr>`;
+            } else {
+                tbody.innerHTML = sortedStats.map((stat, i) => {
+                    const highlight = i === 0 ? 'text-yellow-400 font-bold' : 'text-white';
+                    const mvpIcon = i === 0 ? ' <i class="fas fa-star text-xs ml-1 text-yellow-500 animate-pulse" title="MVP"></i>' : '';
+                    return `
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="p-4 text-slate-400 font-bold">${i+1}</td>
+                        <td class="p-4 ${highlight}">${stat.player}${mvpIcon}</td>
+                        <td class="p-4 text-slate-400 text-sm">${stat.team}</td>
+                        <td class="p-4 text-center text-blue-400 font-bold text-lg">${stat.kills}</td>
+                        <td class="p-4 text-center text-red-400">${stat.deaths}</td>
+                    </tr>
+                `}).join('');
+            }
+            document.getElementById('stats-modal').classList.remove('hidden');
+        }
+
+        function closeStatsModal() { document.getElementById('stats-modal').classList.add('hidden'); }
+
+        function openAdminMatchModal(matchId) {
+            const match = matches.find(m => m.id === matchId);
+            if(!match) return;
+
+            document.getElementById('admin-match-modal-title').innerText = `Stats: ${match.title}`;
+            document.getElementById('stat-match-id').value = match.id;
+            
+            renderAdminMatchStatsList(match);
+            document.getElementById('admin-match-modal').classList.remove('hidden');
+        }
+
+        function renderAdminMatchStatsList(match) {
+            const tbody = document.getElementById('admin-match-stats-tbody');
+            const sorted = match.stats.map((s, idx) => ({...s, originalIdx: idx})).sort((a,b) => b.kills - a.kills);
+
+            if(sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500 italic">No stats logged. Add below.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sorted.map((stat) => `
+                <tr class="hover:bg-white/5">
+                    <td class="p-3">
+                        <div class="font-bold text-white">${stat.player}</div>
+                        <div class="text-xs text-slate-400">${stat.team}</div>
+                    </td>
+                    <td class="p-3 text-center text-blue-400 font-bold">${stat.kills}</td>
+                    <td class="p-3 text-center text-red-400">${stat.deaths}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="deletePlayerStat(${match.id}, ${stat.originalIdx})" class="text-red-400 hover:text-red-300 transition-colors p-2">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function closeAdminMatchModal() { document.getElementById('admin-match-modal').classList.add('hidden'); }
+
+        // --- WINDOW NAVIGATION ---
+        function switchTab(tab) {
+            document.getElementById('view-leaderboard').classList.add('hidden');
+            document.getElementById('view-admin').classList.add('hidden');
+            document.getElementById('view-login').classList.add('hidden');
+            
+            if (tab === 'admin' && !isAuthenticated) {
+                document.getElementById('view-login').classList.remove('hidden');
+            } else {
+                document.getElementById(`view-${tab}`).classList.remove('hidden');
+                updateUI();
+            }
+            
+            document.getElementById('nav-leaderboard').classList.remove('active');
+            document.getElementById('nav-admin').classList.remove('active');
+            document.getElementById(`nav-${tab}`).classList.add('active');
+
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        function toggleMobileMenu() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
+
+        // Bootstrapping
+        fetchState();
+    </script>
+</body>
+</html>
