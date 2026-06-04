@@ -94,10 +94,16 @@
         /* --- TABLE ROW ENTER & SWEEPING HOVER --- */
         .custom-tr {
             background: rgba(255, 255, 255, 0.03);
+            transition: transform 0.25s var(--bouncy-spring), background 0.25s var(--smooth-spring), box-shadow 0.25s var(--smooth-spring);
+            will-change: transform, background-color, box-shadow;
+        }
+
+        /* Hardware-accelerated entrance animation for public view only */
+        .row-entrance {
             opacity: 0;
-            transform: translateY(40px);
-            animation: rowEnter 0.7s var(--smooth-spring) forwards;
-            transition: all 0.3s var(--bouncy-spring);
+            transform: translateY(30px);
+            animation: rowEnter 0.6s var(--smooth-spring) forwards;
+            will-change: transform, opacity;
         }
 
         @keyframes rowEnter {
@@ -105,7 +111,7 @@
         }
 
         .custom-tr:hover {
-            transform: translateY(-6px) scale(1.02);
+            transform: translateY(-4px) scale(1.015);
             background: rgba(59, 130, 246, 0.2);
             box-shadow: 0 10px 30px rgba(59, 130, 246, 0.35);
             position: relative;
@@ -283,7 +289,7 @@
                         <input type="text" id="login-username" placeholder="Username" required class="custom-input">
                     </div>
                     <div>
-                        <input type="password" id="login-password" placeholder="Password (Hint: 1234)" required class="custom-input">
+                        <input type="password" id="login-password" placeholder="Password" required class="custom-input">
                     </div>
                     <button type="submit" class="custom-btn w-full mt-2 text-lg py-3">Access Dashboard</button>
                 </form>
@@ -645,7 +651,7 @@
                 const medal = index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
                 
                 return `
-                <tr class="custom-tr ${rankClass}" style="animation-delay: ${index * 0.08}s">
+                <tr class="custom-tr row-entrance ${rankClass}" style="animation-delay: ${index * 0.05}s">
                     <td class="p-5 font-bold text-lg text-[#94a3b8]">#${index + 1}</td>
                     <td class="p-5 font-bold text-white flex items-center gap-2">${team.name} <span class="text-xl">${medal}</span></td>
                     <td class="p-5 text-center text-white">${team.M || 0}</td>
@@ -695,7 +701,7 @@
             }
 
             tbody.innerHTML = sorted.map((team, index) => `
-                <tr class="custom-tr" style="animation-delay: ${index * 0.05}s">
+                <tr class="custom-tr">
                     <td class="p-5 font-bold text-white">${team.name}</td>
                     <td class="p-5 text-center text-sm font-medium">
                         <span class="text-green-400">${team.W || 0}</span> - <span class="text-[#94a3b8]">${team.D || 0}</span> - <span class="text-red-400">${team.L || 0}</span>
@@ -720,7 +726,7 @@
             }
 
             tbody.innerHTML = sortedMatches.map((m, i) => `
-                <tr class="custom-tr" style="animation-delay: ${i * 0.05}s">
+                <tr class="custom-tr">
                     <td class="p-5 font-bold text-white">${m.title}</td>
                     <td class="p-5 text-center text-slate-300 text-sm">${m.date}</td>
                     <td class="p-5 text-center font-bold text-orange-400">${(m.stats || []).length} <i class="fas fa-user-ninja text-xs"></i></td>
