@@ -471,10 +471,7 @@
                         <input type="text" id="login-username" placeholder="Admin or Team Username" required class="custom-input">
                     </div>
                     <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="block text-xs uppercase text-slate-400 font-semibold">Password</label>
-                            <a onclick="openForgotPasswordModal()" class="text-xs text-blue-400 hover:underline cursor-pointer">Forgot Password?</a>
-                        </div>
+                        <label class="block text-xs uppercase text-slate-400 font-semibold mb-1">Password</label>
                         <input type="password" id="login-password" placeholder="Password" required class="custom-input">
                     </div>
                     <button type="submit" id="login-submit-btn" class="custom-btn w-full mt-2 text-base py-3 flex items-center justify-center gap-2">
@@ -512,11 +509,6 @@
                     <div>
                         <label class="block text-xs uppercase text-slate-400 font-semibold mb-1">Team Name *</label>
                         <input type="text" id="reg-team-name" required placeholder="e.g. Total Gaming" class="custom-input">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs uppercase text-slate-400 font-semibold mb-1">Leader Email *</label>
-                        <input type="email" id="reg-leader-email" required placeholder="leader@example.com" class="custom-input">
                     </div>
 
                     <div>
@@ -787,7 +779,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <!-- OPTION 1: OLD / SOFT END SEASON (SYNC HALL OF FAME ONLY, NO MAINTENANCE) -->
+                    <!-- OPTION 1: SOFT END SEASON (SYNC HALL OF FAME ONLY, NO MAINTENANCE) -->
                     <div class="bg-black/30 p-5 rounded-2xl border border-white/10 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center gap-2 text-yellow-400 font-bold mb-2">
@@ -823,6 +815,7 @@
                 <!-- Manual Hall of Fame Overrides -->
                 <form id="hof-form" onsubmit="saveHallOfFameSettings(event)" class="space-y-4 pt-4 border-t border-white/10">
                     <span class="text-xs uppercase text-slate-400 font-bold tracking-wider block">Manual Hall of Fame Data Overrides</span>
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1 font-semibold">Past Season Label</label>
@@ -846,6 +839,17 @@
                         <div>
                             <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1 font-semibold">Champion Roster</label>
                             <input type="text" id="admin-hof-champ-roster" placeholder="e.g. Player 1, Player 2" class="custom-input">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-white/5">
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1 font-semibold">Runner-Up Team Name</label>
+                            <input type="text" id="admin-hof-runner-name" placeholder="e.g. Team Elite (Optional)" class="custom-input">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1 font-semibold">Runner-Up Logo</label>
+                            <input type="text" id="admin-hof-runner-logo" placeholder="URL or choose image (Optional)" class="custom-input text-xs">
                         </div>
                     </div>
 
@@ -990,31 +994,6 @@
                     <i class="fas fa-lock"></i> Conclude & Lock
                 </button>
             </div>
-        </div>
-    </div>
-
-    <!-- FORGOT PASSWORD MODAL (RATE LIMITED: ONCE EVERY 2 WEEKS) -->
-    <div id="forgot-password-modal" class="fixed inset-0 modal-overlay z-[150] hidden flex items-center justify-center p-4">
-        <div class="custom-card w-full max-w-sm modal-content relative !m-0">
-            <button onclick="closeForgotPasswordModal()" class="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors text-2xl">
-                <i class="fas fa-times"></i>
-            </button>
-            <h3 class="text-xl font-bold text-white mb-2"><i class="fas fa-unlock-alt text-blue-400 mr-2"></i>Reset Password</h3>
-            <p class="text-xs text-slate-400 mb-4">Password resets are permitted <strong>only once every 2 weeks</strong> per team.</p>
-
-            <form onsubmit="handleLeaderPasswordReset(event)" class="space-y-4">
-                <div>
-                    <label class="text-xs text-slate-400 block mb-1 font-semibold">Team Leader Username or Email</label>
-                    <input type="text" id="reset-leader-username" required placeholder="Enter username or email" class="custom-input">
-                </div>
-                <div>
-                    <label class="text-xs text-slate-400 block mb-1 font-semibold">New Password</label>
-                    <input type="password" id="reset-leader-newpass" required placeholder="Enter new password" class="custom-input">
-                </div>
-                <button type="submit" class="custom-btn w-full py-2.5">
-                    <i class="fas fa-key mr-1"></i> Update Password
-                </button>
-            </form>
         </div>
     </div>
 
@@ -1434,10 +1413,6 @@
                 adminAuthData = { username: "admin", passHash: initialHash };
                 db.collection("settings").doc("admin_auth").set(adminAuthData);
             }
-            const masterUserInput = document.getElementById('admin-master-user-input');
-            if (masterUserInput && document.activeElement !== masterUserInput) {
-                masterUserInput.value = adminAuthData.username || "admin";
-            }
         }, (err) => console.error("Failed to fetch admin auth:", err));
 
         // --- REALTIME PAST SEASON (HALL OF FAME) DATA ---
@@ -1788,13 +1763,12 @@
             }
         }
 
-        // --- ROBUST TOKEN REGISTRATION (RESET BUTTON ON ERROR + SHAKE WARNING) ---
+        // --- ROBUST TOKEN REGISTRATION (NO EMAIL REQUIREMENT + ERROR FEEDBACK) ---
         async function handleTokenRegistration(e) {
             e.preventDefault();
             const tokenField = document.getElementById('reg-token');
             const tokenInput = tokenField.value.trim().toUpperCase();
             const teamName = document.getElementById('reg-team-name').value.trim();
-            const email = document.getElementById('reg-leader-email').value.trim();
             const logoUrl = document.getElementById('reg-team-logo').value.trim();
             const username = document.getElementById('reg-leader-user').value.trim();
             const password = document.getElementById('reg-leader-pass').value.trim();
@@ -1805,11 +1779,10 @@
             const p4 = document.getElementById('reg-p4').value.trim();
 
             const submitBtn = document.getElementById('reg-submit-btn');
-
             tokenField.classList.remove('!border-red-500');
 
-            if (!tokenInput || !teamName || !username || !password || !email) {
-                showToast("Please fill in all required fields (Token, Team Name, Email, Username, Password)!", "error");
+            if (!tokenInput || !teamName || !username || !password) {
+                showToast("Please fill in all required fields (Token, Team Name, Username, Password)!", "error");
                 return;
             }
 
@@ -1854,14 +1827,12 @@
 
                 const newTeamDoc = await db.collection("teams").add({
                     name: teamName,
-                    leaderEmail: email,
                     logoUrl: logoUrl,
                     leaderUser: username,
                     leaderPassHash: passHash,
                     rosterLocked: false,
                     disqualified: false,
                     dqReason: "",
-                    lastResetTimestamp: null,
                     roster: { p1, p2, p3, p4, sub1: '', sub2: '' },
                     tokenRedeemed: tokenInput,
                     registeredAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1887,51 +1858,6 @@
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `<i class="fas fa-check-circle mr-1"></i> Activate & Register`;
             }
-        }
-
-        // --- PASSWORD RESET (RATE LIMITED: ONCE EVERY 2 WEEKS) ---
-        function openForgotPasswordModal() {
-            document.getElementById('forgot-password-modal').classList.remove('hidden');
-        }
-
-        function closeForgotPasswordModal() {
-            document.getElementById('forgot-password-modal').classList.add('hidden');
-        }
-
-        async function handleLeaderPasswordReset(e) {
-            e.preventDefault();
-            const identifier = document.getElementById('reset-leader-username').value.trim();
-            const newPass = document.getElementById('reset-leader-newpass').value.trim();
-
-            const team = teams.find(t => 
-                (t.leaderUser || '').toLowerCase() === identifier.toLowerCase() || 
-                (t.leaderEmail || '').toLowerCase() === identifier.toLowerCase()
-            );
-
-            if (!team) {
-                showToast("No active squad found with this username or email ❌", "error");
-                return;
-            }
-
-            const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
-            if (team.lastResetTimestamp) {
-                const lastResetTime = team.lastResetTimestamp.toMillis ? team.lastResetTimestamp.toMillis() : team.lastResetTimestamp;
-                const elapsed = Date.now() - lastResetTime;
-                if (elapsed < TWO_WEEKS_MS) {
-                    const daysRemaining = Math.ceil((TWO_WEEKS_MS - elapsed) / (1000 * 60 * 60 * 24));
-                    showToast(`Limit reached: Password can only be changed once every 2 weeks. Try again in ${daysRemaining} days or open a Discord ticket! ⏳`, "error");
-                    return;
-                }
-            }
-
-            const newHash = await sha256(newPass);
-            db.collection("teams").doc(team.id).update({
-                leaderPassHash: newHash,
-                lastResetTimestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                closeForgotPasswordModal();
-                showToast("Password reset successfully! You can reset again in 2 weeks. 🔑", "success");
-            }).catch(() => showToast("Failed to update password ❌", "error"));
         }
 
         // --- DISQUALIFICATION TOGGLE IN ADMIN MODAL ---
@@ -2062,12 +1988,11 @@
                 return;
             }
 
-            // Execute Full Season Conclusion: Updates Hall of Fame AND turns on Maintenance Mode
             Promise.all([
                 db.collection("settings").doc("past_season").set(pkg, { merge: true }),
                 db.collection("settings").doc("tournament").set({
                     maintenanceMode: true,
-                    maintenanceNotice: `${currentSeason} has concluded! Champions crowned in Hall of Fame. Public viewing is under maintenance while preparing for next season.`
+                    maintenanceNotice: `${currentSeason} has concluded! Champions crowned in Hall of Fame. Standings are under maintenance while preparing for next season.`
                 }, { merge: true })
             ]).then(() => {
                 closeStrictEndModal();
@@ -2229,6 +2154,11 @@
                 `;
             }
 
+            const getVal = (id, fallback = '') => {
+                const el = document.getElementById(id);
+                return el ? el.value.trim() : fallback;
+            };
+
             const fSeason = document.getElementById('admin-hof-season');
             const fChampName = document.getElementById('admin-hof-champ-name');
             const fChampLogo = document.getElementById('admin-hof-champ-logo');
@@ -2248,20 +2178,35 @@
 
         function saveHallOfFameSettings(e) {
             e.preventDefault();
+
+            const getVal = (id, fallback = '') => {
+                const el = document.getElementById(id);
+                return el ? el.value.trim() : fallback;
+            };
+
             const dataToSave = {
-                seasonName: document.getElementById('admin-hof-season').value.trim(),
-                champName: document.getElementById('admin-hof-champ-name').value.trim(),
-                champLogo: document.getElementById('admin-hof-champ-logo').value.trim(),
-                champRecord: document.getElementById('admin-hof-champ-record').value.trim(),
-                champRoster: document.getElementById('admin-hof-champ-roster').value.trim(),
-                runnerName: document.getElementById('admin-hof-runner-name').value.trim(),
-                runnerLogo: document.getElementById('admin-hof-runner-logo').value.trim(),
+                seasonName: getVal('admin-hof-season', pastSeasonData.seasonName || ''),
+                champName: getVal('admin-hof-champ-name', pastSeasonData.champName || ''),
+                champLogo: getVal('admin-hof-champ-logo', pastSeasonData.champLogo || ''),
+                champRecord: getVal('admin-hof-champ-record', pastSeasonData.champRecord || ''),
+                champRoster: getVal('admin-hof-champ-roster', pastSeasonData.champRoster || ''),
+                runnerName: getVal('admin-hof-runner-name', pastSeasonData.runnerName || ''),
+                runnerLogo: getVal('admin-hof-runner-logo', pastSeasonData.runnerLogo || ''),
+                recordPlayer: pastSeasonData.recordPlayer || '',
+                recordKills: pastSeasonData.recordKills || '',
+                recordDesc: pastSeasonData.recordDesc || '',
+                mvpPlayer: pastSeasonData.mvpPlayer || '',
+                mvpKills: pastSeasonData.mvpKills || '',
+                mvpDesc: pastSeasonData.mvpDesc || '',
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             db.collection("settings").doc("past_season").set(dataToSave, { merge: true })
-                .then(() => showToast("Hall of Fame details saved! 🏆", "success"))
-                .catch(() => showToast("Failed to save Hall of Fame ❌", "error"));
+                .then(() => showToast("Hall of Fame manual changes saved! 🏆", "success"))
+                .catch((err) => {
+                    console.error("Firestore Error:", err);
+                    showToast("Failed to save Hall of Fame ❌", "error");
+                });
         }
 
         // --- DISCORD EXPORTER ---
@@ -2374,29 +2319,6 @@
             showToast("Security Lockout: 5 failed attempts. Please wait 30 seconds.", "error");
         }
 
-        async function saveAdminMasterCredentials(e) {
-            e.preventDefault();
-            const newAdminUser = document.getElementById('admin-master-user-input').value.trim();
-            const newAdminPass = document.getElementById('admin-master-pass-input').value.trim();
-
-            if (!newAdminUser) {
-                showToast("Admin username cannot be empty!", "error");
-                return;
-            }
-
-            const updateData = { username: newAdminUser };
-            if (newAdminPass) {
-                updateData.passHash = await sha256(newAdminPass);
-            }
-
-            db.collection("settings").doc("admin_auth").set(updateData, { merge: true })
-                .then(() => {
-                    document.getElementById('admin-master-pass-input').value = '';
-                    showToast("Master admin credentials updated securely! 🛡️", "success");
-                })
-                .catch(() => showToast("Failed to update master credentials ❌", "error"));
-        }
-
         function handleLogout() {
             currentUserRole = null;
             loggedInTeamId = null;
@@ -2423,10 +2345,21 @@
             }
         }
 
+        // --- FIXED: SWITCH ACCOUNT ROUTING ---
         function handlePortalNavClick() {
-            if (currentUserRole === 'admin') switchTab('admin');
-            else if (currentUserRole === 'leader') switchTab('team-portal');
-            else switchTab('login');
+            if (currentUserRole === 'admin') {
+                switchTab('admin');
+            } else if (currentUserRole === 'leader') {
+                // Clicking Switch Account logs out the current team leader and displays the login view immediately
+                currentUserRole = null;
+                loggedInTeamId = null;
+                updateAuthStatusUI(null);
+                switchTab('login');
+                toggleAuthForm('login');
+            } else {
+                switchTab('login');
+                toggleAuthForm('login');
+            }
         }
 
         // --- PASSWORD QUICK ACTIONS FOR ADMIN ---
@@ -2829,14 +2762,12 @@
 
             db.collection("teams").add({
                 name: name,
-                leaderEmail: "",
                 logoUrl: logoUrl,
                 leaderUser: leaderUser,
                 leaderPassHash: passHash,
                 rosterLocked: false,
                 disqualified: false,
                 dqReason: "",
-                lastResetTimestamp: null,
                 roster: { p1: '', p2: '', p3: '', p4: '', sub1: '', sub2: '' },
                 registeredAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
@@ -3127,7 +3058,7 @@
             const team = teams.find(t => t.id === id);
             if(!team) return;
 
-            document.getElementById('edit-modal-title').innerText = `Editing: ${team.name}`;
+            document.getElementById('edit-modal-title').innerText = `Edit Squad Details`;
             document.getElementById('edit-team-index').value = id;
             document.getElementById('edit-name').value = team.name;
             document.getElementById('edit-logo').value = team.logoUrl || '';
