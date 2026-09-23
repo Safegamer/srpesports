@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <style>
-        /* --- DYNAMIC THEME SYSTEM (BACKUP & NEW THEMES) --- */
+        /* --- DYNAMIC THEME SYSTEM --- */
         :root, body[data-theme="midnight-blue"] {
             --theme-bg: radial-gradient(circle at top, #0f172a, #020617);
             --theme-card-bg: rgba(255, 255, 255, 0.04);
@@ -308,7 +308,7 @@
                     <i class="fas fa-crown w-8 text-center text-xl text-yellow-400"></i> <span class="font-semibold text-lg">Hall of Fame</span>
                 </a>
 
-                <!-- NEW: Last Season Results Snapshot Tab -->
+                <!-- Last Season Results Snapshot Tab -->
                 <a onclick="switchTab('past-results')" id="nav-past-results" class="nav-link">
                     <i class="fas fa-history w-8 text-center text-xl text-blue-400"></i> <span class="font-semibold text-lg">Last Results</span>
                 </a>
@@ -336,7 +336,7 @@
         </div>
     </div>
 
-    <!-- Main Content Container (Padded nicely so items don't touch top edges) -->
+    <!-- Main Content Container -->
     <div class="flex-1 overflow-y-auto pt-28 md:pt-12 px-5 md:px-12 pb-28 relative" id="main-scroll">
         
         <!-- Alerts Container -->
@@ -381,7 +381,7 @@
                     </div>
                     <h2 class="text-3xl font-black text-white glow-title mb-3">Season Under Maintenance</h2>
                     <p class="text-slate-400 text-sm mb-6" id="public-maintenance-msg">
-                        Tournament has concluded! Standings are undergoing maintenance while we prepare for the next season.
+                        Tournament has concluded! Standings are undergoing maintenance while we prepare for the upcoming season.
                     </p>
 
                     <!-- Embedded Announcement for Maintenance Mode -->
@@ -524,12 +524,12 @@
                     </button>
                 </form>
 
-                <!-- REGISTER LINK MOVED BELOW SIGN IN -->
+                <!-- REGISTER LINK MOVED BELOW SIGN IN WITH PROPER PHRASING -->
                 <div class="mt-6 pt-5 border-t border-white/10 text-center">
                     <p class="text-xs text-slate-400">
-                        Got a Discord ticket code? 
-                        <a onclick="toggleAuthForm('register')" class="text-blue-400 font-bold hover:underline cursor-pointer ml-1">
-                            Don't have an account? Register
+                        Got a registration token? 
+                        <a onclick="toggleAuthForm('register')" class="text-yellow-400 font-bold hover:underline cursor-pointer ml-1">
+                            Register here →
                         </a>
                     </p>
                 </div>
@@ -540,7 +540,7 @@
                 <div class="text-center mb-5">
                     <i class="fas fa-ticket-alt text-4xl text-yellow-400 mb-2 animate-pulse"></i>
                     <h2 class="text-2xl font-bold glow-title text-white">Register Squad</h2>
-                    <p class="text-xs text-slate-400 mt-1">Enter the 16-character code from your Discord ticket</p>
+                    <p class="text-xs text-slate-400 mt-1">Enter your exclusive 16-character squad registration token</p>
                 </div>
 
                 <form onsubmit="handleTokenRegistration(event)" class="space-y-3.5">
@@ -554,6 +554,11 @@
                     <div>
                         <label class="block text-xs uppercase text-slate-400 font-semibold mb-1">Team Name *</label>
                         <input type="text" id="reg-team-name" required placeholder="e.g. Total Gaming" class="custom-input">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs uppercase text-slate-400 font-semibold mb-1">Leader Email *</label>
+                        <input type="email" id="reg-leader-email" required placeholder="leader@example.com" class="custom-input">
                     </div>
 
                     <div>
@@ -592,15 +597,15 @@
                     </div>
 
                     <button type="submit" id="reg-submit-btn" class="custom-btn w-full mt-2 py-3 text-base flex items-center justify-center gap-2">
-                        <i class="fas fa-check-circle"></i> Activate & Register
+                        <i class="fas fa-check-circle mr-1"></i> Activate & Register
                     </button>
                 </form>
 
                 <div class="mt-5 pt-4 border-t border-white/10 text-center">
                     <p class="text-xs text-slate-400">
-                        Already have an account? 
+                        Already registered your squad? 
                         <a onclick="toggleAuthForm('login')" class="text-blue-400 font-bold hover:underline cursor-pointer ml-1">
-                            Sign In
+                            Sign In here →
                         </a>
                     </p>
                 </div>
@@ -1340,7 +1345,6 @@
             passHash: ""
         };
 
-        // Anti-Brute-Force Lockout State
         let failedLoginAttempts = 0;
         let loginLockoutActive = false;
 
@@ -1677,14 +1681,14 @@
                 if (i > 0 && i % 4 === 0) token += '-';
                 token += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            return token; // Format: XXXX-XXXX-XXXX-XXXX
+            return token;
         }
 
         function createRegistrationToken() {
             const newToken = generate16CharToken();
             db.collection("tokens").add({
                 token: newToken,
-                season: currentSeason, // Token is strictly valid for this season only
+                season: currentSeason,
                 used: false,
                 usedBy: null,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1758,7 +1762,7 @@
             );
         }
 
-        // --- AUTH FORM TOGGLE (SIGN IN VS REGISTER) ---
+        // --- AUTH FORM TOGGLE ---
         function toggleAuthForm(mode) {
             const loginBox = document.getElementById('login-box');
             const registerBox = document.getElementById('register-box');
@@ -1771,11 +1775,13 @@
             }
         }
 
-        // --- REGISTER SQUAD WITH TOKEN (VALID ONLY FOR CURRENT SEASON) ---
+        // --- ROBUST TOKEN REGISTRATION (RESET BUTTON ON ERROR + SHAKE WARNING) ---
         async function handleTokenRegistration(e) {
             e.preventDefault();
-            const tokenInput = document.getElementById('reg-token').value.trim().toUpperCase();
+            const tokenField = document.getElementById('reg-token');
+            const tokenInput = tokenField.value.trim().toUpperCase();
             const teamName = document.getElementById('reg-team-name').value.trim();
+            const email = document.getElementById('reg-leader-email').value.trim();
             const logoUrl = document.getElementById('reg-team-logo').value.trim();
             const username = document.getElementById('reg-leader-user').value.trim();
             const password = document.getElementById('reg-leader-pass').value.trim();
@@ -1785,8 +1791,12 @@
             const p3 = document.getElementById('reg-p3').value.trim();
             const p4 = document.getElementById('reg-p4').value.trim();
 
-            if (!tokenInput || !teamName || !username || !password) {
-                showToast("Please fill in all required fields!", "error");
+            const submitBtn = document.getElementById('reg-submit-btn');
+
+            tokenField.classList.remove('!border-red-500');
+
+            if (!tokenInput || !teamName || !username || !password || !email) {
+                showToast("Please fill in all required fields (Token, Team Name, Email, Username, Password)!", "error");
                 return;
             }
 
@@ -1800,32 +1810,31 @@
                 return;
             }
 
-            const submitBtn = document.getElementById('reg-submit-btn');
             submitBtn.disabled = true;
-            submitBtn.innerText = "Verifying token...";
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Verifying token...`;
 
             try {
-                const tokenQuery = await db.collection("tokens")
-                    .where("token", "==", tokenInput)
-                    .where("used", "==", false)
-                    .limit(1)
-                    .get();
+                // Query strictly by single token field to prevent any Firestore compound query failures
+                const tokenQuery = await db.collection("tokens").where("token", "==", tokenInput).get();
 
                 if (tokenQuery.empty) {
-                    showToast("Invalid or already claimed token! ❌", "error");
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = `<i class="fas fa-check-circle"></i> Activate & Register`;
+                    tokenField.classList.add('!border-red-500');
+                    showToast("Invalid Registration Token! Please check your code ❌", "error");
                     return;
                 }
 
                 const tokenDoc = tokenQuery.docs[0];
                 const tokenData = tokenDoc.data();
 
-                // Validate that the token belongs to the CURRENT SEASON
+                if (tokenData.used) {
+                    tokenField.classList.add('!border-red-500');
+                    showToast(`This token was already claimed by "${tokenData.usedBy || 'another squad'}"! ❌`, "error");
+                    return;
+                }
+
                 if (tokenData.season && tokenData.season !== currentSeason) {
-                    showToast(`Token expired! This token belongs to ${tokenData.season}. Tokens are valid only for one season. ❌`, "error");
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = `<i class="fas fa-check-circle"></i> Activate & Register`;
+                    tokenField.classList.add('!border-red-500');
+                    showToast(`Token Expired! This token was issued for ${tokenData.season}. Tokens are valid for one season only ❌`, "error");
                     return;
                 }
 
@@ -1833,6 +1842,7 @@
 
                 const newTeamDoc = await db.collection("teams").add({
                     name: teamName,
+                    leaderEmail: email,
                     logoUrl: logoUrl,
                     leaderUser: username,
                     leaderPassHash: passHash,
@@ -1851,17 +1861,20 @@
                     usedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                showToast(`🎉 Welcome ${teamName}! Squad registered.`, "success");
+                showToast(`🎉 Welcome ${teamName}! Squad registered successfully.`, "success");
                 currentUserRole = 'leader';
                 loggedInTeamId = newTeamDoc.id;
                 updateAuthStatusUI(`${teamName} Leader`);
                 switchTab('team-portal');
 
             } catch (err) {
-                console.error("Registration error: ", err);
-                showToast("Failed to register. Check internet connection ❌", "error");
+                console.error("Registration error:", err);
+                tokenField.classList.add('!border-red-500');
+                showToast("Verification failed: " + (err.message || "Network error. Please try again! ❌"), "error");
+            } finally {
+                // Always unlock button and restore original state
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fas fa-check-circle"></i> Activate & Register`;
+                submitBtn.innerHTML = `<i class="fas fa-check-circle mr-1"></i> Activate & Register`;
             }
         }
 
@@ -1876,16 +1889,19 @@
 
         async function handleLeaderPasswordReset(e) {
             e.preventDefault();
-            const username = document.getElementById('reset-leader-username').value.trim();
+            const identifier = document.getElementById('reset-leader-username').value.trim();
             const newPass = document.getElementById('reset-leader-newpass').value.trim();
 
-            const team = teams.find(t => (t.leaderUser || '').toLowerCase() === username.toLowerCase());
+            const team = teams.find(t => 
+                (t.leaderUser || '').toLowerCase() === identifier.toLowerCase() || 
+                (t.leaderEmail || '').toLowerCase() === identifier.toLowerCase()
+            );
+
             if (!team) {
-                showToast("Username not found in active teams ❌", "error");
+                showToast("No active squad found with this username or email ❌", "error");
                 return;
             }
 
-            // Two-week (14 days) rate limit enforcement
             const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
             if (team.lastResetTimestamp) {
                 const lastResetTime = team.lastResetTimestamp.toMillis ? team.lastResetTimestamp.toMillis() : team.lastResetTimestamp;
@@ -1979,7 +1995,6 @@
                 }
             });
 
-            // Snapshot the exact final standings for "Last Season Results" tab
             const finalStandingsSnapshot = sorted.map((t, idx) => ({
                 rank: idx + 1,
                 name: t.name,
@@ -2012,15 +2027,14 @@
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            // Conclude season: Save Hall of Fame + Archive & IMMEDIATELY TRIGGER MAINTENANCE MODE
             Promise.all([
                 db.collection("settings").doc("past_season").set(newHofData, { merge: true }),
                 db.collection("settings").doc("tournament").set({
                     maintenanceMode: true,
-                    maintenanceNotice: `${currentSeason} has concluded! Final standings archived in Last Results & Hall of Fame. Stay tuned on Discord for next season!`
+                    maintenanceNotice: `${currentSeason} has concluded! Final standings archived in Last Results & Hall of Fame. Stay tuned on Discord for the next season!`
                 }, { merge: true })
             ]).then(() => {
-                showToast(`🏆 ${currentSeason} ended! Champions crowned & site is now under Maintenance.`, "success");
+                showToast(`🏆 ${currentSeason} ended! Champions crowned & site is now in Maintenance Mode.`, "success");
             }).catch((err) => {
                 console.error("Failed to conclude tournament:", err);
                 showToast("Failed to conclude tournament ❌", "error");
@@ -2586,7 +2600,6 @@
                     P: pts
                 };
             }).sort((a, b) => {
-                // If a team is disqualified, push to bottom of the leaderboard
                 if (a.disqualified && !b.disqualified) return 1;
                 if (!a.disqualified && b.disqualified) return -1;
                 if (b.P !== a.P) return b.P - a.P;
@@ -2652,7 +2665,7 @@
             const sorted = getSortedTeams();
             
             if (sorted.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="p-12 text-center text-[#94a3b8] italic">No active teams registered. Teams can register with Discord tokens on the login page!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="p-12 text-center text-[#94a3b8] italic">No active teams registered. Teams can register with tokens on the login page!</td></tr>`;
                 return;
             }
 
@@ -2811,7 +2824,7 @@
             `).join('');
         }
 
-        // --- ADMIN MANUAL TEAM REGISTRATION (RESTORED) ---
+        // --- ADMIN MANUAL TEAM REGISTRATION ---
         async function addTeamManual(e) {
             e.preventDefault();
             const name = document.getElementById('new-team-name').value.trim();
@@ -2833,6 +2846,7 @@
 
             db.collection("teams").add({
                 name: name,
+                leaderEmail: "",
                 logoUrl: logoUrl,
                 leaderUser: leaderUser,
                 leaderPassHash: passHash,
@@ -2863,7 +2877,7 @@
             );
         }
 
-        // --- MATCH CREATION (BERMUDA ONLY) ---
+        // --- MATCH CREATION ---
         function addMatch(e) {
             e.preventDefault();
             const teamAId = document.getElementById('match-team-a').value;
@@ -3135,7 +3149,6 @@
             document.getElementById('edit-name').value = team.name;
             document.getElementById('edit-logo').value = team.logoUrl || '';
 
-            // Disqualification fields
             const dqCheckbox = document.getElementById('edit-team-disqualified');
             const dqReasonInput = document.getElementById('edit-team-dq-reason');
             dqCheckbox.checked = !!team.disqualified;
