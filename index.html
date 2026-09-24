@@ -307,15 +307,10 @@
                 <a onclick="switchTab('past-season')" id="nav-past-season" class="nav-link">
                     <i class="fas fa-crown w-8 text-center text-xl text-yellow-400"></i> <span class="font-semibold text-lg">Hall of Fame</span>
                 </a>
-                
-                <!-- Shown for Logged In Leaders -->
-                <a onclick="switchTab('team-portal')" id="nav-team-portal" class="nav-link hidden">
-                    <i class="fas fa-user-shield w-8 text-center text-xl text-green-400"></i> <span class="font-semibold text-lg">Lineup</span>
-                </a>
 
                 <!-- Portal / Admin Tab -->
                 <a onclick="handlePortalNavClick()" id="nav-admin" class="nav-link">
-                    <i class="fas fa-cog w-8 text-center text-xl"></i> <span class="font-semibold text-lg" id="nav-login-label">Portal Login</span>
+                    <i class="fas fa-cog w-8 text-center text-xl"></i> <span class="font-semibold text-lg" id="nav-login-label">Admin Login</span>
                 </a>
             </nav>
         </div>
@@ -457,18 +452,18 @@
         <!-- ============================== -->
         <div id="view-login" class="max-w-md mx-auto hidden mt-8 md:mt-16">
             
-            <!-- A. SIGN IN BOX -->
+            <!-- A. ADMIN SIGN IN BOX -->
             <div id="login-box" class="custom-card">
                 <div class="text-center mb-6">
                     <i class="fas fa-shield-alt text-4xl text-blue-500 mb-3"></i>
-                    <h2 class="text-3xl font-bold glow-title text-white">Tournament Portal</h2>
-                    <p class="text-xs text-slate-400 mt-1">Sign in as Administrator or Participant Team Leader</p>
+                    <h2 class="text-3xl font-bold glow-title text-white">Admin Login</h2>
+                    <p class="text-xs text-slate-400 mt-1">Sign in to access the Administrator Dashboard</p>
                 </div>
 
                 <form onsubmit="handleLogin(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs uppercase text-slate-400 font-semibold mb-1">Username</label>
-                        <input type="text" id="login-username" placeholder="Admin or Team Username" required class="custom-input">
+                        <input type="text" id="login-username" placeholder="Master Admin Username" required class="custom-input">
                     </div>
                     <div>
                         <label class="block text-xs uppercase text-slate-400 font-semibold mb-1">Password</label>
@@ -495,7 +490,7 @@
                 <div class="text-center mb-5">
                     <i class="fas fa-ticket-alt text-4xl text-yellow-400 mb-2 animate-pulse"></i>
                     <h2 class="text-2xl font-bold glow-title text-white">Register Squad</h2>
-                    <p class="text-xs text-slate-400 mt-1">Enter your exclusive 16-character squad registration token</p>
+                    <p class="text-xs text-slate-400 mt-1">Enter your 16-character squad token to finalize registration</p>
                 </div>
 
                 <form onsubmit="handleTokenRegistration(event)" class="space-y-3.5">
@@ -514,7 +509,7 @@
                     <div>
                         <label class="block text-xs uppercase text-slate-400 font-semibold mb-1">Team Logo (Optional)</label>
                         <div class="flex gap-2">
-                            <input type="text" id="reg-team-logo" placeholder="Image URL or gallery" class="custom-input flex-1 text-xs">
+                            <input type="text" id="reg-team-logo" placeholder="Image URL or choose gallery" class="custom-input flex-1 text-xs">
                             <label class="custom-btn secondary flex items-center justify-center cursor-pointer px-3 text-sm" title="Choose from Gallery">
                                 <i class="fas fa-image text-blue-400"></i>
                                 <input type="file" accept="image/*" class="hidden" onchange="previewGalleryImage(this, 'reg-team-logo')">
@@ -522,38 +517,40 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs uppercase text-slate-400 font-semibold mb-1">Leader User *</label>
-                            <input type="text" id="reg-leader-user" required placeholder="Login username" class="custom-input text-xs">
+                    <!-- COMPULSORY STARTING 4 PLAYERS & OPTIONAL SUBSTITUTES -->
+                    <div class="pt-3 border-t border-white/10">
+                        <!-- MANDATORY SUBSTITUTE WARNING -->
+                        <div class="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-xs text-yellow-300 mb-3 leading-relaxed">
+                            <i class="fas fa-exclamation-triangle mr-1"></i> <strong>Notice:</strong> All 4 starting players are compulsory. If you have substitutes, add them now, or else you won't have another chance until an admin approves it.
                         </div>
-                        <div>
-                            <label class="block text-xs uppercase text-slate-400 font-semibold mb-1">Password *</label>
-                            <input type="password" id="reg-leader-pass" required placeholder="Password" class="custom-input text-xs">
-                        </div>
-                    </div>
 
-                    <!-- Optional Player IGNs -->
-                    <div class="pt-2 border-t border-white/10">
-                        <label class="block text-xs uppercase text-blue-400 font-bold mb-1.5">
-                            Lineup IGNs (Optional — Can add/change later)
+                        <label class="block text-xs uppercase text-blue-400 font-bold mb-2">
+                            Starting 4 Players (Compulsory) *
+                        </label>
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <input type="text" id="reg-p1" required placeholder="Player 1 (IGL) *" class="custom-input !py-2 !text-xs font-medium">
+                            <input type="text" id="reg-p2" required placeholder="Player 2 *" class="custom-input !py-2 !text-xs font-medium">
+                            <input type="text" id="reg-p3" required placeholder="Player 3 *" class="custom-input !py-2 !text-xs font-medium">
+                            <input type="text" id="reg-p4" required placeholder="Player 4 *" class="custom-input !py-2 !text-xs font-medium">
+                        </div>
+
+                        <label class="block text-xs uppercase text-yellow-400 font-bold mb-1.5">
+                            Substitutes (Optional)
                         </label>
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="reg-p1" placeholder="Starter 1 (IGL)" class="custom-input !py-1.5 !text-xs">
-                            <input type="text" id="reg-p2" placeholder="Starter 2" class="custom-input !py-1.5 !text-xs">
-                            <input type="text" id="reg-p3" placeholder="Starter 3" class="custom-input !py-1.5 !text-xs">
-                            <input type="text" id="reg-p4" placeholder="Starter 4" class="custom-input !py-1.5 !text-xs">
+                            <input type="text" id="reg-sub1" placeholder="Substitute 1 (Optional)" class="custom-input !py-2 !text-xs">
+                            <input type="text" id="reg-sub2" placeholder="Substitute 2 (Optional)" class="custom-input !py-2 !text-xs">
                         </div>
                     </div>
 
-                    <button type="submit" id="reg-submit-btn" class="custom-btn w-full mt-2 py-3 text-base flex items-center justify-center gap-2">
+                    <button type="submit" id="reg-submit-btn" class="custom-btn w-full mt-3 py-3 text-base flex items-center justify-center gap-2">
                         <i class="fas fa-check-circle mr-1"></i> Activate & Register
                     </button>
                 </form>
 
                 <div class="mt-5 pt-4 border-t border-white/10 text-center">
                     <p class="text-xs text-slate-400">
-                        Already registered your squad? 
+                        Admin access? 
                         <a onclick="toggleAuthForm('login')" class="text-blue-400 font-bold hover:underline cursor-pointer ml-1">
                             Sign In here →
                         </a>
@@ -564,87 +561,7 @@
         </div>
 
         <!-- ============================== -->
-        <!-- 4. TEAM LEADER ROSTER PORTAL   -->
-        <!-- ============================== -->
-        <div id="view-team-portal" class="max-w-3xl mx-auto hidden pb-20 mt-2 md:mt-4">
-            <div class="flex justify-between items-center mb-8">
-                <div>
-                    <h1 class="text-3xl font-bold tracking-tight glow-title text-white" id="leader-team-title">Team Lineup</h1>
-                    <p class="text-sm text-slate-400">4 Starters + 2 Substitutes Roster Submission • Clash Squad</p>
-                </div>
-                <button onclick="handleLogout()" class="custom-btn secondary py-2 px-4 text-sm">
-                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                </button>
-            </div>
-
-            <!-- Team Logo Upload for Leaders -->
-            <div class="custom-card mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <div id="leader-team-logo-preview" class="flex-shrink-0"></div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white">Team Logo / Clan Crest</h3>
-                        <p class="text-xs text-slate-400">Upload your logo directly from your device gallery</p>
-                    </div>
-                </div>
-                <label class="custom-btn secondary py-2 px-4 text-sm flex items-center gap-2 cursor-pointer">
-                    <i class="fas fa-image text-blue-400"></i> Change from Gallery
-                    <input type="file" accept="image/*" class="hidden" onchange="uploadLeaderLogo(this)">
-                </label>
-            </div>
-
-            <div class="custom-card">
-                <div id="roster-lock-alert" class="p-4 rounded-xl border mb-6 flex items-center gap-3"></div>
-
-                <form id="team-roster-form" onsubmit="submitLeaderRoster(event)" class="space-y-6">
-                    <div>
-                        <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-3">
-                            <i class="fas fa-users mr-1"></i> Starting 4 Players (Required)
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-xs text-slate-400 block mb-1">Player 1 (Team Leader / IGL) *</label>
-                                <input type="text" id="roster-p1" required placeholder="Player 1 IGN" class="custom-input">
-                            </div>
-                            <div>
-                                <label class="text-xs text-slate-400 block mb-1">Player 2 (Rusher) *</label>
-                                <input type="text" id="roster-p2" required placeholder="Player 2 IGN" class="custom-input">
-                            </div>
-                            <div>
-                                <label class="text-xs text-slate-400 block mb-1">Player 3 (Sniper / Support) *</label>
-                                <input type="text" id="roster-p3" required placeholder="Player 3 IGN" class="custom-input">
-                            </div>
-                            <div>
-                                <label class="text-xs text-slate-400 block mb-1">Player 4 (Assaulter) *</label>
-                                <input type="text" id="roster-p4" required placeholder="Player 4 IGN" class="custom-input">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-sm font-bold text-yellow-400 uppercase tracking-wider mb-3">
-                            <i class="fas fa-exchange-alt mr-1"></i> Substitutes (Up to 2 Optional)
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-xs text-slate-400 block mb-1">Substitute 1</label>
-                                <input type="text" id="roster-sub1" placeholder="Optional sub IGN" class="custom-input">
-                            </div>
-                            <div>
-                                <label class="text-xs text-slate-400 block mb-1">Substitute 2</label>
-                                <input type="text" id="roster-sub2" placeholder="Optional sub IGN" class="custom-input">
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" id="roster-submit-btn" class="custom-btn w-full py-3.5 text-lg">
-                        <i class="fas fa-lock mr-2"></i> Finalize & Lock Lineup
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- ============================== -->
-        <!-- 5. ADMIN VIEW                  -->
+        <!-- 4. ADMIN VIEW                  -->
         <!-- ============================== -->
         <div id="view-admin" class="max-w-6xl mx-auto hidden pb-20 mt-2 md:mt-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -863,7 +780,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                 <div class="custom-card lg:col-span-1 h-fit" style="animation-delay: 0.1s;">
                     <h3 class="text-xl font-bold mb-3 text-white">Manual Team Register</h3>
-                    <p class="text-xs text-slate-400 mb-4">Direct administrator registration bypass without requiring tokens.</p>
+                    <p class="text-xs text-slate-400 mb-4">Direct administrator bypass (no token required).</p>
                     
                     <form id="add-team-form" onsubmit="addTeamManual(event)" class="space-y-3.5">
                         <div>
@@ -880,14 +797,17 @@
                                 </label>
                             </div>
                         </div>
-                        <div>
-                            <label class="text-xs text-slate-400 block mb-1 font-semibold">Leader Username</label>
-                            <input type="text" id="new-leader-username" required placeholder="e.g. tg_leader" class="custom-input">
+                        
+                        <div class="pt-2 border-t border-white/10">
+                            <label class="text-xs text-blue-400 block mb-1 font-bold">Starting Players</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="new-p1" required placeholder="Player 1 *" class="custom-input !py-1.5 !text-xs">
+                                <input type="text" id="new-p2" required placeholder="Player 2 *" class="custom-input !py-1.5 !text-xs">
+                                <input type="text" id="new-p3" required placeholder="Player 3 *" class="custom-input !py-1.5 !text-xs">
+                                <input type="text" id="new-p4" required placeholder="Player 4 *" class="custom-input !py-1.5 !text-xs">
+                            </div>
                         </div>
-                        <div>
-                            <label class="text-xs text-slate-400 block mb-1 font-semibold">Leader Password</label>
-                            <input type="password" id="new-leader-password" required placeholder="e.g. tgPass123" class="custom-input">
-                        </div>
+
                         <button type="submit" class="custom-btn w-full mt-2"><i class="fas fa-plus mr-1"></i> Register Squad Manually</button>
                     </form>
                 </div>
@@ -895,13 +815,12 @@
                 <div class="custom-card !p-0 lg:col-span-2 overflow-x-auto" style="animation-delay: 0.12s;">
                     <div class="p-4 border-b border-white/10 flex justify-between items-center">
                         <h3 class="font-bold text-base text-white">Active Squads & Disqualification Controls</h3>
-                        <span class="text-xs text-slate-400">Click Edit to Disqualify</span>
+                        <span class="text-xs text-slate-400">Click Edit to Disqualify or Modify Lineup</span>
                     </div>
                     <table class="w-full text-left border-collapse whitespace-nowrap">
                         <thead>
                             <tr class="text-[#94a3b8] text-xs uppercase bg-white/5">
                                 <th class="p-4 font-semibold">Team</th>
-                                <th class="p-4 font-semibold">Leader</th>
                                 <th class="p-4 font-semibold text-center">Status</th>
                                 <th class="p-4 font-semibold text-center">Record</th>
                                 <th class="p-4 font-semibold text-center">Pts</th>
@@ -997,28 +916,6 @@
         </div>
     </div>
 
-    <!-- Quick Change Password Modal (Admin) -->
-    <div id="password-modal" class="fixed inset-0 modal-overlay z-[120] hidden flex items-center justify-center p-4">
-        <div class="custom-card w-full max-w-sm modal-content relative !m-0">
-            <button onclick="closePasswordModal()" class="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors text-2xl">
-                <i class="fas fa-times"></i>
-            </button>
-            <h3 class="text-xl font-bold text-white mb-2"><i class="fas fa-key text-yellow-400 mr-2"></i>Change Password</h3>
-            <p class="text-xs text-slate-400 mb-4" id="password-modal-subtitle">Update participant credentials</p>
-
-            <form onsubmit="savePasswordChange(event)" class="space-y-4">
-                <input type="hidden" id="password-team-id">
-                <div>
-                    <label class="text-xs text-slate-400 block mb-1 font-semibold">New Password</label>
-                    <input type="password" id="password-new-input" required placeholder="Enter new password" class="custom-input">
-                </div>
-                <button type="submit" class="custom-btn w-full py-2.5">
-                    <i class="fas fa-save mr-1"></i> Update Password
-                </button>
-            </form>
-        </div>
-    </div>
-
     <!-- Admin Edit Team Modal (WITH DISQUALIFICATION & REASON) -->
     <div id="edit-modal" class="fixed inset-0 modal-overlay z-[100] hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="custom-card w-full max-w-lg modal-content relative !m-0 max-h-[90vh] flex flex-col">
@@ -1063,20 +960,6 @@
                                     <input type="file" accept="image/*" class="hidden" onchange="previewGalleryImage(this, 'edit-logo')">
                                 </label>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="border-b border-white/10 pb-4">
-                    <h4 class="text-xs uppercase text-yellow-400 font-bold tracking-wider mb-3">Leader Account Credentials</h4>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <span class="text-xs text-slate-400 block mb-1 font-semibold">Username</span>
-                            <input type="text" id="edit-leader-username" required class="custom-input">
-                        </div>
-                        <div>
-                            <span class="text-xs text-slate-400 block mb-1 font-semibold">New Password (Optional)</span>
-                            <input type="password" id="edit-leader-password" placeholder="Leave blank to keep" class="custom-input">
                         </div>
                     </div>
                 </div>
@@ -1318,8 +1201,7 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        let currentUserRole = null; // 'admin' | 'leader' | null
-        let loggedInTeamId = null;
+        let currentUserRole = null; // 'admin' | null
         let teams = [];
         let matches = [];
         let registrationTokens = [];
@@ -1519,18 +1401,6 @@
                         targetInput.value = dataUrl;
                         showToast("Image loaded from gallery! 📸", "success");
                     }
-                });
-            }
-        }
-
-        function uploadLeaderLogo(inputElem) {
-            if (inputElem.files && inputElem.files[0] && loggedInTeamId) {
-                compressAndReadImage(inputElem.files[0], (dataUrl) => {
-                    db.collection("teams").doc(loggedInTeamId).update({
-                        logoUrl: dataUrl
-                    }).then(() => {
-                        showToast("Team logo updated successfully! 🛡️", "success");
-                    }).catch(() => showToast("Failed to upload logo ❌", "error"));
                 });
             }
         }
@@ -1763,36 +1633,36 @@
             }
         }
 
-        // --- ROBUST TOKEN REGISTRATION (NO EMAIL REQUIREMENT + ERROR FEEDBACK) ---
+        // --- TOKEN REGISTRATION (COMPULSORY 4 PLAYERS + OPTIONAL SUBS + NO USERNAME/PASSWORD) ---
         async function handleTokenRegistration(e) {
             e.preventDefault();
             const tokenField = document.getElementById('reg-token');
             const tokenInput = tokenField.value.trim().toUpperCase();
             const teamName = document.getElementById('reg-team-name').value.trim();
             const logoUrl = document.getElementById('reg-team-logo').value.trim();
-            const username = document.getElementById('reg-leader-user').value.trim();
-            const password = document.getElementById('reg-leader-pass').value.trim();
 
             const p1 = document.getElementById('reg-p1').value.trim();
             const p2 = document.getElementById('reg-p2').value.trim();
             const p3 = document.getElementById('reg-p3').value.trim();
             const p4 = document.getElementById('reg-p4').value.trim();
+            const sub1 = document.getElementById('reg-sub1').value.trim();
+            const sub2 = document.getElementById('reg-sub2').value.trim();
 
             const submitBtn = document.getElementById('reg-submit-btn');
             tokenField.classList.remove('!border-red-500');
 
-            if (!tokenInput || !teamName || !username || !password) {
-                showToast("Please fill in all required fields (Token, Team Name, Username, Password)!", "error");
+            if (!tokenInput || !teamName) {
+                showToast("Please provide token and team name!", "error");
+                return;
+            }
+
+            if (!p1 || !p2 || !p3 || !p4) {
+                showToast("All 4 starting players are compulsory! Please fill them in.", "error");
                 return;
             }
 
             if (teams.some(t => t.name.toLowerCase() === teamName.toLowerCase())) {
                 showToast("This squad name is already registered!", "error");
-                return;
-            }
-
-            if (teams.some(t => (t.leaderUser || '').toLowerCase() === username.toLowerCase())) {
-                showToast("This username is already taken!", "error");
                 return;
             }
 
@@ -1823,17 +1693,13 @@
                     return;
                 }
 
-                const passHash = await sha256(password);
-
-                const newTeamDoc = await db.collection("teams").add({
+                await db.collection("teams").add({
                     name: teamName,
                     logoUrl: logoUrl,
-                    leaderUser: username,
-                    leaderPassHash: passHash,
-                    rosterLocked: false,
+                    rosterLocked: true, // Lineup is locked immediately at registration
                     disqualified: false,
                     dqReason: "",
-                    roster: { p1, p2, p3, p4, sub1: '', sub2: '' },
+                    roster: { p1, p2, p3, p4, sub1, sub2 },
                     tokenRedeemed: tokenInput,
                     registeredAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -1845,10 +1711,7 @@
                 });
 
                 showToast(`🎉 Welcome ${teamName}! Squad registered successfully.`, "success");
-                currentUserRole = 'leader';
-                loggedInTeamId = newTeamDoc.id;
-                updateAuthStatusUI(`${teamName} Leader`);
-                switchTab('team-portal');
+                switchTab('leaderboard');
 
             } catch (err) {
                 console.error("Registration error:", err);
@@ -2233,7 +2096,7 @@
                 const rd = ((rdVal > 0 ? `+${rdVal}` : `${rdVal}`)).padEnd(6);
                 const pts = (t.P || 0).toString();
 
-                text += `${pos} ${name} ${m} ${w} ${l} ${d} ${rd} ${pts}\n`;
+                text += `${pos}${name} ${m}${w} ${l}${d} ${rd}${pts}\n`;
             });
 
             text += `\`\`\`\n*Tournament portal: https://srp.lazernode.in*`;
@@ -2263,7 +2126,6 @@
 
             if (isAdminUser && isAdminPassMatch) {
                 currentUserRole = 'admin';
-                loggedInTeamId = null;
                 failedLoginAttempts = 0;
                 showToast("Welcome Administrator! Access Granted.", "success");
                 document.getElementById('login-username').value = '';
@@ -2273,28 +2135,11 @@
                 return;
             }
 
-            const matchedTeam = teams.find(t => 
-                (t.leaderUser || '').toLowerCase() === user.toLowerCase() && 
-                (t.leaderPassHash === inputHash || t.leaderPass === pass)
-            );
-
-            if (matchedTeam) {
-                currentUserRole = 'leader';
-                loggedInTeamId = matchedTeam.id;
-                failedLoginAttempts = 0;
-                showToast(`Welcome ${matchedTeam.name} Leader!`, "success");
-                document.getElementById('login-username').value = '';
-                document.getElementById('login-password').value = '';
-                updateAuthStatusUI(`${matchedTeam.name} Leader`);
-                switchTab('team-portal');
-                return;
-            }
-
             failedLoginAttempts += 1;
             if (failedLoginAttempts >= 5) {
                 triggerLoginLockout();
             } else {
-                showToast(`Invalid credentials ❌ (${5 - failedLoginAttempts} attempts remaining)`, "error");
+                showToast(`Invalid admin credentials ❌ (${5 - failedLoginAttempts} attempts remaining)`, "error");
             }
         }
 
@@ -2321,7 +2166,6 @@
 
         function handleLogout() {
             currentUserRole = null;
-            loggedInTeamId = null;
             updateAuthStatusUI(null);
             showToast("Logged out successfully.");
             switchTab('leaderboard');
@@ -2331,726 +2175,24 @@
             const statusBar = document.getElementById('user-status-bar');
             const statusName = document.getElementById('user-status-name');
             const navLabel = document.getElementById('nav-login-label');
-            const navTeamPortal = document.getElementById('nav-team-portal');
 
-            if (currentUserRole) {
+            if (currentUserRole === 'admin') {
                 statusBar.classList.remove('hidden');
                 statusName.innerText = name;
-                navLabel.innerText = currentUserRole === 'admin' ? "Admin Dashboard" : "Switch Account";
-                navTeamPortal.classList.toggle('hidden', currentUserRole !== 'leader');
+                navLabel.innerText = "Admin Dashboard";
             } else {
                 statusBar.classList.add('hidden');
-                navTeamPortal.classList.add('hidden');
-                navLabel.innerText = "Portal Login";
+                navLabel.innerText = "Admin Login";
             }
         }
 
-        // --- FIXED: SWITCH ACCOUNT ROUTING ---
         function handlePortalNavClick() {
             if (currentUserRole === 'admin') {
                 switchTab('admin');
-            } else if (currentUserRole === 'leader') {
-                // Clicking Switch Account logs out the current team leader and displays the login view immediately
-                currentUserRole = null;
-                loggedInTeamId = null;
-                updateAuthStatusUI(null);
-                switchTab('login');
-                toggleAuthForm('login');
             } else {
                 switchTab('login');
                 toggleAuthForm('login');
             }
-        }
-
-        // --- PASSWORD QUICK ACTIONS FOR ADMIN ---
-        function openChangePasswordModal(teamId, teamName, currentUsername) {
-            document.getElementById('password-team-id').value = teamId;
-            document.getElementById('password-modal-subtitle').innerText = `Change password for ${teamName} (${currentUsername})`;
-            document.getElementById('password-new-input').value = '';
-            document.getElementById('password-modal').classList.remove('hidden');
-        }
-
-        function closePasswordModal() {
-            document.getElementById('password-modal').classList.add('hidden');
-        }
-
-        async function savePasswordChange(e) {
-            e.preventDefault();
-            const teamId = document.getElementById('password-team-id').value;
-            const newPass = document.getElementById('password-new-input').value.trim();
-
-            if (!teamId || !newPass) return;
-
-            const newHash = await sha256(newPass);
-
-            db.collection("teams").doc(teamId).update({
-                leaderPassHash: newHash
-            }).then(() => {
-                closePasswordModal();
-                showToast("Password updated & hashed securely! 🔑", "success");
-            }).catch(err => {
-                console.error(err);
-                showToast("Failed to update password ❌", "error");
-            });
-        }
-
-        // --- LEADER ROSTER PORTAL ---
-        function renderLeaderPortal() {
-            if (currentUserRole !== 'leader' || !loggedInTeamId) return;
-            const team = teams.find(t => t.id === loggedInTeamId);
-            if (!team) return;
-
-            document.getElementById('leader-team-title').innerText = `${team.name} Lineup`;
-            const alertBox = document.getElementById('roster-lock-alert');
-            const submitBtn = document.getElementById('roster-submit-btn');
-            const inputs = ['roster-p1', 'roster-p2', 'roster-p3', 'roster-p4', 'roster-sub1', 'roster-sub2'];
-
-            const logoPreview = document.getElementById('leader-team-logo-preview');
-            if (logoPreview) {
-                logoPreview.innerHTML = getTeamBadge(team, 'w-14 h-14', 'text-base');
-            }
-
-            const r = team.roster || {};
-            document.getElementById('roster-p1').value = r.p1 || '';
-            document.getElementById('roster-p2').value = r.p2 || '';
-            document.getElementById('roster-p3').value = r.p3 || '';
-            document.getElementById('roster-p4').value = r.p4 || '';
-            document.getElementById('roster-sub1').value = r.sub1 || '';
-            document.getElementById('roster-sub2').value = r.sub2 || '';
-
-            if (team.rosterLocked) {
-                alertBox.className = "p-4 rounded-xl border border-red-500/40 bg-red-500/10 text-red-300 mb-6 flex items-center gap-3";
-                alertBox.innerHTML = `<i class="fas fa-lock text-xl text-red-400"></i><div><p class="font-bold">Lineup Locked</p><p class="text-xs text-red-200/80">Roster is finalized. Only an administrator can unlock or modify players.</p></div>`;
-                inputs.forEach(id => document.getElementById(id).disabled = true);
-                submitBtn.disabled = true;
-                submitBtn.className = "custom-btn w-full py-3.5 text-lg opacity-50 cursor-not-allowed !bg-slate-700";
-                submitBtn.innerHTML = `<i class="fas fa-lock mr-2"></i> Roster Locked (Read-Only)`;
-            } else {
-                alertBox.className = "p-4 rounded-xl border border-yellow-500/40 bg-yellow-500/10 text-yellow-300 mb-6 flex items-center gap-3";
-                alertBox.innerHTML = `<i class="fas fa-exclamation-circle text-xl text-yellow-400"></i><div><p class="font-bold">Roster Pending Finalization</p><p class="text-xs text-yellow-200/80">Enter all 4 active player IGNs. Once submitted, your lineup is automatically locked.</p></div>`;
-                inputs.forEach(id => document.getElementById(id).disabled = false);
-                submitBtn.disabled = false;
-                submitBtn.className = "custom-btn w-full py-3.5 text-lg";
-                submitBtn.innerHTML = `<i class="fas fa-check-circle mr-2"></i> Submit & Lock Lineup`;
-            }
-        }
-
-        function submitLeaderRoster(e) {
-            e.preventDefault();
-            if (currentUserRole !== 'leader' || !loggedInTeamId) return;
-
-            const p1 = document.getElementById('roster-p1').value.trim();
-            const p2 = document.getElementById('roster-p2').value.trim();
-            const p3 = document.getElementById('roster-p3').value.trim();
-            const p4 = document.getElementById('roster-p4').value.trim();
-            const sub1 = document.getElementById('roster-sub1').value.trim();
-            const sub2 = document.getElementById('roster-sub2').value.trim();
-
-            if (!p1 || !p2 || !p3 || !p4) {
-                showToast("All 4 Starting Players are required!", "error");
-                return;
-            }
-
-            openConfirmModal(
-                "Lock Lineup?",
-                "Once locked, changes can only be made by tournament administrators.",
-                () => {
-                    db.collection("teams").doc(loggedInTeamId).update({
-                        roster: { p1, p2, p3, p4, sub1, sub2 },
-                        rosterLocked: true
-                    }).then(() => {
-                        showToast("Lineup locked! 🔒", "success");
-                        renderLeaderPortal();
-                    }).catch(() => showToast("Failed to lock roster ❌", "error"));
-                },
-                "Lock Lineup",
-                "custom-btn"
-            );
-        }
-
-        // --- TEAM BANNER / LOGO HELPER ---
-        function getTeamBadge(team, sizeClass = "w-8 h-8", textClass = "text-xs") {
-            if (team && team.logoUrl && team.logoUrl.trim() !== '') {
-                return `<img src="${team.logoUrl.trim()}" alt="${team.name}" class="${sizeClass} rounded-lg object-cover border border-white/10 shadow-sm flex-shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div style="display:none;" class="${sizeClass} rounded-lg bg-white/5 border border-white/15 items-center justify-center font-black ${textClass} text-yellow-400 flex-shrink-0 shadow-inner">${(team.name || 'T').substring(0,2).toUpperCase()}</div>`;
-            }
-            const initials = (team && team.name ? team.name : 'T').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-            return `<div class="${sizeClass} rounded-lg bg-white/5 border border-white/15 flex items-center justify-center font-black ${textClass} text-yellow-400 flex-shrink-0 shadow-inner">${initials}</div>`;
-        }
-
-        // --- AUTOMATIC STANDINGS CALCULATION (+3 PTS PER WIN, DISQUALIFIED PUSHED TO BOTTOM) ---
-        function getSortedTeams() {
-            return teams.map(team => {
-                let m = 0;
-                let w = 0;
-                let l = 0;
-                let d = 0;
-                let rd = 0;
-
-                matches.forEach(match => {
-                    const scoreA = parseInt(match.teamAScore) || 0;
-                    const scoreB = parseInt(match.teamBScore) || 0;
-
-                    if (match.teamAId === team.id) {
-                        m += 1;
-                        rd += (scoreA - scoreB);
-                        if (scoreA > scoreB) w += 1;
-                        else if (scoreA < scoreB) l += 1;
-                        else d += 1;
-                    } else if (match.teamBId === team.id) {
-                        m += 1;
-                        rd += (scoreB - scoreA);
-                        if (scoreB > scoreA) w += 1;
-                        else if (scoreB < scoreA) l += 1;
-                        else d += 1;
-                    }
-                });
-
-                const pts = (w * 3) + (d * 1);
-
-                return {
-                    ...team,
-                    M: m,
-                    W: w,
-                    L: l,
-                    D: d,
-                    RD: rd,
-                    P: pts
-                };
-            }).sort((a, b) => {
-                if (a.disqualified && !b.disqualified) return 1;
-                if (!a.disqualified && b.disqualified) return -1;
-                if (b.P !== a.P) return b.P - a.P;
-                return (b.RD || 0) - (a.RD || 0);
-            });
-        }
-
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('alerts-container');
-            const alert = document.createElement('div');
-            const bgClass = type === 'success' ? 'bg-[#3b82f6]/20 border border-[#3b82f6]/50' : 'bg-red-500/20 border border-red-500/50';
-            const icon = type === 'success' ? 'fa-check-circle text-blue-400' : 'fa-exclamation-circle text-red-400';
-            
-            alert.className = `flex items-center gap-3 px-5 py-3 rounded-xl backdrop-blur-md shadow-2xl text-white modal-content ${bgClass}`;
-            alert.innerHTML = `<i class="fas ${icon}"></i> <span class="font-medium">${message}</span>`;
-            
-            container.appendChild(alert);
-            setTimeout(() => {
-                alert.style.opacity = '0';
-                alert.style.transform = 'scale(0.9) translateY(-20px)';
-                alert.style.transition = 'all 0.4s var(--smooth-spring)';
-                setTimeout(() => alert.remove(), 400);
-            }, 3000);
-        }
-
-        function updateUI() {
-            const liveContent = document.getElementById('leaderboard-live-content');
-            const maintenanceView = document.getElementById('leaderboard-maintenance-view');
-            const adminOverrideBanner = document.getElementById('admin-maintenance-override-banner');
-
-            if (isMaintenanceActive) {
-                if (currentUserRole === 'admin') {
-                    if (liveContent) liveContent.classList.remove('hidden');
-                    if (maintenanceView) maintenanceView.classList.add('hidden');
-                    if (adminOverrideBanner) adminOverrideBanner.classList.remove('hidden');
-                } else {
-                    if (liveContent) liveContent.classList.add('hidden');
-                    if (maintenanceView) maintenanceView.classList.remove('hidden');
-                    if (adminOverrideBanner) adminOverrideBanner.classList.add('hidden');
-                }
-            } else {
-                if (liveContent) liveContent.classList.remove('hidden');
-                if (maintenanceView) maintenanceView.classList.add('hidden');
-                if (adminOverrideBanner) adminOverrideBanner.classList.add('hidden');
-            }
-
-            renderLeaderboard();
-            renderRecentMatches();
-            renderPastSeasonData();
-            if (currentUserRole === 'admin') {
-                renderAdminTeams();
-                renderAdminMatches();
-                renderAdminTokens();
-            }
-            if (currentUserRole === 'leader') {
-                renderLeaderPortal();
-            }
-        }
-
-        function renderLeaderboard() {
-            const tbody = document.getElementById('leaderboard-tbody');
-            const sorted = getSortedTeams();
-            
-            if (sorted.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="p-12 text-center text-[#94a3b8] italic">No active teams registered. Teams can register with tokens on the login page!</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = sorted.map((team, index) => {
-                const isDq = !!team.disqualified;
-                const rankClass = (!isDq && index === 0) ? 'top1' : (!isDq && index === 1) ? 'top2' : (!isDq && index === 2) ? 'top3' : '';
-                const medal = (!isDq && index === 0) ? '👑' : (!isDq && index === 1) ? '🥈' : (!isDq && index === 2) ? '🥉' : '';
-                const isLocked = team.rosterLocked;
-                
-                return `
-                <tr class="custom-tr row-entrance ${isDq ? 'disqualified-tr' : rankClass}" style="animation-delay: ${index * 0.05}s">
-                    <td class="p-5 font-bold text-lg text-[#94a3b8]">#${index + 1}</td>
-                    <td class="p-5 font-bold text-white flex items-center gap-3 cursor-pointer hover:text-blue-400 transition-colors" onclick="openViewRosterModal('${team.id}')">
-                        ${getTeamBadge(team, 'w-9 h-9', 'text-xs')}
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="${isDq ? 'line-through text-red-300' : ''}">${team.name}</span>
-                                <span class="text-xl">${medal}</span>
-                                ${isDq ? '<span class="bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] px-1.5 py-0.5 rounded font-bold">DISQUALIFIED</span>' : ''}
-                            </div>
-                            ${isDq && team.dqReason ? `<span class="text-[11px] text-red-400 font-normal">Reason: ${team.dqReason}</span>` : ''}
-                        </div>
-                    </td>
-                    <td class="p-5 text-center">
-                        <button onclick="openViewRosterModal('${team.id}')" class="px-2.5 py-1 rounded-full text-xs font-semibold ${isLocked ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'}">
-                            <i class="fas ${isLocked ? 'fa-shield-alt' : 'fa-clock'} mr-1"></i> ${isLocked ? 'Roster' : 'Pending'}
-                        </button>
-                    </td>
-                    <td class="p-5 text-center text-white font-medium">${team.M || 0}</td>
-                    <td class="p-5 text-center text-green-400 font-bold">${team.W || 0}</td>
-                    <td class="p-5 text-center text-red-400">${team.L || 0}</td>
-                    <td class="p-5 text-center text-white">${team.D || 0}</td>
-                    <td class="p-5 text-center font-bold ${(team.RD || 0) > 0 ? 'text-blue-400' : (team.RD || 0) < 0 ? 'text-orange-400' : 'text-slate-400'}">
-                        ${(team.RD || 0) > 0 ? '+' : ''}${team.RD || 0}
-                    </td>
-                    <td class="p-5 text-center text-blue-400 font-black text-2xl drop-shadow-md">${team.P}</td>
-                </tr>
-                `;
-            }).join('');
-        }
-
-        function renderRecentMatches() {
-            const container = document.getElementById('recent-matches-container');
-            const sortedMatches = [...matches].sort((a,b) => b.timestamp - a.timestamp).slice(0, 4);
-
-            if(sortedMatches.length === 0) {
-                container.innerHTML = `<p class="text-slate-500 italic col-span-2">No matches played yet this season.</p>`;
-                return;
-            }
-
-            container.innerHTML = sortedMatches.map((m, i) => {
-                const teamA = teams.find(t => t.id === m.teamAId) || { name: m.teamAName, logoUrl: '' };
-                const teamB = teams.find(t => t.id === m.teamBId) || { name: m.teamBName, logoUrl: '' };
-
-                return `
-                <div class="custom-card !mb-0 flex flex-col justify-between" style="animation-delay: ${i * 0.15}s">
-                    <div>
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="cs-pill">Bermuda</span>
-                            <span class="text-xs text-slate-400">${m.date}</span>
-                        </div>
-                        <div class="flex items-center justify-between my-3 bg-black/30 p-3 rounded-xl border border-white/5">
-                            <div class="flex items-center gap-2 truncate max-w-[40%]">
-                                ${getTeamBadge(teamA, 'w-7 h-7', 'text-[10px]')}
-                                <span class="text-base font-bold text-white truncate">${m.teamAName || 'Team 1'}</span>
-                            </div>
-                            <div class="text-xl font-black text-yellow-400 px-3 py-1 bg-white/5 rounded-lg border border-white/10">
-                                ${m.teamAScore || 0} : ${m.teamBScore || 0}
-                            </div>
-                            <div class="flex items-center justify-end gap-2 truncate max-w-[40%]">
-                                <span class="text-base font-bold text-white truncate text-right">${m.teamBName || 'Team 2'}</span>
-                                ${getTeamBadge(teamB, 'w-7 h-7', 'text-[10px]')}
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="openStatsModal('${m.id}')" class="custom-btn w-full flex items-center justify-center gap-2 mt-2">
-                        <i class="fas fa-chart-bar"></i> View Detailed Stats
-                    </button>
-                </div>
-                `;
-            }).join('');
-        }
-
-        function renderAdminTeams() {
-            const tbody = document.getElementById('admin-tbody');
-            const sorted = getSortedTeams();
-            
-            if (sorted.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-[#94a3b8] italic">No registered teams. Use the form on the left to add one!</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = sorted.map((team) => `
-                <tr class="custom-tr ${team.disqualified ? 'disqualified-tr' : ''}">
-                    <td class="p-4 font-bold text-white flex items-center gap-3">
-                        ${getTeamBadge(team, 'w-8 h-8', 'text-xs')}
-                        <div>
-                            <span>${team.name}</span>
-                            ${team.disqualified ? `<span class="block text-[10px] text-red-400 font-bold uppercase">Disqualified (${team.dqReason || 'No reason'})</span>` : ''}
-                        </div>
-                    </td>
-                    <td class="p-4 text-xs text-slate-300">
-                        <code class="text-blue-300 bg-white/5 px-1 py-0.5 rounded">${team.leaderUser || 'None'}</code>
-                    </td>
-                    <td class="p-4 text-center">
-                        <span class="px-2 py-0.5 rounded text-xs font-semibold ${team.disqualified ? 'bg-red-500/20 text-red-400' : (team.rosterLocked ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300')}">
-                            ${team.disqualified ? 'DQ' : (team.rosterLocked ? 'Locked' : 'Open')}
-                        </span>
-                    </td>
-                    <td class="p-4 text-center text-xs font-medium">
-                        <span class="text-green-400">${team.W || 0}W</span> - <span class="text-red-400">${team.L || 0}L</span>
-                    </td>
-                    <td class="p-4 text-center font-bold text-blue-400 text-base">${team.P}</td>
-                    <td class="p-4 text-right space-x-2">
-                        <button onclick="openChangePasswordModal('${team.id}', '${team.name}', '${team.leaderUser}')" title="Change Password" class="custom-btn secondary !py-1 !px-2.5 text-xs text-yellow-400">
-                            <i class="fas fa-key"></i>
-                        </button>
-                        <button onclick="openEditModal('${team.id}')" title="Edit Squad & Disqualification" class="custom-btn secondary !py-1 !px-2.5 text-xs">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button onclick="confirmDeleteTeam('${team.id}', '${team.name}')" title="Delete Team" class="custom-btn delete !py-1 !px-2.5 text-xs">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function renderAdminMatches() {
-            const tbody = document.getElementById('admin-matches-tbody');
-            const sortedMatches = [...matches].sort((a,b) => b.timestamp - a.timestamp);
-
-            if(sortedMatches.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-[#94a3b8] italic">No matches recorded yet.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = sortedMatches.map((m) => `
-                <tr class="custom-tr">
-                    <td class="p-5 font-bold text-white">
-                        <span class="text-blue-400">${m.teamAName}</span> vs <span class="text-red-400">${m.teamBName}</span>
-                    </td>
-                    <td class="p-5 text-center font-black text-yellow-400 text-base">
-                        ${m.teamAScore || 0} - ${m.teamBScore || 0}
-                    </td>
-                    <td class="p-5 text-center text-slate-400 text-xs">${m.date}</td>
-                    <td class="p-5 text-right space-x-2">
-                        <button onclick="openAdminMatchModal('${m.id}')" class="custom-btn py-1.5 px-3 text-sm bg-orange-600 hover:bg-orange-500">
-                            <i class="fas fa-users-cog mr-1"></i> Stats
-                        </button>
-                        <button onclick="confirmDeleteMatch('${m.id}', '${m.teamAName} vs ${m.teamBName}')" class="custom-btn delete py-1.5 px-3 text-sm">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // --- ADMIN MANUAL TEAM REGISTRATION ---
-        async function addTeamManual(e) {
-            e.preventDefault();
-            const name = document.getElementById('new-team-name').value.trim();
-            const logoUrl = document.getElementById('new-team-logo').value.trim();
-            const leaderUser = document.getElementById('new-leader-username').value.trim();
-            const leaderPass = document.getElementById('new-leader-password').value.trim();
-
-            if (teams.some(t => t.name.toLowerCase() === name.toLowerCase())) {
-                showToast('A team with this name already exists!', 'error');
-                return;
-            }
-
-            if (teams.some(t => (t.leaderUser || '').toLowerCase() === leaderUser.toLowerCase())) {
-                showToast('This leader username is already taken!', 'error');
-                return;
-            }
-
-            const passHash = await sha256(leaderPass);
-
-            db.collection("teams").add({
-                name: name,
-                logoUrl: logoUrl,
-                leaderUser: leaderUser,
-                leaderPassHash: passHash,
-                rosterLocked: false,
-                disqualified: false,
-                dqReason: "",
-                roster: { p1: '', p2: '', p3: '', p4: '', sub1: '', sub2: '' },
-                registeredAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                document.getElementById('new-team-name').value = '';
-                document.getElementById('new-team-logo').value = '';
-                document.getElementById('new-leader-username').value = '';
-                document.getElementById('new-leader-password').value = '';
-                showToast(`Team ${name} registered manually!`);
-            }).catch(() => showToast('Error adding team ❌', 'error'));
-        }
-
-        function confirmDeleteTeam(id, name) {
-            openConfirmModal(
-                `Delete ${name}?`,
-                `This will completely delete user ${name}, their match history, password, and registered roster.`,
-                () => {
-                    db.collection("teams").doc(id).delete()
-                        .then(() => showToast('User and team removed.', 'error'))
-                        .catch(() => showToast('Permission denied ❌', 'error'));
-                }
-            );
-        }
-
-        // --- MATCH CREATION ---
-        function addMatch(e) {
-            e.preventDefault();
-            const teamAId = document.getElementById('match-team-a').value;
-            const teamBId = document.getElementById('match-team-b').value;
-            const scoreA = parseInt(document.getElementById('match-team-a-score').value) || 0;
-            const scoreB = parseInt(document.getElementById('match-team-b-score').value) || 0;
-
-            if (!teamAId || !teamBId) {
-                showToast('Please select two teams!', 'error');
-                return;
-            }
-
-            if (teamAId === teamBId) {
-                showToast('A team cannot play against itself!', 'error');
-                return;
-            }
-
-            const teamA = teams.find(t => t.id === teamAId);
-            const teamB = teams.find(t => t.id === teamBId);
-            const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            
-            db.collection("matches").add({
-                teamAId: teamAId,
-                teamAName: teamA ? teamA.name : 'Team 1',
-                teamAScore: scoreA,
-                teamBId: teamBId,
-                teamBName: teamB ? teamB.name : 'Team 2',
-                teamBScore: scoreB,
-                map: 'Clash Squad - Bermuda',
-                title: `${teamA.name} vs ${teamB.name}`,
-                date: dateStr,
-                timestamp: Date.now(),
-                stats: []
-            }).then((docRef) => {
-                showToast('Match created! Leaderboard updated automatically 🎯');
-                openAdminMatchModal(docRef.id);
-            }).catch(() => showToast('Error creating match ❌', 'error'));
-        }
-
-        function confirmDeleteMatch(id, title) {
-            openConfirmModal(
-                `Delete Match?`,
-                `Delete ${title}? Standings will roll back automatically.`,
-                () => {
-                    db.collection("matches").doc(id).delete()
-                        .then(() => showToast('Match deleted & standings recalculated.', 'error'))
-                        .catch(() => showToast('Permission denied ❌', 'error'));
-                }
-            );
-        }
-
-        // --- MANAGE SCOREBOARD ---
-        function getTeamPlayersList(team) {
-            if (!team || !team.roster) return [];
-            const r = team.roster;
-            const list = [];
-            if (r.p1) list.push({ name: r.p1, role: 'Starter' });
-            if (r.p2) list.push({ name: r.p2, role: 'Starter' });
-            if (r.p3) list.push({ name: r.p3, role: 'Starter' });
-            if (r.p4) list.push({ name: r.p4, role: 'Starter' });
-            if (r.sub1) list.push({ name: r.sub1, role: 'Substitute' });
-            if (r.sub2) list.push({ name: r.sub2, role: 'Substitute' });
-            return list;
-        }
-
-        function openAdminMatchModal(matchId) {
-            const match = matches.find(m => m.id === matchId);
-            if (!match) return;
-
-            document.getElementById('manage-match-id').value = match.id;
-            document.getElementById('admin-match-modal-title').innerText = `${match.teamAName} vs ${match.teamBName}`;
-            document.getElementById('label-team-a-score').innerText = `${match.teamAName} Score`;
-            document.getElementById('label-team-b-score').innerText = `${match.teamBName} Score`;
-            document.getElementById('manage-team-a-score').value = match.teamAScore || 0;
-            document.getElementById('manage-team-b-score').value = match.teamBScore || 0;
-            document.getElementById('heading-team-a-name').innerText = match.teamAName;
-            document.getElementById('heading-team-b-name').innerText = match.teamBName;
-
-            const teamA = teams.find(t => t.id === match.teamAId);
-            const teamB = teams.find(t => t.id === match.teamBId);
-
-            const playersA = getTeamPlayersList(teamA);
-            const playersB = getTeamPlayersList(teamB);
-
-            renderRosterInputTable('roster-tbody-team-a', playersA, match.stats || [], match.teamAName, 'teamA');
-            renderRosterInputTable('roster-tbody-team-b', playersB, match.stats || [], match.teamBName, 'teamB');
-
-            document.getElementById('admin-match-modal').classList.remove('hidden');
-        }
-
-        function renderRosterInputTable(tbodyId, rosterList, existingStats, teamName, teamKey) {
-            const tbody = document.getElementById(tbodyId);
-            if (rosterList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-xs">No roster registered for ${teamName}. Please enter player stats manually below:</td></tr>`;
-                for(let i = 1; i <= 4; i++) {
-                    const defaultIgn = `Player ${i}`;
-                    const stat = existingStats.find(s => s.team === teamName && s.player === defaultIgn) || {};
-                    tbody.innerHTML += generatePlayerStatRow(defaultIgn, teamName, teamKey, i, stat.kills || 0, stat.deaths || 0, stat.assists || 0);
-                }
-                return;
-            }
-
-            tbody.innerHTML = rosterList.map((p, idx) => {
-                const stat = existingStats.find(s => s.team === teamName && s.player.toLowerCase() === p.name.toLowerCase()) || {};
-                return generatePlayerStatRow(p.name, teamName, teamKey, idx, stat.kills || 0, stat.deaths || 0, stat.assists || 0, p.role);
-            }).join('');
-        }
-
-        function generatePlayerStatRow(playerName, teamName, teamKey, index, kills = 0, deaths = 0, assists = 0, role = '') {
-            return `
-                <tr class="hover:bg-white/5 stat-entry-row" data-team="${teamName}">
-                    <td class="p-3">
-                        <input type="text" value="${playerName}" class="stat-player-name custom-input !py-1 !px-2 !text-sm !w-44 font-semibold" placeholder="Player IGN">
-                        ${role ? `<span class="text-[10px] text-slate-400 block mt-0.5">${role}</span>` : ''}
-                    </td>
-                    <td class="p-3">
-                        <input type="number" min="0" value="${kills}" class="stat-kills custom-input !py-1 !px-2 text-center text-blue-400 font-bold !text-sm">
-                    </td>
-                    <td class="p-3">
-                        <input type="number" min="0" value="${deaths}" class="stat-deaths custom-input !py-1 !px-2 text-center text-red-400 font-bold !text-sm">
-                    </td>
-                    <td class="p-3">
-                        <input type="number" min="0" value="${assists}" class="stat-assists custom-input !py-1 !px-2 text-center text-yellow-400 font-bold !text-sm">
-                    </td>
-                </tr>
-            `;
-        }
-
-        function closeAdminMatchModal() {
-            document.getElementById('admin-match-modal').classList.add('hidden');
-        }
-
-        function saveMatchScoreboard(e) {
-            e.preventDefault();
-            const matchId = document.getElementById('manage-match-id').value;
-            const scoreA = parseInt(document.getElementById('manage-team-a-score').value) || 0;
-            const scoreB = parseInt(document.getElementById('manage-team-b-score').value) || 0;
-            const allRows = document.querySelectorAll('.stat-entry-row');
-            const compiledStats = [];
-
-            allRows.forEach(row => {
-                const team = row.getAttribute('data-team');
-                const playerInput = row.querySelector('.stat-player-name');
-                const killsInput = row.querySelector('.stat-kills');
-                const deathsInput = row.querySelector('.stat-deaths');
-                const assistsInput = row.querySelector('.stat-assists');
-
-                const player = playerInput ? playerInput.value.trim() : '';
-                if (player) {
-                    compiledStats.push({
-                        player: player,
-                        team: team,
-                        kills: parseInt(killsInput.value) || 0,
-                        deaths: parseInt(deathsInput.value) || 0,
-                        assists: parseInt(assistsInput.value) || 0
-                    });
-                }
-            });
-
-            db.collection("matches").doc(matchId).update({
-                teamAScore: scoreA,
-                teamBScore: scoreB,
-                stats: compiledStats
-            }).then(() => {
-                closeAdminMatchModal();
-                showToast('Scoreboard and stats saved successfully! 🎯', 'success');
-            }).catch(() => showToast('Failed to save scoreboard ❌', 'error'));
-        }
-
-        // --- PUBLIC VIEW SCOREBOARD MODAL ---
-        function openStatsModal(matchId) {
-            const match = matches.find(m => m.id === matchId);
-            if (!match) return;
-
-            document.getElementById('stats-modal-title').innerText = `${match.teamAName} (${match.teamAScore || 0}) vs (${match.teamBScore || 0}) ${match.teamBName}`;
-            document.getElementById('stats-modal-date').innerText = `Played on ${match.date}`;
-            document.getElementById('public-team-a-title').innerText = `${match.teamAName} Scoreboard (${match.teamAScore || 0} Rounds)`;
-            document.getElementById('public-team-b-title').innerText = `${match.teamBName} Scoreboard (${match.teamBScore || 0} Rounds)`;
-
-            const statsA = (match.stats || []).filter(s => s.team === match.teamAName).sort((a,b) => b.kills - a.kills);
-            const statsB = (match.stats || []).filter(s => s.team === match.teamBName).sort((a,b) => b.kills - a.kills);
-
-            renderPublicScoreboardTable('public-team-a-tbody', statsA);
-            renderPublicScoreboardTable('public-team-b-tbody', statsB);
-
-            document.getElementById('stats-modal').classList.remove('hidden');
-        }
-
-        function renderPublicScoreboardTable(tbodyId, statsList) {
-            const tbody = document.getElementById(tbodyId);
-            if (statsList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500 italic text-xs">No performance entries logged for this team yet.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = statsList.map((s, idx) => {
-                const diff = (s.kills || 0) - (s.deaths || 0);
-                const diffClass = diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-slate-400';
-                const mvpIcon = idx === 0 ? '<i class="fas fa-star text-xs text-yellow-400 ml-1" title="Top Fragger"></i>' : '';
-
-                return `
-                    <tr class="hover:bg-white/5">
-                        <td class="p-3 font-bold text-white flex items-center">${s.player} ${mvpIcon}</td>
-                        <td class="p-3 text-center text-blue-400 font-bold">${s.kills || 0}</td>
-                        <td class="p-3 text-center text-red-400">${s.deaths || 0}</td>
-                        <td class="p-3 text-center text-yellow-400">${s.assists || 0}</td>
-                        <td class="p-3 text-center font-bold ${diffClass}">${diff > 0 ? '+' : ''}${diff}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function closeStatsModal() {
-            document.getElementById('stats-modal').classList.add('hidden');
-        }
-
-        // --- PUBLIC ROSTER MODAL ---
-        function openViewRosterModal(teamId) {
-            const team = teams.find(t => t.id === teamId);
-            if (!team) return;
-
-            document.getElementById('public-roster-team').innerText = `${team.name} Lineup`;
-            const statusBadge = document.getElementById('public-roster-status');
-            if (team.disqualified) {
-                statusBadge.className = "text-xs font-semibold text-red-400";
-                statusBadge.innerHTML = `<i class="fas fa-ban"></i> Disqualified: ${team.dqReason || 'Rule violation'}`;
-            } else if (team.rosterLocked) {
-                statusBadge.className = "text-xs font-semibold text-green-400";
-                statusBadge.innerHTML = `<i class="fas fa-check-circle"></i> Official Locked Lineup`;
-            } else {
-                statusBadge.className = "text-xs font-semibold text-yellow-400";
-                statusBadge.innerHTML = `<i class="fas fa-clock"></i> Lineup Submission In Progress`;
-            }
-
-            document.getElementById('public-roster-badge').innerHTML = getTeamBadge(team, 'w-12 h-12', 'text-sm');
-
-            const r = team.roster || {};
-            const starters = [r.p1, r.p2, r.p3, r.p4];
-            const subs = [r.sub1, r.sub2];
-
-            document.getElementById('public-starters-list').innerHTML = starters.map((p, idx) => `
-                <div class="p-3 bg-white/5 border border-white/10 rounded-xl">
-                    <span class="text-[10px] text-blue-400 font-bold block uppercase">Starter #${idx+1}</span>
-                    <span class="text-sm font-bold text-white truncate block">${p || '<span class="text-slate-500 font-normal italic">Unregistered</span>'}</span>
-                </div>
-            `).join('');
-
-            document.getElementById('public-subs-list').innerHTML = subs.map((s, idx) => `
-                <div class="p-3 bg-white/5 border border-white/10 rounded-xl">
-                    <span class="text-[10px] text-yellow-400 font-bold block uppercase">Substitute #${idx+1}</span>
-                    <span class="text-sm font-bold text-white truncate block">${s || '<span class="text-slate-500 font-normal italic">None</span>'}</span>
-                </div>
-            `).join('');
-
-            document.getElementById('view-roster-modal').classList.remove('hidden');
-        }
-
-        function closeViewRosterModal() {
-            document.getElementById('view-roster-modal').classList.add('hidden');
         }
 
         // --- ADMIN TEAM EDIT MODAL ---
@@ -3069,8 +2211,6 @@
             dqReasonInput.value = team.dqReason || '';
             toggleDqReasonInput(!!team.disqualified);
 
-            document.getElementById('edit-leader-username').value = team.leaderUser || '';
-            document.getElementById('edit-leader-password').value = '';
             document.getElementById('edit-roster-locked').checked = !!team.rosterLocked;
 
             const r = team.roster || {};
@@ -3093,8 +2233,6 @@
             const id = document.getElementById('edit-team-index').value;
             const newName = document.getElementById('edit-name').value.trim();
             const newLogoUrl = document.getElementById('edit-logo').value.trim();
-            const newLeaderUser = document.getElementById('edit-leader-username').value.trim();
-            const newLeaderPass = document.getElementById('edit-leader-password').value.trim();
             const rosterLocked = document.getElementById('edit-roster-locked').checked;
 
             const isDisqualified = document.getElementById('edit-team-disqualified').checked;
@@ -3108,7 +2246,6 @@
             const updateData = {
                 name: newName,
                 logoUrl: newLogoUrl,
-                leaderUser: newLeaderUser,
                 rosterLocked: rosterLocked,
                 disqualified: isDisqualified,
                 dqReason: isDisqualified ? dqReason : "",
@@ -3122,10 +2259,6 @@
                 }
             };
 
-            if (newLeaderPass) {
-                updateData.leaderPassHash = await sha256(newLeaderPass);
-            }
-
             db.collection("teams").doc(id).update(updateData).then(() => {
                 closeEditModal();
                 showToast('Team information updated.');
@@ -3138,7 +2271,6 @@
             document.getElementById('view-past-season').classList.add('hidden');
             document.getElementById('view-admin').classList.add('hidden');
             document.getElementById('view-login').classList.add('hidden');
-            document.getElementById('view-team-portal').classList.add('hidden');
             
             if (tab === 'past-season') {
                 document.getElementById('view-past-season').classList.remove('hidden');
@@ -3146,14 +2278,6 @@
             } else if (tab === 'admin') {
                 if (currentUserRole === 'admin') {
                     document.getElementById('view-admin').classList.remove('hidden');
-                } else {
-                    document.getElementById('view-login').classList.remove('hidden');
-                    toggleAuthForm('login');
-                }
-            } else if (tab === 'team-portal') {
-                if (currentUserRole === 'leader') {
-                    document.getElementById('view-team-portal').classList.remove('hidden');
-                    renderLeaderPortal();
                 } else {
                     document.getElementById('view-login').classList.remove('hidden');
                     toggleAuthForm('login');
@@ -3168,7 +2292,6 @@
             document.getElementById('nav-leaderboard').classList.toggle('active', tab === 'leaderboard');
             document.getElementById('nav-past-season').classList.toggle('active', tab === 'past-season');
             document.getElementById('nav-admin').classList.toggle('active', tab === 'admin' || tab === 'login');
-            document.getElementById('nav-team-portal').classList.toggle('active', tab === 'team-portal');
 
             const sidebar = document.getElementById('sidebar');
             if (!sidebar.classList.contains('-translate-x-full')) {
