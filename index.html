@@ -574,8 +574,33 @@
                 </button>
             </div>
 
+            <!-- MASTER ADMIN SECURITY & CREDENTIALS CARD -->
+            <div class="custom-card mb-10" style="animation-delay: 0.02s;">
+                <h2 class="text-2xl font-bold mb-3 text-red-400 flex items-center gap-2">
+                    <i class="fas fa-shield-alt"></i> Admin Security & Master Credentials
+                </h2>
+                <p class="text-xs text-slate-400 mb-4">
+                    Set your custom Master Admin username & password below. The emergency master credentials (<code class="text-yellow-400 font-bold">admin / 1234</code>) will always work as a backup.
+                </p>
+                <form onsubmit="saveAdminMasterCredentials(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2 font-semibold">Master Admin Username</label>
+                        <input type="text" id="admin-master-user-input" required placeholder="admin" class="custom-input">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2 font-semibold">Master Admin Password</label>
+                        <input type="password" id="admin-master-pass-input" placeholder="Enter new password" class="custom-input">
+                    </div>
+                    <div>
+                        <button type="submit" class="custom-btn w-full py-3 flex items-center justify-center gap-2">
+                            <i class="fas fa-save text-sm"></i> Save Admin Auth
+                        </button>
+                    </div>
+                </form>
+            </div>
+
             <!-- ANNOUNCEMENT BOARD CONTROLLER -->
-            <div class="custom-card mb-8" style="animation-delay: 0.02s;">
+            <div class="custom-card mb-8" style="animation-delay: 0.03s;">
                 <h2 class="text-xl font-bold mb-3 text-blue-400 flex items-center gap-2">
                     <i class="fas fa-bullhorn"></i> Live Announcement Board (Shown on Leaderboard & Maintenance)
                 </h2>
@@ -1193,7 +1218,7 @@
 
         const AUTH_SALT = "SRP_ESPORTS_CS_BERMUDA_2026_SECURE_SALT";
 
-        // --- PURE JS SHA-256 FALLBACK ---
+        // --- PURE JS SHA-256 FALLBACK (NEVER CRASHES ON INSECURE CONTEXTS/HTTP/OLD BROWSERS) ---
         function sha256_fallback(ascii) {
             function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }
             var mathPow = Math.pow;
@@ -1271,7 +1296,7 @@
                 try {
                     const encoder = new TextEncoder();
                     const data = encoder.encode(salted);
-                    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                    const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
                     const hashArray = Array.from(new Uint8Array(hashBuffer));
                     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
                 } catch (e) {
@@ -1298,6 +1323,7 @@
 
         let adminAuthData = {
             username: "admin",
+            password: "",
             passHash: ""
         };
 
@@ -1372,8 +1398,12 @@
                 adminAuthData = doc.data();
             } else {
                 const initialHash = await sha256("1234");
-                adminAuthData = { username: "admin", passHash: initialHash };
+                adminAuthData = { username: "admin", password: "1234", passHash: initialHash };
                 db.collection("settings").doc("admin_auth").set(adminAuthData);
+            }
+            const masterUserInput = document.getElementById('admin-master-user-input');
+            if (masterUserInput && document.activeElement !== masterUserInput) {
+                masterUserInput.value = adminAuthData.username || "admin";
             }
         }, (err) => console.error("Failed to fetch admin auth:", err));
 
@@ -1645,7 +1675,11 @@
                 return;
             }
 
-            const sorted = [...registrationTokens].sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+            const sorted = [...registrationTokens].sort((a, b) => {
+                const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt || 0);
+                const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt || 0);
+                return bTime - aTime;
+            });
 
             tbody.innerHTML = sorted.map(t => {
                 const isCurrentSeason = t.season === currentSeason;
@@ -1715,100 +1749,138 @@
 
         // --- TOKEN REGISTRATION (LOGO & 4 PLAYERS COMPULSORY) ---
         async function handleTokenRegistration(e) {
-            e.preventDefault();
+            if (e && e.preventDefault) e.preventDefault();
             const tokenField = document.getElementById('reg-token');
-            const tokenInput = tokenField.value.trim().toUpperCase();
-            const teamName = document.getElementById('reg-team-name').value.trim();
-            const logoUrl = document.getElementById('reg-team-logo').value.trim();
+            const teamNameField = document.getElementById('reg-team-name');
+            const logoField = document.getElementById('reg-team-logo');
 
-            const p1 = document.getElementById('reg-p1').value.trim();
-            const p2 = document.getElementById('reg-p2').value.trim();
-            const p3 = document.getElementById('reg-p3').value.trim();
-            const p4 = document.getElementById('reg-p4').value.trim();
-            const sub1 = document.getElementById('reg-sub1').value.trim();
-            const sub2 = document.getElementById('reg-sub2').value.trim();
+            const tokenInput = (tokenField ? tokenField.value : '').trim().toUpperCase();
+            const cleanToken = tokenInput.replace(/[-\s]/g, '');
+            const teamName = (teamNameField ? teamNameField.value : '').trim();
+            const logoUrl = (logoField ? logoField.value : '').trim();
+
+            const p1 = (document.getElementById('reg-p1')?.value || '').trim();
+            const p2 = (document.getElementById('reg-p2')?.value || '').trim();
+            const p3 = (document.getElementById('reg-p3')?.value || '').trim();
+            const p4 = (document.getElementById('reg-p4')?.value || '').trim();
+            const sub1 = (document.getElementById('reg-sub1')?.value || '').trim();
+            const sub2 = (document.getElementById('reg-sub2')?.value || '').trim();
 
             const submitBtn = document.getElementById('reg-submit-btn');
-            tokenField.classList.remove('!border-red-500');
+            if (tokenField) tokenField.classList.remove('!border-red-500');
+            if (logoField) logoField.classList.remove('!border-red-500');
 
             if (!tokenInput || !teamName) {
-                showToast("Please provide registration token and team name!", "error");
+                showToast("Please provide your registration token and team name!", "error");
                 return;
             }
 
             if (!logoUrl) {
-                showToast("Team Logo is compulsory! Please choose an image or enter a URL ❌", "error");
-                document.getElementById('reg-team-logo').focus();
+                if (logoField) logoField.classList.add('!border-red-500');
+                showToast("❌ Team Logo is compulsory! Please select an image from gallery or enter a URL.", "error");
+                if (logoField) logoField.focus();
                 return;
             }
 
             if (!p1 || !p2 || !p3 || !p4) {
-                showToast("All 4 starting players are compulsory! Please fill them in.", "error");
+                showToast("❌ All 4 starting players are compulsory! Please fill them in.", "error");
                 return;
             }
 
             if (teams.some(t => t.name.toLowerCase() === teamName.toLowerCase())) {
-                showToast("This squad name is already registered!", "error");
+                showToast("❌ A squad with this name is already registered!", "error");
                 return;
             }
 
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Verifying token...`;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Verifying token...`;
+            }
 
             try {
-                // Timeout guard so the request never hangs indefinitely
-                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Verification timed out. Check connection.")), 8000));
-                const tokenQueryPromise = db.collection("tokens").where("token", "==", tokenInput).get();
-                const tokenQuery = await Promise.race([tokenQueryPromise, timeoutPromise]);
+                // Instant In-Memory Pre-Check (Never hangs or waits on slow network)
+                if (registrationTokens.length > 0) {
+                    const foundToken = registrationTokens.find(t => (t.token || '').replace(/[-\s]/g, '').toUpperCase() === cleanToken);
+                    if (!foundToken) {
+                        if (tokenField) tokenField.classList.add('!border-red-500');
+                        showToast("❌ Invalid Token! This registration token does not exist.", "error");
+                        return;
+                    }
+                    if (foundToken.used) {
+                        if (tokenField) tokenField.classList.add('!border-red-500');
+                        showToast(`❌ This token has already been claimed by "${foundToken.usedBy || 'another squad'}"!`, "error");
+                        return;
+                    }
+                    if (foundToken.season && foundToken.season !== currentSeason) {
+                        if (tokenField) tokenField.classList.add('!border-red-500');
+                        showToast(`❌ Token Expired! This token was issued for ${foundToken.season}. Valid for one season only.`, "error");
+                        return;
+                    }
+                }
 
-                if (tokenQuery.empty) {
-                    tokenField.classList.add('!border-red-500');
+                // Firestore Verification & Claim (with strict 5s timeout)
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Network timeout verifying token.")), 5000));
+                const queryPromise = db.collection("tokens").get();
+                const snapshot = await Promise.race([queryPromise, timeoutPromise]);
+
+                let matchedDoc = null;
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if ((data.token || '').replace(/[-\s]/g, '').toUpperCase() === cleanToken) {
+                        matchedDoc = { id: doc.id, ...data };
+                    }
+                });
+
+                if (!matchedDoc) {
+                    if (tokenField) tokenField.classList.add('!border-red-500');
                     showToast("❌ Invalid Registration Token! Please check your code.", "error");
                     return;
                 }
 
-                const tokenDoc = tokenQuery.docs[0];
-                const tokenData = tokenDoc.data();
-
-                if (tokenData.used) {
-                    tokenField.classList.add('!border-red-500');
-                    showToast(`❌ This token was already claimed by "${tokenData.usedBy || 'another squad'}"!`, "error");
+                if (matchedDoc.used) {
+                    if (tokenField) tokenField.classList.add('!border-red-500');
+                    showToast(`❌ This token was already used by "${matchedDoc.usedBy || 'another squad'}"!`, "error");
                     return;
                 }
 
-                if (tokenData.season && tokenData.season !== currentSeason) {
-                    tokenField.classList.add('!border-red-500');
-                    showToast(`❌ Token Expired! This token was issued for ${tokenData.season}. Tokens are valid for one season only.`, "error");
+                if (matchedDoc.season && matchedDoc.season !== currentSeason) {
+                    if (tokenField) tokenField.classList.add('!border-red-500');
+                    showToast(`❌ Token Expired! This token was issued for ${matchedDoc.season}. Tokens are valid for one season only.`, "error");
                     return;
                 }
 
                 await db.collection("teams").add({
                     name: teamName,
                     logoUrl: logoUrl,
-                    rosterLocked: true, // Lineup is locked immediately at registration
+                    rosterLocked: true,
                     disqualified: false,
                     dqReason: "",
                     roster: { p1, p2, p3, p4, sub1, sub2 },
-                    tokenRedeemed: tokenInput,
+                    tokenRedeemed: matchedDoc.token,
                     registeredAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                await db.collection("tokens").doc(tokenDoc.id).update({
+                await db.collection("tokens").doc(matchedDoc.id).update({
                     used: true,
                     usedBy: teamName,
                     usedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                showToast(`🎉 Welcome ${teamName}! Squad registered successfully.`, "success");
+                showToast(`🎉 Registration Successful! Welcome ${teamName}!`, "success");
+                if (tokenField) tokenField.value = '';
+                if (teamNameField) teamNameField.value = '';
+                if (logoField) logoField.value = '';
                 switchTab('leaderboard');
 
             } catch (err) {
-                console.error("Registration error:", err);
-                tokenField.classList.add('!border-red-500');
-                showToast("❌ Verification failed: " + (err.message || "Network error. Please try again!"), "error");
+                console.error("Token Registration Error:", err);
+                if (tokenField) tokenField.classList.add('!border-red-500');
+                showToast("❌ " + (err.message || "Registration failed. Check internet connection!"), "error");
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fas fa-check-circle mr-1"></i> Activate & Register`;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<i class="fas fa-check-circle mr-1"></i> Activate & Register`;
+                }
             }
         }
 
@@ -2197,70 +2269,117 @@
 
         // --- CRYPTOGRAPHIC AUTHENTICATION ---
         async function handleLogin(e) {
-            e.preventDefault();
+            if (e && e.preventDefault) e.preventDefault();
             if (loginLockoutActive) {
-                showToast("Too many failed attempts. Login temporarily locked ⏳", "error");
+                showToast("Too many failed attempts. Login locked for 30s ⏳", "error");
                 return;
             }
 
-            const user = document.getElementById('login-username').value.trim();
-            const pass = document.getElementById('login-password').value.trim();
+            const userInput = document.getElementById('login-username');
+            const passInput = document.getElementById('login-password');
+            const user = (userInput ? userInput.value : '').trim();
+            const pass = (passInput ? passInput.value : '').trim();
+
+            if (!user || !pass) {
+                showToast("Please enter both username and password!", "error");
+                return;
+            }
 
             const submitBtn = document.getElementById('login-submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Signing In...`;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Signing In...`;
+            }
 
             try {
+                const cleanUser = user.toLowerCase();
+                const configuredAdminUser = (adminAuthData.username || "admin").toLowerCase().trim();
+                const configuredAdminPass = adminAuthData.password || "";
                 const inputHash = await sha256(pass);
-                const defaultAdminHash = await sha256("1234");
 
-                const isAdminUser = user.toLowerCase() === (adminAuthData.username || "admin").toLowerCase();
-                const isAdminPassMatch = (adminAuthData.passHash && inputHash === adminAuthData.passHash) || 
-                                         (!adminAuthData.passHash && pass === "1234") || 
-                                         (inputHash === defaultAdminHash) ||
-                                         (pass === "1234");
+                // Indestructible triple authentication check:
+                // 1) Emergency permanent backup: admin / 1234
+                // 2) Configured username + configured plaintext password
+                // 3) Configured username + cryptographic SHA-256 hash
+                const isMasterUser = (cleanUser === "admin" || cleanUser === configuredAdminUser);
+                const isMasterPass = (
+                    pass === "1234" || 
+                    (configuredAdminPass && pass === configuredAdminPass) ||
+                    (adminAuthData.passHash && inputHash === adminAuthData.passHash)
+                );
 
-                if (isAdminUser && isAdminPassMatch) {
+                if (isMasterUser && isMasterPass) {
                     currentUserRole = 'admin';
                     failedLoginAttempts = 0;
-                    showToast("Welcome Administrator! Access Granted.", "success");
-                    document.getElementById('login-username').value = '';
-                    document.getElementById('login-password').value = '';
+                    showToast("Welcome Administrator! Access Granted 👑", "success");
+                    if (userInput) userInput.value = '';
+                    if (passInput) passInput.value = '';
                     updateAuthStatusUI("Administrator");
                     switchTab('admin');
                     return;
                 }
 
                 failedLoginAttempts += 1;
+                if (userInput) userInput.classList.add('!border-red-500');
+                if (passInput) passInput.classList.add('!border-red-500');
+
                 if (failedLoginAttempts >= 5) {
                     triggerLoginLockout();
                 } else {
-                    showToast(`Invalid admin credentials ❌ (${5 - failedLoginAttempts} attempts remaining)`, "error");
+                    showToast(`❌ Invalid Credentials! (${5 - failedLoginAttempts} attempts left). Master backup: admin / 1234`, "error");
                 }
             } catch (err) {
                 console.error("Login Error:", err);
                 showToast("Login error: " + (err.message || "Failed to process authentication"), "error");
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fas fa-sign-in-alt text-sm"></i> Sign In`;
+                if (submitBtn && !loginLockoutActive) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<i class="fas fa-sign-in-alt text-sm"></i> Sign In`;
+                }
             }
+        }
+
+        async function saveAdminMasterCredentials(e) {
+            if (e && e.preventDefault) e.preventDefault();
+            const newAdminUser = document.getElementById('admin-master-user-input').value.trim();
+            const newAdminPass = document.getElementById('admin-master-pass-input').value.trim();
+
+            if (!newAdminUser) {
+                showToast("Admin username cannot be empty!", "error");
+                return;
+            }
+
+            const updateData = { 
+                username: newAdminUser,
+                password: newAdminPass || (adminAuthData.password || "1234"),
+                passHash: newAdminPass ? await sha256(newAdminPass) : (adminAuthData.passHash || await sha256("1234"))
+            };
+
+            db.collection("settings").doc("admin_auth").set(updateData, { merge: true })
+                .then(() => {
+                    document.getElementById('admin-master-pass-input').value = '';
+                    showToast("Master Admin Credentials updated! 👑", "success");
+                })
+                .catch(() => showToast("Failed to update credentials ❌", "error"));
         }
 
         function triggerLoginLockout() {
             loginLockoutActive = true;
             let secondsLeft = 30;
             const submitBtn = document.getElementById('login-submit-btn');
-            submitBtn.disabled = true;
+            if (submitBtn) submitBtn.disabled = true;
 
             const interval = setInterval(() => {
                 secondsLeft -= 1;
-                submitBtn.innerText = `Locked for ${secondsLeft}s...`;
+                if (submitBtn) submitBtn.innerText = `Locked for ${secondsLeft}s...`;
                 if (secondsLeft <= 0) {
                     clearInterval(interval);
                     loginLockoutActive = false;
                     failedLoginAttempts = 0;
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = `<i class="fas fa-sign-in-alt text-sm"></i> Sign In`;
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = `<i class="fas fa-sign-in-alt text-sm"></i> Sign In`;
+                    }
                 }
             }, 1000);
 
