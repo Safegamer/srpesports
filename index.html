@@ -979,7 +979,7 @@
                         <div>
                             <span class="text-xs text-slate-400 block mb-1 font-semibold">Logo (URL or Gallery) *</span>
                             <div class="flex gap-2">
-                                <input type="text" id="edit-logo" required placeholder="URL or gallery" class="custom-input flex-1 text-xs">
+                                <input type="text" id="edit-logo" required placeholder="URL or gallery *" class="custom-input flex-1 text-xs">
                                 <label class="custom-btn secondary flex items-center justify-center cursor-pointer px-3 text-sm">
                                     <i class="fas fa-image text-blue-400"></i>
                                     <input type="file" accept="image/*" class="hidden" onchange="previewGalleryImage(this, 'edit-logo')">
@@ -1798,7 +1798,7 @@
             }
 
             try {
-                // Instant In-Memory Pre-Check (Never hangs or waits on slow network)
+                // Instant In-Memory Pre-Check
                 if (registrationTokens.length > 0) {
                     const foundToken = registrationTokens.find(t => (t.token || '').replace(/[-\s]/g, '').toUpperCase() === cleanToken);
                     if (!foundToken) {
@@ -2424,16 +2424,17 @@
 
             document.getElementById('edit-modal-title').innerText = `Edit Squad Details`;
             document.getElementById('edit-team-index').value = id;
-            document.getElementById('edit-name').value = team.name;
+            document.getElementById('edit-name').value = team.name || '';
             document.getElementById('edit-logo').value = team.logoUrl || '';
 
             const dqCheckbox = document.getElementById('edit-team-disqualified');
             const dqReasonInput = document.getElementById('edit-team-dq-reason');
-            dqCheckbox.checked = !!team.disqualified;
-            dqReasonInput.value = team.dqReason || '';
+            if (dqCheckbox) dqCheckbox.checked = !!team.disqualified;
+            if (dqReasonInput) dqReasonInput.value = team.dqReason || '';
             toggleDqReasonInput(!!team.disqualified);
 
-            document.getElementById('edit-roster-locked').checked = !!team.rosterLocked;
+            const lockCheckbox = document.getElementById('edit-roster-locked');
+            if (lockCheckbox) lockCheckbox.checked = !!team.rosterLocked;
 
             const r = team.roster || {};
             document.getElementById('edit-roster-p1').value = r.p1 || '';
@@ -2451,14 +2452,13 @@
         }
 
         async function saveTeamEdits(e) {
-            e.preventDefault();
+            if (e && e.preventDefault) e.preventDefault();
             const id = document.getElementById('edit-team-index').value;
             const newName = document.getElementById('edit-name').value.trim();
             const newLogoUrl = document.getElementById('edit-logo').value.trim();
-            const rosterLocked = document.getElementById('edit-roster-locked').checked;
-
-            const isDisqualified = document.getElementById('edit-team-disqualified').checked;
-            const dqReason = document.getElementById('edit-team-dq-reason').value.trim();
+            const rosterLocked = document.getElementById('edit-roster-locked')?.checked ?? true;
+            const isDisqualified = document.getElementById('edit-team-disqualified')?.checked ?? false;
+            const dqReason = document.getElementById('edit-team-dq-reason')?.value.trim() || '';
 
             if (teams.some(t => t.id !== id && t.name.toLowerCase() === newName.toLowerCase())) {
                 showToast('A team with this name already exists!', 'error'); 
@@ -2477,12 +2477,12 @@
                 disqualified: isDisqualified,
                 dqReason: isDisqualified ? dqReason : "",
                 roster: {
-                    p1: document.getElementById('edit-roster-p1').value.trim(),
-                    p2: document.getElementById('edit-roster-p2').value.trim(),
-                    p3: document.getElementById('edit-roster-p3').value.trim(),
-                    p4: document.getElementById('edit-roster-p4').value.trim(),
-                    sub1: document.getElementById('edit-roster-sub1').value.trim(),
-                    sub2: document.getElementById('edit-roster-sub2').value.trim()
+                    p1: document.getElementById('edit-roster-p1')?.value.trim() || '',
+                    p2: document.getElementById('edit-roster-p2')?.value.trim() || '',
+                    p3: document.getElementById('edit-roster-p3')?.value.trim() || '',
+                    p4: document.getElementById('edit-roster-p4')?.value.trim() || '',
+                    sub1: document.getElementById('edit-roster-sub1')?.value.trim() || '',
+                    sub2: document.getElementById('edit-roster-sub2')?.value.trim() || ''
                 }
             };
 
