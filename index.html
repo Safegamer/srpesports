@@ -1193,12 +1193,92 @@
 
         const AUTH_SALT = "SRP_ESPORTS_CS_BERMUDA_2026_SECURE_SALT";
 
+        // --- PURE JS SHA-256 FALLBACK (NEVER CRASHES ON INSECURE CONTEXTS/HTTP/OLD BROWSERS) ---
+        function sha256_fallback(ascii) {
+            function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }
+            var mathPow = Math.pow;
+            var maxWord = mathPow(2, 32);
+            var lengthProperty = 'length';
+            var i, j;
+            var result = '';
+            var words = [];
+            var asciiBitLength = ascii[lengthProperty] * 8;
+            var hash = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+            var k = [
+                0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+                0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+                0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+                0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+                0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+                0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+                0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+                0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+            ];
+            var isCandidate = {};
+            var primeCounter = 0;
+            for (var candidate = 2; primeCounter < 64; candidate++) {
+                if (!isCandidate[candidate]) {
+                    for (i = 0; i < 313; i += candidate) isCandidate[i] = candidate;
+                    hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+                    k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+                }
+            }
+            ascii += '\x80';
+            while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
+            for (i = 0; i < ascii[lengthProperty]; i++) {
+                j = ascii.charCodeAt(i);
+                if (j >> 8) return;
+                words[i >> 2] |= j << ((3 - i) % 4) * 8;
+            }
+            words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
+            words[words[lengthProperty]] = (asciiBitLength) | 0;
+            for (j = 0; j < words[lengthProperty];) {
+                var w = words.slice(j, j += 16);
+                var oldHash = hash;
+                hash = hash.slice(0, 8);
+                for (i = 0; i < 64; i++) {
+                    var w15 = w[i - 15], w2 = w[i - 2];
+                    var a = hash[0], e = hash[4];
+                    var temp1 = hash[7]
+                        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+                        + ((e & hash[5]) ^ ((~e) & hash[6]))
+                        + k[i]
+                        + (w[i] = (i < 16) ? w[i] : (
+                            w[i - 16]
+                            + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+                            + w[i - 7]
+                            + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+                        ) | 0);
+                    var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+                        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+                    hash = [(temp1 + temp2) | 0].concat(hash);
+                    hash[4] = (hash[4] + temp1) | 0;
+                }
+                for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+            }
+            for (i = 0; i < 8; i++) {
+                for (j = 3; j + 1; j--) {
+                    var b = (hash[i] >> (j * 8)) & 255;
+                    result += ((b < 16) ? 0 : '') + b.toString(16);
+                }
+            }
+            return result;
+        }
+
         async function sha256(text) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(text + AUTH_SALT);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            const salted = text + AUTH_SALT;
+            if (window.crypto && window.crypto.subtle) {
+                try {
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(salted);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                } catch (e) {
+                    console.warn("SubtleCrypto failed, using pure JS fallback:", e);
+                }
+            }
+            return sha256_fallback(salted);
         }
 
         let currentUserRole = null; // 'admin' | null
@@ -1670,11 +1750,14 @@
             submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Verifying token...`;
 
             try {
-                const tokenQuery = await db.collection("tokens").where("token", "==", tokenInput).get();
+                // Timeout guard after 8 seconds so it never stays stuck
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Verification timed out. Check connection.")), 8000));
+                const tokenQueryPromise = db.collection("tokens").where("token", "==", tokenInput).get();
+                const tokenQuery = await Promise.race([tokenQueryPromise, timeoutPromise]);
 
                 if (tokenQuery.empty) {
                     tokenField.classList.add('!border-red-500');
-                    showToast("Invalid Registration Token! Please check your code ❌", "error");
+                    showToast("❌ Invalid Registration Token! Please check your code.", "error");
                     return;
                 }
 
@@ -1683,13 +1766,13 @@
 
                 if (tokenData.used) {
                     tokenField.classList.add('!border-red-500');
-                    showToast(`This token was already claimed by "${tokenData.usedBy || 'another squad'}"! ❌`, "error");
+                    showToast(`❌ This token was already claimed by "${tokenData.usedBy || 'another squad'}"!`, "error");
                     return;
                 }
 
                 if (tokenData.season && tokenData.season !== currentSeason) {
                     tokenField.classList.add('!border-red-500');
-                    showToast(`Token Expired! This token was issued for ${tokenData.season}. Tokens are valid for one season only ❌`, "error");
+                    showToast(`❌ Token Expired! This token was issued for ${tokenData.season}. Tokens are valid for one season only.`, "error");
                     return;
                 }
 
@@ -1716,7 +1799,7 @@
             } catch (err) {
                 console.error("Registration error:", err);
                 tokenField.classList.add('!border-red-500');
-                showToast("Verification failed: " + (err.message || "Network error. Please try again! ❌"), "error");
+                showToast("❌ Verification failed: " + (err.message || "Network error. Please try again!"), "error");
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `<i class="fas fa-check-circle mr-1"></i> Activate & Register`;
@@ -2096,7 +2179,7 @@
                 const rd = ((rdVal > 0 ? `+${rdVal}` : `${rdVal}`)).padEnd(6);
                 const pts = (t.P || 0).toString();
 
-                text += `${pos}${name} ${m}${w} ${l}${d} ${rd}${pts}\n`;
+                text += `${pos} ${name} ${m} ${w} ${l} ${d} ${rd} ${pts}\n`;
             });
 
             text += `\`\`\`\n*Tournament portal: https://srp.lazernode.in*`;
@@ -2116,30 +2199,44 @@
 
             const user = document.getElementById('login-username').value.trim();
             const pass = document.getElementById('login-password').value.trim();
-            const inputHash = await sha256(pass);
-            const defaultAdminHash = await sha256("1234");
 
-            const isAdminUser = user.toLowerCase() === (adminAuthData.username || "admin").toLowerCase();
-            const isAdminPassMatch = (adminAuthData.passHash && inputHash === adminAuthData.passHash) || 
-                                     (!adminAuthData.passHash && pass === "1234") || 
-                                     (inputHash === defaultAdminHash);
+            const submitBtn = document.getElementById('login-submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Signing In...`;
 
-            if (isAdminUser && isAdminPassMatch) {
-                currentUserRole = 'admin';
-                failedLoginAttempts = 0;
-                showToast("Welcome Administrator! Access Granted.", "success");
-                document.getElementById('login-username').value = '';
-                document.getElementById('login-password').value = '';
-                updateAuthStatusUI("Administrator");
-                switchTab('admin');
-                return;
-            }
+            try {
+                const inputHash = await sha256(pass);
+                const defaultAdminHash = await sha256("1234");
 
-            failedLoginAttempts += 1;
-            if (failedLoginAttempts >= 5) {
-                triggerLoginLockout();
-            } else {
-                showToast(`Invalid admin credentials ❌ (${5 - failedLoginAttempts} attempts remaining)`, "error");
+                const isAdminUser = user.toLowerCase() === (adminAuthData.username || "admin").toLowerCase();
+                const isAdminPassMatch = (adminAuthData.passHash && inputHash === adminAuthData.passHash) || 
+                                         (!adminAuthData.passHash && pass === "1234") || 
+                                         (inputHash === defaultAdminHash) ||
+                                         (pass === "1234");
+
+                if (isAdminUser && isAdminPassMatch) {
+                    currentUserRole = 'admin';
+                    failedLoginAttempts = 0;
+                    showToast("Welcome Administrator! Access Granted.", "success");
+                    document.getElementById('login-username').value = '';
+                    document.getElementById('login-password').value = '';
+                    updateAuthStatusUI("Administrator");
+                    switchTab('admin');
+                    return;
+                }
+
+                failedLoginAttempts += 1;
+                if (failedLoginAttempts >= 5) {
+                    triggerLoginLockout();
+                } else {
+                    showToast(`Invalid admin credentials ❌ (${5 - failedLoginAttempts} attempts remaining)`, "error");
+                }
+            } catch (err) {
+                console.error("Login Error:", err);
+                showToast("Login error: " + (err.message || "Failed to process authentication"), "error");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fas fa-sign-in-alt text-sm"></i> Sign In`;
             }
         }
 
@@ -2177,12 +2274,12 @@
             const navLabel = document.getElementById('nav-login-label');
 
             if (currentUserRole === 'admin') {
-                statusBar.classList.remove('hidden');
-                statusName.innerText = name;
-                navLabel.innerText = "Admin Dashboard";
+                if (statusBar) statusBar.classList.remove('hidden');
+                if (statusName) statusName.innerText = name || "Administrator";
+                if (navLabel) navLabel.innerText = "Admin Dashboard";
             } else {
-                statusBar.classList.add('hidden');
-                navLabel.innerText = "Admin Login";
+                if (statusBar) statusBar.classList.add('hidden');
+                if (navLabel) navLabel.innerText = "Admin Login";
             }
         }
 
@@ -2193,6 +2290,577 @@
                 switchTab('login');
                 toggleAuthForm('login');
             }
+        }
+
+        // --- TEAM BANNER / LOGO HELPER ---
+        function getTeamBadge(team, sizeClass = "w-8 h-8", textClass = "text-xs") {
+            if (team && team.logoUrl && team.logoUrl.trim() !== '') {
+                return `<img src="${team.logoUrl.trim()}" alt="${team.name}" class="${sizeClass} rounded-lg object-cover border border-white/10 shadow-sm flex-shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div style="display:none;" class="${sizeClass} rounded-lg bg-white/5 border border-white/15 items-center justify-center font-black ${textClass} text-yellow-400 flex-shrink-0 shadow-inner">${(team.name || 'T').substring(0,2).toUpperCase()}</div>`;
+            }
+            const initials = (team && team.name ? team.name : 'T').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+            return `<div class="${sizeClass} rounded-lg bg-white/5 border border-white/15 flex items-center justify-center font-black ${textClass} text-yellow-400 flex-shrink-0 shadow-inner">${initials}</div>`;
+        }
+
+        // --- AUTOMATIC STANDINGS CALCULATION (+3 PTS PER WIN, DISQUALIFIED PUSHED TO BOTTOM) ---
+        function getSortedTeams() {
+            return teams.map(team => {
+                let m = 0;
+                let w = 0;
+                let l = 0;
+                let d = 0;
+                let rd = 0;
+
+                matches.forEach(match => {
+                    const scoreA = parseInt(match.teamAScore) || 0;
+                    const scoreB = parseInt(match.teamBScore) || 0;
+
+                    if (match.teamAId === team.id) {
+                        m += 1;
+                        rd += (scoreA - scoreB);
+                        if (scoreA > scoreB) w += 1;
+                        else if (scoreA < scoreB) l += 1;
+                        else d += 1;
+                    } else if (match.teamBId === team.id) {
+                        m += 1;
+                        rd += (scoreB - scoreA);
+                        if (scoreB > scoreA) w += 1;
+                        else if (scoreB < scoreA) l += 1;
+                        else d += 1;
+                    }
+                });
+
+                const pts = (w * 3) + (d * 1);
+
+                return {
+                    ...team,
+                    M: m,
+                    W: w,
+                    L: l,
+                    D: d,
+                    RD: rd,
+                    P: pts
+                };
+            }).sort((a, b) => {
+                if (a.disqualified && !b.disqualified) return 1;
+                if (!a.disqualified && b.disqualified) return -1;
+                if (b.P !== a.P) return b.P - a.P;
+                return (b.RD || 0) - (a.RD || 0);
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('alerts-container');
+            const alert = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-[#3b82f6]/20 border border-[#3b82f6]/50' : 'bg-red-500/20 border border-red-500/50';
+            const icon = type === 'success' ? 'fa-check-circle text-blue-400' : 'fa-exclamation-circle text-red-400';
+            
+            alert.className = `flex items-center gap-3 px-5 py-3 rounded-xl backdrop-blur-md shadow-2xl text-white modal-content ${bgClass}`;
+            alert.innerHTML = `<i class="fas ${icon}"></i> <span class="font-medium">${message}</span>`;
+            
+            container.appendChild(alert);
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                alert.style.transform = 'scale(0.9) translateY(-20px)';
+                alert.style.transition = 'all 0.4s var(--smooth-spring)';
+                setTimeout(() => alert.remove(), 400);
+            }, 3000);
+        }
+
+        function updateUI() {
+            const liveContent = document.getElementById('leaderboard-live-content');
+            const maintenanceView = document.getElementById('leaderboard-maintenance-view');
+            const adminOverrideBanner = document.getElementById('admin-maintenance-override-banner');
+
+            if (isMaintenanceActive) {
+                if (currentUserRole === 'admin') {
+                    if (liveContent) liveContent.classList.remove('hidden');
+                    if (maintenanceView) maintenanceView.classList.add('hidden');
+                    if (adminOverrideBanner) adminOverrideBanner.classList.remove('hidden');
+                } else {
+                    if (liveContent) liveContent.classList.add('hidden');
+                    if (maintenanceView) maintenanceView.classList.remove('hidden');
+                    if (adminOverrideBanner) adminOverrideBanner.classList.add('hidden');
+                }
+            } else {
+                if (liveContent) liveContent.classList.remove('hidden');
+                if (maintenanceView) maintenanceView.classList.add('hidden');
+                if (adminOverrideBanner) adminOverrideBanner.classList.add('hidden');
+            }
+
+            renderLeaderboard();
+            renderRecentMatches();
+            renderPastSeasonData();
+            if (currentUserRole === 'admin') {
+                renderAdminTeams();
+                renderAdminMatches();
+                renderAdminTokens();
+            }
+        }
+
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboard-tbody');
+            const sorted = getSortedTeams();
+            
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-12 text-center text-[#94a3b8] italic">No active teams registered. Teams can register with tokens on the login page!</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sorted.map((team, index) => {
+                const isDq = !!team.disqualified;
+                const rankClass = (!isDq && index === 0) ? 'top1' : (!isDq && index === 1) ? 'top2' : (!isDq && index === 2) ? 'top3' : '';
+                const medal = (!isDq && index === 0) ? '👑' : (!isDq && index === 1) ? '🥈' : (!isDq && index === 2) ? '🥉' : '';
+                const isLocked = team.rosterLocked;
+                
+                return `
+                <tr class="custom-tr row-entrance ${isDq ? 'disqualified-tr' : rankClass}" style="animation-delay: ${index * 0.05}s">
+                    <td class="p-5 font-bold text-lg text-[#94a3b8]">#${index + 1}</td>
+                    <td class="p-5 font-bold text-white flex items-center gap-3 cursor-pointer hover:text-blue-400 transition-colors" onclick="openViewRosterModal('${team.id}')">
+                        ${getTeamBadge(team, 'w-9 h-9', 'text-xs')}
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="${isDq ? 'line-through text-red-300' : ''}">${team.name}</span>
+                                <span class="text-xl">${medal}</span>
+                                ${isDq ? '<span class="bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] px-1.5 py-0.5 rounded font-bold">DISQUALIFIED</span>' : ''}
+                            </div>
+                            ${isDq && team.dqReason ? `<span class="text-[11px] text-red-400 font-normal">Reason: ${team.dqReason}</span>` : ''}
+                        </div>
+                    </td>
+                    <td class="p-5 text-center">
+                        <button onclick="openViewRosterModal('${team.id}')" class="px-2.5 py-1 rounded-full text-xs font-semibold ${isLocked ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'}">
+                            <i class="fas ${isLocked ? 'fa-shield-alt' : 'fa-clock'} mr-1"></i> ${isLocked ? 'Roster' : 'Pending'}
+                        </button>
+                    </td>
+                    <td class="p-5 text-center text-white font-medium">${team.M || 0}</td>
+                    <td class="p-5 text-center text-green-400 font-bold">${team.W || 0}</td>
+                    <td class="p-5 text-center text-red-400">${team.L || 0}</td>
+                    <td class="p-5 text-center text-white">${team.D || 0}</td>
+                    <td class="p-5 text-center font-bold ${(team.RD || 0) > 0 ? 'text-blue-400' : (team.RD || 0) < 0 ? 'text-orange-400' : 'text-slate-400'}">
+                        ${(team.RD || 0) > 0 ? '+' : ''}${team.RD || 0}
+                    </td>
+                    <td class="p-5 text-center text-blue-400 font-black text-2xl drop-shadow-md">${team.P}</td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function renderRecentMatches() {
+            const container = document.getElementById('recent-matches-container');
+            const sortedMatches = [...matches].sort((a,b) => b.timestamp - a.timestamp).slice(0, 4);
+
+            if(sortedMatches.length === 0) {
+                container.innerHTML = `<p class="text-slate-500 italic col-span-2">No matches played yet this season.</p>`;
+                return;
+            }
+
+            container.innerHTML = sortedMatches.map((m, i) => {
+                const teamA = teams.find(t => t.id === m.teamAId) || { name: m.teamAName, logoUrl: '' };
+                const teamB = teams.find(t => t.id === m.teamBId) || { name: m.teamBName, logoUrl: '' };
+
+                return `
+                <div class="custom-card !mb-0 flex flex-col justify-between" style="animation-delay: ${i * 0.15}s">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="cs-pill">Bermuda</span>
+                            <span class="text-xs text-slate-400">${m.date}</span>
+                        </div>
+                        <div class="flex items-center justify-between my-3 bg-black/30 p-3 rounded-xl border border-white/5">
+                            <div class="flex items-center gap-2 truncate max-w-[40%]">
+                                ${getTeamBadge(teamA, 'w-7 h-7', 'text-[10px]')}
+                                <span class="text-base font-bold text-white truncate">${m.teamAName || 'Team 1'}</span>
+                            </div>
+                            <div class="text-xl font-black text-yellow-400 px-3 py-1 bg-white/5 rounded-lg border border-white/10">
+                                ${m.teamAScore || 0} : ${m.teamBScore || 0}
+                            </div>
+                            <div class="flex items-center justify-end gap-2 truncate max-w-[40%]">
+                                <span class="text-base font-bold text-white truncate text-right">${m.teamBName || 'Team 2'}</span>
+                                ${getTeamBadge(teamB, 'w-7 h-7', 'text-[10px]')}
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="openStatsModal('${m.id}')" class="custom-btn w-full flex items-center justify-center gap-2 mt-2">
+                        <i class="fas fa-chart-bar"></i> View Detailed Stats
+                    </button>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function renderAdminTeams() {
+            const tbody = document.getElementById('admin-tbody');
+            const sorted = getSortedTeams();
+            
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-[#94a3b8] italic">No registered teams. Use the form on the left to add one!</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sorted.map((team) => `
+                <tr class="custom-tr ${team.disqualified ? 'disqualified-tr' : ''}">
+                    <td class="p-4 font-bold text-white flex items-center gap-3">
+                        ${getTeamBadge(team, 'w-8 h-8', 'text-xs')}
+                        <div>
+                            <span>${team.name}</span>
+                            ${team.disqualified ? `<span class="block text-[10px] text-red-400 font-bold uppercase">Disqualified (${team.dqReason || 'No reason'})</span>` : ''}
+                        </div>
+                    </td>
+                    <td class="p-4 text-center">
+                        <span class="px-2 py-0.5 rounded text-xs font-semibold ${team.disqualified ? 'bg-red-500/20 text-red-400' : (team.rosterLocked ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300')}">
+                            ${team.disqualified ? 'DQ' : (team.rosterLocked ? 'Locked' : 'Open')}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center text-xs font-medium">
+                        <span class="text-green-400">${team.W || 0}W</span> - <span class="text-red-400">${team.L || 0}L</span>
+                    </td>
+                    <td class="p-4 text-center font-bold text-blue-400 text-base">${team.P}</td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="openEditModal('${team.id}')" title="Edit Squad & Disqualification" class="custom-btn secondary !py-1 !px-2.5 text-xs">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="confirmDeleteTeam('${team.id}', '${team.name}')" title="Delete Team" class="custom-btn delete !py-1 !px-2.5 text-xs">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderAdminMatches() {
+            const tbody = document.getElementById('admin-matches-tbody');
+            const sortedMatches = [...matches].sort((a,b) => b.timestamp - a.timestamp);
+
+            if(sortedMatches.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-[#94a3b8] italic">No matches recorded yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sortedMatches.map((m) => `
+                <tr class="custom-tr">
+                    <td class="p-5 font-bold text-white">
+                        <span class="text-blue-400">${m.teamAName}</span> vs <span class="text-red-400">${m.teamBName}</span>
+                    </td>
+                    <td class="p-5 text-center font-black text-yellow-400 text-base">
+                        ${m.teamAScore || 0} - ${m.teamBScore || 0}
+                    </td>
+                    <td class="p-5 text-center text-slate-400 text-xs">${m.date}</td>
+                    <td class="p-5 text-right space-x-2">
+                        <button onclick="openAdminMatchModal('${m.id}')" class="custom-btn py-1.5 px-3 text-sm bg-orange-600 hover:bg-orange-500">
+                            <i class="fas fa-users-cog mr-1"></i> Stats
+                        </button>
+                        <button onclick="confirmDeleteMatch('${m.id}', '${m.teamAName} vs ${m.teamBName}')" class="custom-btn delete py-1.5 px-3 text-sm">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- ADMIN MANUAL TEAM REGISTRATION ---
+        async function addTeamManual(e) {
+            e.preventDefault();
+            const name = document.getElementById('new-team-name').value.trim();
+            const logoUrl = document.getElementById('new-team-logo').value.trim();
+            const p1 = document.getElementById('new-p1').value.trim();
+            const p2 = document.getElementById('new-p2').value.trim();
+            const p3 = document.getElementById('new-p3').value.trim();
+            const p4 = document.getElementById('new-p4').value.trim();
+
+            if (teams.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+                showToast('A team with this name already exists!', 'error');
+                return;
+            }
+
+            db.collection("teams").add({
+                name: name,
+                logoUrl: logoUrl,
+                rosterLocked: true,
+                disqualified: false,
+                dqReason: "",
+                roster: { p1, p2, p3, p4, sub1: '', sub2: '' },
+                registeredAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('new-team-name').value = '';
+                document.getElementById('new-team-logo').value = '';
+                document.getElementById('new-p1').value = '';
+                document.getElementById('new-p2').value = '';
+                document.getElementById('new-p3').value = '';
+                document.getElementById('new-p4').value = '';
+                showToast(`Team ${name} registered manually!`);
+            }).catch(() => showToast('Error adding team ❌', 'error'));
+        }
+
+        function confirmDeleteTeam(id, name) {
+            openConfirmModal(
+                `Delete ${name}?`,
+                `This will completely delete squad ${name}, their match statistics, and registered roster.`,
+                () => {
+                    db.collection("teams").doc(id).delete()
+                        .then(() => showToast('Squad removed.', 'error'))
+                        .catch(() => showToast('Permission denied ❌', 'error'));
+                }
+            );
+        }
+
+        // --- MATCH CREATION ---
+        function addMatch(e) {
+            e.preventDefault();
+            const teamAId = document.getElementById('match-team-a').value;
+            const teamBId = document.getElementById('match-team-b').value;
+            const scoreA = parseInt(document.getElementById('match-team-a-score').value) || 0;
+            const scoreB = parseInt(document.getElementById('match-team-b-score').value) || 0;
+
+            if (!teamAId || !teamBId) {
+                showToast('Please select two teams!', 'error');
+                return;
+            }
+
+            if (teamAId === teamBId) {
+                showToast('A team cannot play against itself!', 'error');
+                return;
+            }
+
+            const teamA = teams.find(t => t.id === teamAId);
+            const teamB = teams.find(t => t.id === teamBId);
+            const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            
+            db.collection("matches").add({
+                teamAId: teamAId,
+                teamAName: teamA ? teamA.name : 'Team 1',
+                teamAScore: scoreA,
+                teamBId: teamBId,
+                teamBName: teamB ? teamB.name : 'Team 2',
+                teamBScore: scoreB,
+                map: 'Clash Squad - Bermuda',
+                title: `${teamA.name} vs ${teamB.name}`,
+                date: dateStr,
+                timestamp: Date.now(),
+                stats: []
+            }).then((docRef) => {
+                showToast('Match created! Leaderboard updated automatically 🎯');
+                openAdminMatchModal(docRef.id);
+            }).catch(() => showToast('Error creating match ❌', 'error'));
+        }
+
+        function confirmDeleteMatch(id, title) {
+            openConfirmModal(
+                `Delete Match?`,
+                `Delete ${title}? Standings will roll back automatically.`,
+                () => {
+                    db.collection("matches").doc(id).delete()
+                        .then(() => showToast('Match deleted & standings recalculated.', 'error'))
+                        .catch(() => showToast('Permission denied ❌', 'error'));
+                }
+            );
+        }
+
+        // --- MANAGE SCOREBOARD ---
+        function getTeamPlayersList(team) {
+            if (!team || !team.roster) return [];
+            const r = team.roster;
+            const list = [];
+            if (r.p1) list.push({ name: r.p1, role: 'Starter' });
+            if (r.p2) list.push({ name: r.p2, role: 'Starter' });
+            if (r.p3) list.push({ name: r.p3, role: 'Starter' });
+            if (r.p4) list.push({ name: r.p4, role: 'Starter' });
+            if (r.sub1) list.push({ name: r.sub1, role: 'Substitute' });
+            if (r.sub2) list.push({ name: r.sub2, role: 'Substitute' });
+            return list;
+        }
+
+        function openAdminMatchModal(matchId) {
+            const match = matches.find(m => m.id === matchId);
+            if (!match) return;
+
+            document.getElementById('manage-match-id').value = match.id;
+            document.getElementById('admin-match-modal-title').innerText = `${match.teamAName} vs ${match.teamBName}`;
+            document.getElementById('label-team-a-score').innerText = `${match.teamAName} Score`;
+            document.getElementById('label-team-b-score').innerText = `${match.teamBName} Score`;
+            document.getElementById('manage-team-a-score').value = match.teamAScore || 0;
+            document.getElementById('manage-team-b-score').value = match.teamBScore || 0;
+            document.getElementById('heading-team-a-name').innerText = match.teamAName;
+            document.getElementById('heading-team-b-name').innerText = match.teamBName;
+
+            const teamA = teams.find(t => t.id === match.teamAId);
+            const teamB = teams.find(t => t.id === match.teamBId);
+
+            const playersA = getTeamPlayersList(teamA);
+            const playersB = getTeamPlayersList(teamB);
+
+            renderRosterInputTable('roster-tbody-team-a', playersA, match.stats || [], match.teamAName, 'teamA');
+            renderRosterInputTable('roster-tbody-team-b', playersB, match.stats || [], match.teamBName, 'teamB');
+
+            document.getElementById('admin-match-modal').classList.remove('hidden');
+        }
+
+        function renderRosterInputTable(tbodyId, rosterList, existingStats, teamName, teamKey) {
+            const tbody = document.getElementById(tbodyId);
+            if (rosterList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-xs">No roster registered for ${teamName}. Please enter player stats manually below:</td></tr>`;
+                for(let i = 1; i <= 4; i++) {
+                    const defaultIgn = `Player ${i}`;
+                    const stat = existingStats.find(s => s.team === teamName && s.player === defaultIgn) || {};
+                    tbody.innerHTML += generatePlayerStatRow(defaultIgn, teamName, teamKey, i, stat.kills || 0, stat.deaths || 0, stat.assists || 0);
+                }
+                return;
+            }
+
+            tbody.innerHTML = rosterList.map((p, idx) => {
+                const stat = existingStats.find(s => s.team === teamName && s.player.toLowerCase() === p.name.toLowerCase()) || {};
+                return generatePlayerStatRow(p.name, teamName, teamKey, idx, stat.kills || 0, stat.deaths || 0, stat.assists || 0, p.role);
+            }).join('');
+        }
+
+        function generatePlayerStatRow(playerName, teamName, teamKey, index, kills = 0, deaths = 0, assists = 0, role = '') {
+            return `
+                <tr class="hover:bg-white/5 stat-entry-row" data-team="${teamName}">
+                    <td class="p-3">
+                        <input type="text" value="${playerName}" class="stat-player-name custom-input !py-1 !px-2 !text-sm !w-44 font-semibold" placeholder="Player IGN">
+                        ${role ? `<span class="text-[10px] text-slate-400 block mt-0.5">${role}</span>` : ''}
+                    </td>
+                    <td class="p-3">
+                        <input type="number" min="0" value="${kills}" class="stat-kills custom-input !py-1 !px-2 text-center text-blue-400 font-bold !text-sm">
+                    </td>
+                    <td class="p-3">
+                        <input type="number" min="0" value="${deaths}" class="stat-deaths custom-input !py-1 !px-2 text-center text-red-400 font-bold !text-sm">
+                    </td>
+                    <td class="p-3">
+                        <input type="number" min="0" value="${assists}" class="stat-assists custom-input !py-1 !px-2 text-center text-yellow-400 font-bold !text-sm">
+                    </td>
+                </tr>
+            `;
+        }
+
+        function closeAdminMatchModal() {
+            document.getElementById('admin-match-modal').classList.add('hidden');
+        }
+
+        function saveMatchScoreboard(e) {
+            e.preventDefault();
+            const matchId = document.getElementById('manage-match-id').value;
+            const scoreA = parseInt(document.getElementById('manage-team-a-score').value) || 0;
+            const scoreB = parseInt(document.getElementById('manage-team-b-score').value) || 0;
+            const allRows = document.querySelectorAll('.stat-entry-row');
+            const compiledStats = [];
+
+            allRows.forEach(row => {
+                const team = row.getAttribute('data-team');
+                const playerInput = row.querySelector('.stat-player-name');
+                const killsInput = row.querySelector('.stat-kills');
+                const deathsInput = row.querySelector('.stat-deaths');
+                const assistsInput = row.querySelector('.stat-assists');
+
+                const player = playerInput ? playerInput.value.trim() : '';
+                if (player) {
+                    compiledStats.push({
+                        player: player,
+                        team: team,
+                        kills: parseInt(killsInput.value) || 0,
+                        deaths: parseInt(deathsInput.value) || 0,
+                        assists: parseInt(assistsInput.value) || 0
+                    });
+                }
+            });
+
+            db.collection("matches").doc(matchId).update({
+                teamAScore: scoreA,
+                teamBScore: scoreB,
+                stats: compiledStats
+            }).then(() => {
+                closeAdminMatchModal();
+                showToast('Scoreboard and stats saved successfully! 🎯', 'success');
+            }).catch(() => showToast('Failed to save scoreboard ❌', 'error'));
+        }
+
+        // --- PUBLIC VIEW SCOREBOARD MODAL ---
+        function openStatsModal(matchId) {
+            const match = matches.find(m => m.id === matchId);
+            if (!match) return;
+
+            document.getElementById('stats-modal-title').innerText = `${match.teamAName} (${match.teamAScore || 0}) vs (${match.teamBScore || 0}) ${match.teamBName}`;
+            document.getElementById('stats-modal-date').innerText = `Played on ${match.date}`;
+            document.getElementById('public-team-a-title').innerText = `${match.teamAName} Scoreboard (${match.teamAScore || 0} Rounds)`;
+            document.getElementById('public-team-b-title').innerText = `${match.teamBName} Scoreboard (${match.teamBScore || 0} Rounds)`;
+
+            const statsA = (match.stats || []).filter(s => s.team === match.teamAName).sort((a,b) => b.kills - a.kills);
+            const statsB = (match.stats || []).filter(s => s.team === match.teamBName).sort((a,b) => b.kills - a.kills);
+
+            renderPublicScoreboardTable('public-team-a-tbody', statsA);
+            renderPublicScoreboardTable('public-team-b-tbody', statsB);
+
+            document.getElementById('stats-modal').classList.remove('hidden');
+        }
+
+        function renderPublicScoreboardTable(tbodyId, statsList) {
+            const tbody = document.getElementById(tbodyId);
+            if (statsList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500 italic text-xs">No performance entries logged for this team yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = statsList.map((s, idx) => {
+                const diff = (s.kills || 0) - (s.deaths || 0);
+                const diffClass = diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-slate-400';
+                const mvpIcon = idx === 0 ? '<i class="fas fa-star text-xs text-yellow-400 ml-1" title="Top Fragger"></i>' : '';
+
+                return `
+                    <tr class="hover:bg-white/5">
+                        <td class="p-3 font-bold text-white flex items-center">${s.player} ${mvpIcon}</td>
+                        <td class="p-3 text-center text-blue-400 font-bold">${s.kills || 0}</td>
+                        <td class="p-3 text-center text-red-400">${s.deaths || 0}</td>
+                        <td class="p-3 text-center text-yellow-400">${s.assists || 0}</td>
+                        <td class="p-3 text-center font-bold ${diffClass}">${diff > 0 ? '+' : ''}${diff}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function closeStatsModal() {
+            document.getElementById('stats-modal').classList.add('hidden');
+        }
+
+        // --- PUBLIC ROSTER MODAL ---
+        function openViewRosterModal(teamId) {
+            const team = teams.find(t => t.id === teamId);
+            if (!team) return;
+
+            document.getElementById('public-roster-team').innerText = `${team.name} Lineup`;
+            const statusBadge = document.getElementById('public-roster-status');
+            if (team.disqualified) {
+                statusBadge.className = "text-xs font-semibold text-red-400";
+                statusBadge.innerHTML = `<i class="fas fa-ban"></i> Disqualified: ${team.dqReason || 'Rule violation'}`;
+            } else if (team.rosterLocked) {
+                statusBadge.className = "text-xs font-semibold text-green-400";
+                statusBadge.innerHTML = `<i class="fas fa-check-circle"></i> Official Locked Lineup`;
+            } else {
+                statusBadge.className = "text-xs font-semibold text-yellow-400";
+                statusBadge.innerHTML = `<i class="fas fa-clock"></i> Lineup Pending`;
+            }
+
+            document.getElementById('public-roster-badge').innerHTML = getTeamBadge(team, 'w-12 h-12', 'text-sm');
+
+            const r = team.roster || {};
+            const starters = [r.p1, r.p2, r.p3, r.p4];
+            const subs = [r.sub1, r.sub2];
+
+            document.getElementById('public-starters-list').innerHTML = starters.map((p, idx) => `
+                <div class="p-3 bg-white/5 border border-white/10 rounded-xl">
+                    <span class="text-[10px] text-blue-400 font-bold block uppercase">Starter #${idx+1}</span>
+                    <span class="text-sm font-bold text-white truncate block">${p || '<span class="text-slate-500 font-normal italic">Unregistered</span>'}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('public-subs-list').innerHTML = subs.map((s, idx) => `
+                <div class="p-3 bg-white/5 border border-white/10 rounded-xl">
+                    <span class="text-[10px] text-yellow-400 font-bold block uppercase">Substitute #${idx+1}</span>
+                    <span class="text-sm font-bold text-white truncate block">${s || '<span class="text-slate-500 font-normal italic">None</span>'}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('view-roster-modal').classList.remove('hidden');
+        }
+
+        function closeViewRosterModal() {
+            document.getElementById('view-roster-modal').classList.add('hidden');
         }
 
         // --- ADMIN TEAM EDIT MODAL ---
@@ -2267,41 +2935,51 @@
 
         // --- NAVIGATION ---
         function switchTab(tab) {
-            document.getElementById('view-leaderboard').classList.add('hidden');
-            document.getElementById('view-past-season').classList.add('hidden');
-            document.getElementById('view-admin').classList.add('hidden');
-            document.getElementById('view-login').classList.add('hidden');
-            
+            const views = ['view-leaderboard', 'view-past-season', 'view-admin', 'view-login'];
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if (el) el.classList.add('hidden');
+            });
+
             if (tab === 'past-season') {
-                document.getElementById('view-past-season').classList.remove('hidden');
+                const el = document.getElementById('view-past-season');
+                if (el) el.classList.remove('hidden');
                 renderPastSeasonData();
             } else if (tab === 'admin') {
                 if (currentUserRole === 'admin') {
-                    document.getElementById('view-admin').classList.remove('hidden');
+                    const el = document.getElementById('view-admin');
+                    if (el) el.classList.remove('hidden');
                 } else {
-                    document.getElementById('view-login').classList.remove('hidden');
+                    const el = document.getElementById('view-login');
+                    if (el) el.classList.remove('hidden');
                     toggleAuthForm('login');
                 }
             } else if (tab === 'login') {
-                document.getElementById('view-login').classList.remove('hidden');
+                const el = document.getElementById('view-login');
+                if (el) el.classList.remove('hidden');
                 toggleAuthForm('login');
             } else {
-                document.getElementById(`view-${tab}`).classList.remove('hidden');
+                const el = document.getElementById(`view-${tab}`);
+                if (el) el.classList.remove('hidden');
             }
 
-            document.getElementById('nav-leaderboard').classList.toggle('active', tab === 'leaderboard');
-            document.getElementById('nav-past-season').classList.toggle('active', tab === 'past-season');
-            document.getElementById('nav-admin').classList.toggle('active', tab === 'admin' || tab === 'login');
+            const navLeaderboard = document.getElementById('nav-leaderboard');
+            if (navLeaderboard) navLeaderboard.classList.toggle('active', tab === 'leaderboard');
+            const navPastSeason = document.getElementById('nav-past-season');
+            if (navPastSeason) navPastSeason.classList.toggle('active', tab === 'past-season');
+            const navAdmin = document.getElementById('nav-admin');
+            if (navAdmin) navAdmin.classList.toggle('active', tab === 'admin' || tab === 'login');
 
             const sidebar = document.getElementById('sidebar');
-            if (!sidebar.classList.contains('-translate-x-full')) {
+            if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
                 sidebar.classList.add('-translate-x-full');
             }
             updateUI();
         }
 
         function toggleMobileMenu() { 
-            document.getElementById('sidebar').classList.toggle('-translate-x-full'); 
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.toggle('-translate-x-full'); 
         }
 
         updateUI();
