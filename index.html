@@ -269,6 +269,37 @@
             text-transform: uppercase;
         }
 
+
+        /* --- ADMIN BACKUP MANAGER --- */
+        .backup-manager-card {
+            background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(59,130,246,0.05));
+            border: 1px solid rgba(14,165,233,0.28);
+        }
+        .backup-row {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            transition: all 0.25s ease;
+        }
+        .backup-row:hover {
+            background: rgba(59,130,246,0.07);
+            border-color: rgba(59,130,246,0.28);
+            transform: translateY(-1px);
+        }
+        .backup-hash {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 10px;
+            color: #64748b;
+            word-break: break-all;
+        }
+        .backup-frozen {
+            color: #7dd3fc;
+            background: rgba(14,165,233,0.08);
+            border: 1px solid rgba(14,165,233,0.18);
+            border-radius: 9px;
+            padding: 8px 10px;
+        }
+
         .champion-card {
             background: linear-gradient(135deg, rgba(234, 179, 8, 0.12), rgba(255, 255, 255, 0.03));
             border: 1px solid rgba(234, 179, 8, 0.4);
@@ -838,6 +869,78 @@
                 </form>
             </div>
             
+
+            <!-- ============================== -->
+            <!-- 5. ADMIN BACKUP MANAGER         -->
+            <!-- ============================== -->
+            <div class="custom-card backup-manager-card mb-10" style="animation-delay: 0.095s;">
+                <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-shield-alt text-cyan-300 text-xl"></i>
+                            <h2 class="text-2xl font-black text-cyan-300">Backups</h2>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                            Admin-only point-in-time backups. Each backup freezes the real Firebase team list and the website code
+                            as they exist when the backup is created. Backups are stored in this browser until downloaded.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="createAdminBackup()" class="custom-btn flex items-center gap-2">
+                            <i class="fas fa-save"></i> Create Backup
+                        </button>
+
+                        <button type="button" onclick="reuseSelectedBackup()" class="custom-btn gold-btn flex items-center gap-2">
+                            <i class="fas fa-rotate-left"></i> Reuse Backup
+                        </button>
+
+                        <button type="button" onclick="downloadSelectedBackup()" class="custom-btn secondary flex items-center gap-2">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+
+                        <button type="button" onclick="document.getElementById('backup-upload-input').click()" class="custom-btn secondary flex items-center gap-2">
+                            <i class="fas fa-upload"></i> Upload Backup
+                        </button>
+
+                        <input id="backup-upload-input" type="file" accept=".json,application/json" class="hidden" onchange="handleBackupUpload(this)">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
+                    <div class="backup-frozen">
+                        <div class="text-[10px] uppercase tracking-widest font-black text-sky-300">Frozen teams</div>
+                        <div id="backup-frozen-team-count" class="text-lg font-black text-white mt-1">—</div>
+                        <div class="text-[11px] text-slate-500 mt-1">Team names are stored exactly as captured.</div>
+                    </div>
+                    <div class="backup-frozen">
+                        <div class="text-[10px] uppercase tracking-widest font-black text-sky-300">Frozen code hash</div>
+                        <div id="backup-frozen-code-hash" class="backup-hash mt-2">—</div>
+                    </div>
+                    <div class="backup-frozen">
+                        <div class="text-[10px] uppercase tracking-widest font-black text-sky-300">Selected backup</div>
+                        <div id="backup-selected-label" class="text-sm font-bold text-white mt-1">None selected</div>
+                        <div id="backup-selected-meta" class="text-[11px] text-slate-500 mt-1"></div>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h3 class="text-base font-bold text-white">Saved Backups</h3>
+                        <span id="backup-storage-note" class="text-[11px] text-slate-500"></span>
+                    </div>
+                    <div id="backup-list" class="space-y-3">
+                        <div class="backup-row p-4 text-xs text-slate-500">No backups created yet.</div>
+                    </div>
+                </div>
+
+                <div class="mt-5 p-3 rounded-xl bg-yellow-500/5 border border-yellow-500/15 text-[11px] text-slate-400 leading-relaxed">
+                    <strong class="text-yellow-300">Reuse Backup:</strong>
+                    restores the selected Firebase snapshot after administrator confirmation, then loads the backed-up website code in this browser.
+                    It does not automatically change the hosted <code>index.html</code> file on your server; use <strong>Download</strong> to keep a copy of the backup or restore code manually on the host.
+                </div>
+            </div>
+
             <!-- ADMIN MANUAL TEAM REGISTRATION -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                 <div class="custom-card lg:col-span-1 h-fit" style="animation-delay: 0.1s;">
@@ -3163,6 +3266,571 @@
             const sidebar = document.getElementById('sidebar');
             if (sidebar) sidebar.classList.toggle('-translate-x-full'); 
         }
+
+
+        // ============================================================
+        // ADMIN BACKUP MANAGER
+        // Backup only. No public controls are added.
+        // ============================================================
+        const ADMIN_BACKUPS_STORAGE_KEY = "srp_esports_admin_backups_v1";
+        let selectedAdminBackupId = null;
+
+        function loadAdminBackups() {
+            try {
+                const raw = localStorage.getItem(ADMIN_BACKUPS_STORAGE_KEY);
+                const items = raw ? JSON.parse(raw) : [];
+                return Array.isArray(items) ? items : [];
+            } catch (e) {
+                console.error("Failed to load local backups:", e);
+                return [];
+            }
+        }
+
+        function saveAdminBackups(items) {
+            localStorage.setItem(ADMIN_BACKUPS_STORAGE_KEY, JSON.stringify(items));
+        }
+
+        function makeBackupId() {
+            return "backup_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+        }
+
+        function backupSafeClone(value) {
+            if (value === null || value === undefined) return value;
+            if (Array.isArray(value)) return value.map(backupSafeClone);
+            if (typeof value === "object") {
+                const out = {};
+                Object.keys(value).forEach(key => out[key] = backupSafeClone(value[key]));
+                return out;
+            }
+            return value;
+        }
+
+        function encodeFirestoreValue(value) {
+            if (value === null || value === undefined) return value;
+
+            if (window.firebase?.firestore?.Timestamp && value instanceof firebase.firestore.Timestamp) {
+                return {
+                    __srpType: "timestamp",
+                    seconds: value.seconds,
+                    nanoseconds: value.nanoseconds
+                };
+            }
+
+            if (window.firebase?.firestore?.GeoPoint && value instanceof firebase.firestore.GeoPoint) {
+                return {
+                    __srpType: "geopoint",
+                    latitude: value.latitude,
+                    longitude: value.longitude
+                };
+            }
+
+            if (window.firebase?.firestore?.DocumentReference && value instanceof firebase.firestore.DocumentReference) {
+                return {
+                    __srpType: "documentReference",
+                    path: value.path
+                };
+            }
+
+            if (Array.isArray(value)) return value.map(encodeFirestoreValue);
+
+            if (value instanceof Date) {
+                return {
+                    __srpType: "date",
+                    value: value.toISOString()
+                };
+            }
+
+            if (typeof value === "object") {
+                const out = {};
+                Object.keys(value).forEach(key => {
+                    out[key] = encodeFirestoreValue(value[key]);
+                });
+                return out;
+            }
+
+            return value;
+        }
+
+        function decodeFirestoreValue(value) {
+            if (value === null || value === undefined) return value;
+            if (Array.isArray(value)) return value.map(decodeFirestoreValue);
+
+            if (typeof value === "object" && value.__srpType) {
+                if (value.__srpType === "timestamp" && window.firebase?.firestore?.Timestamp) {
+                    return new firebase.firestore.Timestamp(value.seconds, value.nanoseconds);
+                }
+                if (value.__srpType === "geopoint" && window.firebase?.firestore?.GeoPoint) {
+                    return new firebase.firestore.GeoPoint(value.latitude, value.longitude);
+                }
+                if (value.__srpType === "date") {
+                    return new Date(value.value);
+                }
+                // Document references are intentionally restored as plain metadata.
+                if (value.__srpType === "documentReference") {
+                    return value.path;
+                }
+            }
+
+            if (typeof value === "object") {
+                const out = {};
+                Object.keys(value).forEach(key => out[key] = decodeFirestoreValue(value[key]));
+                return out;
+            }
+
+            return value;
+        }
+
+        async function backupDigest(text) {
+            if (window.crypto?.subtle) {
+                try {
+                    const data = new TextEncoder().encode(text);
+                    const digest = await crypto.subtle.digest("SHA-256", data);
+                    return Array.from(new Uint8Array(digest))
+                        .map(b => b.toString(16).padStart(2, "0"))
+                        .join("");
+                } catch (e) {}
+            }
+            // Deterministic fallback; the backup is still protected by the admin area and immutable in the UI.
+            let hash = 2166136261;
+            for (let i = 0; i < text.length; i++) {
+                hash ^= text.charCodeAt(i);
+                hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+            }
+            return (hash >>> 0).toString(16).padStart(8, "0");
+        }
+
+        async function captureCurrentSource() {
+            try {
+                if (location.protocol !== "file:") {
+                    const response = await fetch(location.href, {
+                        cache: "no-store",
+                        credentials: "same-origin"
+                    });
+                    if (response.ok) return await response.text();
+                }
+            } catch (e) {
+                console.warn("Source fetch failed, falling back to current DOM:", e);
+            }
+            return "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+        }
+
+        async function readCollectionForBackup(collectionName) {
+            const snapshot = await db.collection(collectionName).get();
+            const docs = [];
+            snapshot.forEach(doc => {
+                docs.push({
+                    id: doc.id,
+                    data: encodeFirestoreValue(doc.data())
+                });
+            });
+            return docs;
+        }
+
+        async function readAllSettingsForBackup() {
+            const snapshot = await db.collection("settings").get();
+            const docs = [];
+            snapshot.forEach(doc => {
+                docs.push({
+                    id: doc.id,
+                    data: encodeFirestoreValue(doc.data())
+                });
+            });
+            return docs;
+        }
+
+        async function createAdminBackup() {
+            if (currentUserRole !== "admin") {
+                showToast("Admin access required.", "error");
+                return;
+            }
+
+            if (!db) {
+                showToast("Firebase is not connected.", "error");
+                return;
+            }
+
+            const defaultName = "SRP Backup " + new Date().toLocaleString();
+            const backupName = prompt("Enter a name for this backup:", defaultName);
+            if (backupName === null) return;
+
+            showToast("Creating backup… Firebase is being READ only.", "success");
+
+            try {
+                const [
+                    teamsSnapshot,
+                    matchesSnapshot,
+                    tokensSnapshot,
+                    settingsSnapshot,
+                    sourceCode
+                ] = await Promise.all([
+                    readCollectionForBackup("teams"),
+                    readCollectionForBackup("matches"),
+                    readCollectionForBackup("tokens"),
+                    readAllSettingsForBackup(),
+                    captureCurrentSource()
+                ]);
+
+                const teamNameList = teamsSnapshot
+                    .map(t => String(t.data?.name || ""))
+                    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+
+                const codeHash = await backupDigest(sourceCode);
+                const teamNamesHash = await backupDigest(JSON.stringify(teamNameList));
+
+                const backup = {
+                    format: "SRP-ESPORTS-FIRESTORE-BACKUP",
+                    version: 1,
+                    id: makeBackupId(),
+                    name: backupName.trim() || defaultName,
+                    createdAt: new Date().toISOString(),
+                    app: "SRP-ESPORTS",
+                    firebaseProjectId: firebaseConfig.projectId,
+                    integrity: {
+                        codeSha256: codeHash,
+                        teamNamesSha256: teamNamesHash
+                    },
+                    lockedTeamNames: teamNameList,
+                    codeHtml: sourceCode,
+                    firestore: {
+                        teams: teamsSnapshot,
+                        matches: matchesSnapshot,
+                        tokens: tokensSnapshot,
+                        settings: settingsSnapshot
+                    }
+                };
+
+                const backups = loadAdminBackups();
+                backups.unshift(backup);
+
+                // Keep the local manager from becoming unreasonably large.
+                while (backups.length > 10) backups.pop();
+
+                saveAdminBackups(backups);
+                selectedAdminBackupId = backup.id;
+                renderAdminBackups();
+                showToast(`Backup created: ${backup.name}`, "success");
+            } catch (error) {
+                console.error("Backup creation failed:", error);
+                showToast("Backup failed: " + (error.message || "Unknown error"), "error");
+            }
+        }
+
+        function getSelectedAdminBackup() {
+            const backups = loadAdminBackups();
+            return backups.find(b => b.id === selectedAdminBackupId) || backups[0] || null;
+        }
+
+        function renderAdminBackups() {
+            const list = document.getElementById("backup-list");
+            const countEl = document.getElementById("backup-storage-note");
+            const teamCountEl = document.getElementById("backup-frozen-team-count");
+            const codeHashEl = document.getElementById("backup-frozen-code-hash");
+            const selectedLabelEl = document.getElementById("backup-selected-label");
+            const selectedMetaEl = document.getElementById("backup-selected-meta");
+
+            if (!list) return;
+
+            const backups = loadAdminBackups();
+            if (backups.length === 0) {
+                list.innerHTML = `<div class="backup-row p-4 text-xs text-slate-500">No backups created yet.</div>`;
+                countEl.textContent = "0 local backups";
+                teamCountEl.textContent = "—";
+                codeHashEl.textContent = "—";
+                selectedLabelEl.textContent = "None selected";
+                selectedMetaEl.textContent = "";
+                return;
+            }
+
+            if (!selectedAdminBackupId || !backups.some(b => b.id === selectedAdminBackupId)) {
+                selectedAdminBackupId = backups[0].id;
+            }
+
+            const selected = backups.find(b => b.id === selectedAdminBackupId) || backups[0];
+
+            countEl.textContent = `${backups.length} local backup${backups.length === 1 ? "" : "s"}`;
+            teamCountEl.textContent = `${(selected.lockedTeamNames || []).length} teams`;
+            codeHashEl.textContent = selected.integrity?.codeSha256 || "Unavailable";
+            selectedLabelEl.textContent = selected.name || selected.id;
+            selectedMetaEl.textContent = new Date(selected.createdAt).toLocaleString();
+
+            list.innerHTML = backups.map(backup => {
+                const isSelected = backup.id === selected.id;
+                const teamCount = (backup.lockedTeamNames || []).length;
+                const created = new Date(backup.createdAt).toLocaleString();
+                const hash = backup.integrity?.codeSha256 || "—";
+
+                return `
+                    <div class="backup-row p-4 ${isSelected ? "ring-1 ring-cyan-400/40" : ""}">
+                        <div class="flex flex-col xl:flex-row xl:items-center gap-4">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="font-bold text-white">${escapeHtmlBackup(backup.name || "Unnamed Backup")}</span>
+                                    ${isSelected ? `<span class="cs-pill !bg-cyan-500/10 !border-cyan-400/20 !text-cyan-300">Selected</span>` : ""}
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-1">
+                                    ${created} · ${teamCount} frozen team names
+                                </div>
+                                <div class="backup-hash mt-2">Code SHA-256: ${escapeHtmlBackup(hash)}</div>
+                            </div>
+
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" onclick="selectAdminBackup('${backup.id}')" class="custom-btn secondary !py-2 !px-3 text-xs">
+                                    <i class="fas fa-crosshairs"></i> Select
+                                </button>
+                                <button type="button" onclick="reuseAdminBackupById('${backup.id}')" class="custom-btn gold-btn !py-2 !px-3 text-xs">
+                                    <i class="fas fa-rotate-left"></i> Reuse
+                                </button>
+                                <button type="button" onclick="downloadAdminBackupById('${backup.id}')" class="custom-btn secondary !py-2 !px-3 text-xs">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function escapeHtmlBackup(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function selectAdminBackup(id) {
+            if (currentUserRole !== "admin") return;
+            selectedAdminBackupId = id;
+            renderAdminBackups();
+        }
+
+        async function validateAdminBackup(backup) {
+            if (!backup || backup.format !== "SRP-ESPORTS-FIRESTORE-BACKUP") {
+                throw new Error("Invalid SRP-ESPORTS backup file.");
+            }
+            if (!backup.firestore || !Array.isArray(backup.firestore.teams)) {
+                throw new Error("Backup is missing its team snapshot.");
+            }
+            if (typeof backup.codeHtml !== "string" || !backup.codeHtml.trim()) {
+                throw new Error("Backup is missing its code snapshot.");
+            }
+
+            const teamNames = backup.lockedTeamNames || backup.firestore.teams
+                .map(t => String(t.data?.name || ""))
+                .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+
+            const codeHash = await backupDigest(backup.codeHtml);
+            const teamHash = await backupDigest(JSON.stringify(teamNames));
+
+            if (backup.integrity?.codeSha256 && backup.integrity.codeSha256 !== codeHash) {
+                throw new Error("Backup code integrity check failed.");
+            }
+            if (backup.integrity?.teamNamesSha256 && backup.integrity.teamNamesSha256 !== teamHash) {
+                throw new Error("Backup team-name integrity check failed.");
+            }
+
+            return true;
+        }
+
+        async function reuseSelectedBackup() {
+            const backup = getSelectedAdminBackup();
+            if (!backup) {
+                showToast("Select or create a backup first.", "error");
+                return;
+            }
+            await reuseAdminBackup(backup);
+        }
+
+        async function reuseAdminBackupById(id) {
+            const backup = loadAdminBackups().find(b => b.id === id);
+            if (!backup) {
+                showToast("Backup not found.", "error");
+                return;
+            }
+            selectedAdminBackupId = id;
+            renderAdminBackups();
+            await reuseAdminBackup(backup);
+        }
+
+        async function writeBackupCollection(collectionName, backupDocs) {
+            const desired = Array.isArray(backupDocs) ? backupDocs : [];
+            const existingSnapshot = await db.collection(collectionName).get();
+
+            const existingIds = [];
+            existingSnapshot.forEach(doc => existingIds.push(doc.id));
+
+            const operations = [];
+
+            // Delete documents not present in the backup.
+            existingIds.forEach(id => {
+                if (!desired.some(d => d.id === id)) {
+                    operations.push({ type: "delete", ref: db.collection(collectionName).doc(id) });
+                }
+            });
+
+            // Write every backed-up document exactly.
+            desired.forEach(doc => {
+                operations.push({
+                    type: "set",
+                    ref: db.collection(collectionName).doc(doc.id),
+                    data: decodeFirestoreValue(doc.data)
+                });
+            });
+
+            // Firestore batches support max 500 writes. Use chunks for safety.
+            for (let i = 0; i < operations.length; i += 450) {
+                const batch = db.batch();
+                operations.slice(i, i + 450).forEach(op => {
+                    if (op.type === "delete") batch.delete(op.ref);
+                    else batch.set(op.ref, op.data);
+                });
+                await batch.commit();
+            }
+        }
+
+        async function reuseAdminBackup(backup) {
+            if (currentUserRole !== "admin") {
+                showToast("Admin access required.", "error");
+                return;
+            }
+
+            try {
+                await validateAdminBackup(backup);
+            } catch (error) {
+                showToast("Backup validation failed: " + error.message, "error");
+                return;
+            }
+
+            const teamCount = (backup.lockedTeamNames || []).length;
+            const confirmationText =
+                `This will restore ${teamCount} teams plus matches, tokens and settings to Firebase. ` +
+                `The current Firebase data in those collections will be replaced by the selected backup.\n\n` +
+                `Type RESTORE BACKUP to continue.`;
+
+            const typed = prompt(confirmationText);
+            if (typed !== "RESTORE BACKUP") {
+                showToast("Restore cancelled.", "error");
+                return;
+            }
+
+            if (!confirm(
+                "Final confirmation: restore this backup to Firebase and then load the backed-up code in this browser?"
+            )) {
+                showToast("Restore cancelled.", "error");
+                return;
+            }
+
+            showToast("Restoring backup… Please do not close this tab.", "success");
+
+            try {
+                await writeBackupCollection("teams", backup.firestore.teams);
+                await writeBackupCollection("matches", backup.firestore.matches || []);
+                await writeBackupCollection("tokens", backup.firestore.tokens || []);
+                await writeBackupCollection("settings", backup.firestore.settings || []);
+
+                showToast("Firebase data restored. Loading backed-up code…", "success");
+
+                // The browser cannot overwrite the hosted file, but it can load the exact
+                // code captured by the backup. Download is available for permanent deployment.
+                setTimeout(() => {
+                    document.open();
+                    document.write(backup.codeHtml);
+                    document.close();
+                }, 500);
+            } catch (error) {
+                console.error("Backup restore failed:", error);
+                showToast("Restore failed: " + (error.message || "Unknown error"), "error");
+            }
+        }
+
+        function downloadSelectedBackup() {
+            const backup = getSelectedAdminBackup();
+            if (!backup) {
+                showToast("Select or create a backup first.", "error");
+                return;
+            }
+            downloadAdminBackupById(backup.id);
+        }
+
+        function downloadAdminBackupById(id) {
+            const backup = loadAdminBackups().find(b => b.id === id);
+            if (!backup) {
+                showToast("Backup not found.", "error");
+                return;
+            }
+
+            const filenameSafe = String(backup.name || "srp-backup")
+                .replace(/[^a-z0-9-_]+/gi, "-")
+                .replace(/^-+|-+$/g, "")
+                .slice(0, 80) || "srp-backup";
+
+            const blob = new Blob(
+                [JSON.stringify(backup, null, 2)],
+                { type: "application/json;charset=utf-8" }
+            );
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${filenameSafe}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+            showToast("Backup downloaded.", "success");
+        }
+
+        function handleBackupUpload(input) {
+            if (currentUserRole !== "admin") {
+                input.value = "";
+                showToast("Admin access required.", "error");
+                return;
+            }
+
+            const file = input.files?.[0];
+            input.value = "";
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async () => {
+                try {
+                    const backup = JSON.parse(reader.result);
+                    await validateAdminBackup(backup);
+
+                    const backups = loadAdminBackups();
+                    // Re-uploading the same backup replaces the local copy by ID.
+                    const existingIndex = backups.findIndex(b => b.id === backup.id);
+                    if (existingIndex >= 0) backups[existingIndex] = backup;
+                    else backups.unshift(backup);
+
+                    while (backups.length > 10) backups.pop();
+                    saveAdminBackups(backups);
+                    selectedAdminBackupId = backup.id;
+                    renderAdminBackups();
+
+                    showToast(`Backup uploaded: ${backup.name || backup.id}`, "success");
+                } catch (error) {
+                    console.error("Backup upload failed:", error);
+                    showToast("Backup upload failed: " + (error.message || "Invalid JSON backup"), "error");
+                }
+            };
+            reader.onerror = () => showToast("Could not read the backup file.", "error");
+            reader.readAsText(file);
+        }
+
+        // Render the admin backup list whenever the admin dashboard is shown.
+        const originalSwitchTabForBackups = switchTab;
+        switchTab = function(tab) {
+            originalSwitchTabForBackups(tab);
+            if (tab === "admin" && currentUserRole === "admin") {
+                setTimeout(renderAdminBackups, 0);
+            }
+        };
+
+        // Initial local rendering.
+        setTimeout(renderAdminBackups, 0);
 
         updateUI();
     </script>
