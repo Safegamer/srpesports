@@ -64,6 +64,25 @@
             --theme-badge-text: #34d399;
         }
 
+
+        /* --- WATER CONSERVATION THEME --- */
+        body[data-theme="save-our-oceans"] {
+            --theme-bg: radial-gradient(circle at 15% -5%, #0e7490 0%, #063b50 22%, #022536 48%, #011421 78%, #000c15 100%);
+            --theme-card-bg: rgba(8, 80, 105, 0.24);
+            --theme-card-border: rgba(103, 232, 249, 0.19);
+            --theme-accent: #22d3ee;
+            --theme-accent-hover: #06b6d4;
+            --theme-accent-text: #67e8f9;
+            --theme-accent-glow: rgba(34, 211, 238, 0.38);
+            --theme-btn-gradient: linear-gradient(135deg, #0ea5e9, #0e7490);
+            --theme-tr-hover: rgba(34, 211, 238, 0.13);
+            --theme-nav-active: rgba(34, 211, 238, 0.19);
+            --theme-title-gradient: linear-gradient(to right, #67e8f9, #a5f3fc, #f0fdfa);
+            --theme-badge-bg: rgba(34, 211, 238, 0.12);
+            --theme-badge-border: rgba(103, 232, 249, 0.28);
+            --theme-badge-text: #a5f3fc;
+        }
+
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -329,6 +348,502 @@
         }
         .tourney-match.complete { border-color: rgba(34,197,94,.28); }
         .tourney-match.waiting { border-color: rgba(245,158,11,.20); }
+
+        /* --- MATCH CARD REDESIGN --- */
+
+
+
+        /* --- ADMIN LEAGUE SCHEDULE BUILDER --- */
+        .schedule-builder-card {
+            background: linear-gradient(135deg, rgba(8,145,178,.07), rgba(59,130,246,.035));
+            border: 1px solid rgba(103,232,249,.16);
+        }
+
+        .schedule-toolbar {
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            align-items:center;
+        }
+
+        .schedule-day-panel {
+            border:1px solid rgba(255,255,255,.07);
+            border-radius:16px;
+            overflow:hidden;
+            background:rgba(2,6,23,.24);
+        }
+
+        .schedule-day-head {
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            padding:13px 15px;
+            background:rgba(255,255,255,.035);
+            border-bottom:1px solid rgba(255,255,255,.06);
+        }
+
+        .schedule-day-list {
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:10px;
+            padding:10px;
+        }
+
+        .schedule-match-editor {
+            border:1px solid rgba(255,255,255,.07);
+            border-radius:14px;
+            background:rgba(0,0,0,.16);
+            padding:13px;
+            min-width:0;
+            transition:border-color .2s ease, background .2s ease, transform .2s ease;
+        }
+
+        .schedule-match-editor:hover {
+            border-color:rgba(103,232,249,.20);
+            background:rgba(34,211,238,.025);
+            transform:translateY(-1px);
+        }
+
+        .schedule-match-editor.locked {
+            border-color:rgba(34,197,94,.18);
+        }
+
+        .schedule-match-top {
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            margin-bottom:11px;
+        }
+
+        .schedule-match-number {
+            display:flex;
+            align-items:center;
+            gap:8px;
+            min-width:0;
+        }
+
+        .schedule-match-number-badge {
+            min-width:35px;
+            height:28px;
+            padding:0 8px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            border-radius:9px;
+            background:rgba(59,130,246,.10);
+            border:1px solid rgba(59,130,246,.20);
+            color:#93c5fd;
+            font-size:10px;
+            font-weight:900;
+        }
+
+        .schedule-match-label {
+            min-width:0;
+            font-size:10px;
+            text-transform:uppercase;
+            letter-spacing:.10em;
+            color:#64748b;
+            font-weight:800;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+
+        .schedule-status-pill {
+            display:inline-flex;
+            align-items:center;
+            gap:5px;
+            border-radius:999px;
+            padding:5px 8px;
+            font-size:9px;
+            font-weight:900;
+            text-transform:uppercase;
+            letter-spacing:.07em;
+            white-space:nowrap;
+        }
+
+        .schedule-status-pill.pending {
+            color:#fbbf24;
+            background:rgba(251,191,36,.055);
+            border:1px solid rgba(251,191,36,.18);
+        }
+
+        .schedule-status-pill.done {
+            color:#86efac;
+            background:rgba(34,197,94,.055);
+            border:1px solid rgba(34,197,94,.18);
+        }
+
+        .schedule-meta-fields {
+            display:grid;
+            grid-template-columns:90px 105px minmax(0,1fr);
+            gap:7px;
+            margin-bottom:11px;
+        }
+
+        .schedule-field-label {
+            display:block;
+            font-size:8px;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            color:#64748b;
+            margin:0 0 4px 2px;
+            font-weight:800;
+        }
+
+        .schedule-meta-fields .custom-select,
+        .schedule-team-select {
+            width:100%;
+            padding:9px 9px;
+            font-size:11px;
+        }
+
+        .schedule-matchup-editor {
+            display:grid;
+            grid-template-columns:minmax(0,1fr) 50px minmax(0,1fr);
+            align-items:center;
+            gap:8px;
+        }
+
+        .schedule-team-editor {
+            min-width:0;
+        }
+
+        .schedule-team-name-preview {
+            min-height:15px;
+            margin-top:4px;
+            padding:0 2px;
+            color:#64748b;
+            font-size:9px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+
+        .schedule-vs-center {
+            text-align:center;
+            color:#facc15;
+            font-size:11px;
+            font-weight:1000;
+            letter-spacing:.08em;
+        }
+
+        .schedule-match-bottom {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:8px;
+            margin-top:10px;
+            padding-top:9px;
+            border-top:1px solid rgba(255,255,255,.05);
+            min-width:0;
+        }
+
+        .schedule-editor-hint {
+            min-width:0;
+            overflow:hidden;
+            white-space:nowrap;
+            text-overflow:ellipsis;
+            font-size:9px;
+            color:#64748b;
+        }
+
+        .schedule-lock {
+            font-size:9px;
+            color:#86efac;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            white-space:nowrap;
+        }
+
+        @media (max-width: 1050px) {
+            .schedule-day-list {
+                grid-template-columns:1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .schedule-builder-card {
+                padding:13px !important;
+            }
+
+            .schedule-day-list {
+                padding:8px;
+                gap:8px;
+            }
+
+            .schedule-match-editor {
+                padding:11px;
+            }
+
+            .schedule-meta-fields {
+                grid-template-columns:1fr 1fr;
+            }
+
+            .schedule-meta-fields .ocean-field {
+                grid-column:1 / -1;
+            }
+
+            .schedule-matchup-editor {
+                grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);
+                gap:6px;
+            }
+
+            .schedule-team-select {
+                font-size:10px;
+                padding:9px 7px;
+            }
+
+            .schedule-match-bottom {
+                align-items:center;
+            }
+
+            .schedule-editor-hint {
+                display:none;
+            }
+
+            .schedule-toolbar {
+                display:grid;
+                grid-template-columns:1fr 1fr;
+            }
+
+            .schedule-toolbar .custom-btn {
+                width:100%;
+                justify-content:center;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .schedule-match-label {
+                max-width:150px;
+                font-size:9px;
+            }
+
+            .schedule-meta-fields {
+                grid-template-columns:1fr 1fr;
+            }
+
+            .schedule-meta-fields .custom-select {
+                font-size:10px;
+                padding:8px 6px;
+            }
+
+            .schedule-matchup-editor {
+                grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr);
+            }
+
+            .schedule-team-select {
+                font-size:9px;
+                padding:8px 5px;
+            }
+        }
+
+        .match-card-v2 {
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(34,211,238,.055), transparent 38%),
+                rgba(2, 6, 23, .72);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 10px 28px rgba(0,0,0,.18);
+            transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+        }
+        .match-card-v2:hover {
+            transform: translateY(-2px);
+            border-color: rgba(103,232,249,.22);
+            box-shadow: 0 16px 34px rgba(8,145,178,.14);
+        }
+        .match-card-v2.complete {
+            border-color: rgba(34,197,94,.28);
+            background:
+                radial-gradient(circle at 0% 0%, rgba(34,197,94,.055), transparent 38%),
+                rgba(2, 6, 23, .72);
+        }
+        .match-meta-v2 {
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            margin-bottom:14px;
+            font-size:10px;
+            text-transform:uppercase;
+            letter-spacing:.13em;
+            color:#64748b;
+        }
+        .match-stage-v2 {
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+            min-width:0;
+            color:#94a3b8;
+            font-weight:800;
+        }
+        .match-stage-v2 .dot {
+            width:7px;
+            height:7px;
+            border-radius:50%;
+            background:#22d3ee;
+            box-shadow:0 0 10px rgba(34,211,238,.5);
+            flex:0 0 auto;
+        }
+        .match-status-v2 {
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:999px;
+            padding:5px 8px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.07);
+            white-space:nowrap;
+            font-weight:800;
+        }
+        .match-status-v2.pending {
+            color:#fbbf24;
+            border-color:rgba(251,191,36,.18);
+            background:rgba(251,191,36,.05);
+        }
+        .match-status-v2.done {
+            color:#86efac;
+            border-color:rgba(34,197,94,.18);
+            background:rgba(34,197,94,.05);
+        }
+        .matchup-v2 {
+            display:grid;
+            grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr);
+            align-items:center;
+            gap:10px;
+        }
+        .match-team-v2 {
+            min-width:0;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+        .match-team-v2.away {
+            justify-content:flex-end;
+            text-align:right;
+        }
+        .match-team-info-v2 {
+            min-width:0;
+        }
+        .match-seed-v2 {
+            display:block;
+            font-size:9px;
+            color:#64748b;
+            font-weight:800;
+            letter-spacing:.08em;
+            text-transform:uppercase;
+            margin-bottom:3px;
+        }
+        .match-team-name-v2 {
+            display:block;
+            min-width:0;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            font-size:14px;
+            line-height:1.2;
+            font-weight:900;
+            color:#f8fafc;
+        }
+        .match-team-name-v2.tbd {
+            color:#64748b;
+        }
+        .match-team-avatar-v2 {
+            width:38px;
+            height:38px;
+            border-radius:11px;
+            flex:0 0 38px;
+            overflow:hidden;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:rgba(255,255,255,.045);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .match-team-avatar-v2 img {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+        .match-center-v2 {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:5px;
+            min-width:0;
+        }
+        .match-score-v2 {
+            min-width:56px;
+            text-align:center;
+            font-size:16px;
+            line-height:1;
+            font-weight:1000;
+            color:#fef08a;
+            padding:8px 6px;
+            border-radius:10px;
+            background:rgba(250,204,21,.07);
+            border:1px solid rgba(250,204,21,.13);
+        }
+        .match-vs-v2 {
+            font-size:12px;
+            font-weight:1000;
+            color:#facc15;
+            letter-spacing:.08em;
+        }
+        .match-card-action-v2 {
+            margin-top:13px;
+            padding-top:11px;
+            border-top:1px solid rgba(255,255,255,.06);
+            display:flex;
+            justify-content:flex-end;
+        }
+        .match-card-action-v2 button {
+            font-size:11px !important;
+            padding:7px 11px !important;
+        }
+
+        /* The league cards are easier to read as one column until wide desktop. */
+        #league-schedule-container {
+            grid-template-columns:1fr;
+        }
+        @media (min-width: 1100px) {
+            #league-schedule-container {
+                grid-template-columns:repeat(2,minmax(0,1fr));
+            }
+        }
+        @media (max-width: 640px) {
+            .match-card-v2 {
+                padding:13px;
+                border-radius:14px;
+            }
+            .matchup-v2 {
+                grid-template-columns:minmax(0,1fr) 52px minmax(0,1fr);
+                gap:7px;
+            }
+            .match-team-v2 {
+                gap:8px;
+            }
+            .match-team-avatar-v2 {
+                width:34px;
+                height:34px;
+                flex-basis:34px;
+                border-radius:10px;
+            }
+            .match-team-name-v2 {
+                font-size:13px;
+            }
+            .match-score-v2 {
+                min-width:48px;
+                font-size:14px;
+                padding:7px 4px;
+            }
+        }
         .seed-pill {
             display:inline-flex; align-items:center; justify-content:center;
             min-width:34px; height:24px; padding:0 8px; border-radius:999px;
@@ -346,7 +861,42 @@
             border: 1px solid rgba(234, 179, 8, 0.4);
             box-shadow: 0 10px 40px rgba(234, 179, 8, 0.15);
         }
-    </style>
+    
+        /* FIXED S-5 PLAN: hide the old editable tournament configuration card */
+        #s5-fixed-plan-info {
+            background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(99,102,241,0.05));
+            border: 1px solid rgba(14,165,233,0.20);
+        }
+        #s5-fixed-plan-info .s5-stage {
+            background: rgba(0,0,0,0.18);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        /* --- SAVE WATER CAMPAIGN UI --- */
+        .water-mission-compact {
+            background: linear-gradient(135deg, rgba(14,116,144,0.10), rgba(34,211,238,0.035));
+            border-color: rgba(103,232,249,0.17);
+        }
+        .water-hero-card {
+            background: linear-gradient(135deg, rgba(8,145,178,0.13), rgba(14,116,144,0.05));
+            border-color: rgba(103,232,249,0.20);
+        }
+        .water-fact-card {
+            background: linear-gradient(135deg, rgba(14,116,144,0.10), rgba(2,132,199,0.04));
+            border-color: rgba(103,232,249,0.18);
+        }
+        @media (max-width: 640px) {
+            .water-mission-compact p {
+                max-width: 42ch;
+            }
+            #view-save-water .custom-card {
+                margin-bottom: 16px;
+            }
+        }
+
+</style>
 </head>
 <body class="flex h-screen overflow-hidden text-slate-200" data-theme="midnight-blue">
 
@@ -378,6 +928,11 @@
                 <!-- Public Team Registration Tab -->
                 <a onclick="switchTab('tournament')" id="nav-tournament" class="nav-link">
                     <i class="fas fa-sitemap w-8 text-center text-xl text-cyan-400"></i> <span class="font-semibold text-lg">Tournament</span>
+                </a>
+
+                <!-- Season Theme / Water Conservation -->
+                <a onclick="switchTab('save-water')" id="nav-save-water" class="nav-link">
+                    <i class="fas fa-droplet w-8 text-center text-xl text-cyan-300"></i> <span class="font-semibold text-lg">Save Water</span>
                 </a>
 
                 <a onclick="switchTab('team-registration')" id="nav-team-registration" class="nav-link">
@@ -487,6 +1042,26 @@
                     </button>
                 </div>
 
+                <!-- Compact Season 5 Mission -->
+                <div class="custom-card !p-4 sm:!p-5 mb-6 water-mission-compact" style="animation-delay:0.05s;">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-cyan-400/10 border border-cyan-300/20 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-droplet text-xl text-cyan-300"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="cs-pill">Season 5 Mission</span>
+                                <span class="text-[11px] uppercase tracking-widest text-cyan-200/70">Save Water</span>
+                            </div>
+                            <p class="text-sm sm:text-base font-bold text-white mt-1">Every drop matters.</p>
+                            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">We’re using this season to spread awareness about responsible water use.</p>
+                        </div>
+                        <button type="button" onclick="switchTab('save-water')" class="custom-btn secondary !py-2 !px-3 text-xs flex-shrink-0">
+                            Learn
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Leaderboard Table -->
                 <div class="custom-card !p-0 overflow-hidden overflow-x-auto">
                     <table class="w-full text-left border-collapse whitespace-nowrap">
@@ -517,6 +1092,11 @@
                     <div id="recent-matches-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Populated by JS -->
                     </div>
+                    <div class="mt-5 text-center">
+                        <button type="button" onclick="switchTab('save-water')" class="text-[11px] text-cyan-200/65 hover:text-cyan-200 transition-colors">
+                            💧 Season 5 Mission: Save Water · Learn more
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -533,7 +1113,7 @@
                         <span id="tournament-live-status" class="cs-pill">Planning</span>
                     </div>
                     <h1 class="text-4xl font-black tracking-tight glow-title text-white">Tournament Structure</h1>
-                    <p class="text-sm text-slate-400 mt-2">Slots, league schedule, automatic standings, BO3 knockout, playoffs and Grand Final.</p>
+                    <p class="text-sm text-slate-400 mt-2">Slots, league schedule, automatic standings, BO3 knockout, playoffs and Waterfall Grand Final.</p>
                 </div>
                 <button onclick="copyTournamentDiscord()" class="custom-btn discord-btn flex items-center gap-2">
                     <i class="fab fa-discord"></i> Copy Tournament Update
@@ -547,21 +1127,41 @@
                 <div class="custom-card !mb-0 text-center"><div class="text-[11px] uppercase tracking-widest text-slate-500">League Matches</div><div id="tourney-stat-league" class="text-3xl font-black text-blue-400 mt-1">60</div></div>
             </div>
 
+
+            <div class="custom-card mb-8" style="background: linear-gradient(135deg, rgba(14,116,144,0.12), rgba(8,145,178,0.06)); border-color: rgba(103,232,249,0.18);">
+                <div class="flex flex-col md:flex-row md:items-center gap-5">
+                    <div class="w-16 h-16 rounded-2xl bg-cyan-400/10 border border-cyan-300/20 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-water text-3xl text-cyan-300"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="cs-pill">Save Our Oceans</span>
+                            <span class="text-[11px] text-cyan-200/70 uppercase tracking-widest">Water Conservation Campaign</span>
+                        </div>
+                        <h2 class="text-2xl font-black text-white mt-2">Every drop matters.</h2>
+                        <p class="text-xs text-slate-400 mt-1.5 max-w-3xl leading-relaxed">
+                            SRP-ESPORTS uses water-inspired tournament names to spread awareness about protecting
+                            oceans, lakes and rivers. Play for the competition. Share the message for the planet.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <div class="custom-card mb-8">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
                     <div>
-                        <h2 class="text-2xl font-bold text-white"><i class="fas fa-th-large text-cyan-400 mr-2"></i>Team Slot Chart</h2>
+                        <h2 class="text-2xl font-bold text-white"><i class="fas fa-th-large text-cyan-400 mr-2"></i>Ocean Slot Chart</h2>
                         <p class="text-xs text-slate-500 mt-1">Every planned slot exists from the start. Registered teams occupy the next available slot automatically.</p>
                     </div>
                     <span id="tourney-slot-summary" class="text-xs font-bold text-slate-400"></span>
                 </div>
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     <div>
-                        <div class="flex items-center justify-between mb-3"><h3 class="font-black text-cyan-300">Team A</h3><span id="group-a-count" class="text-xs text-slate-500"></span></div>
+                        <div class="flex items-center justify-between mb-3"><h3 class="font-black text-cyan-300">Ocean A</h3><span id="group-a-count" class="text-xs text-slate-500"></span></div>
                         <div id="tourney-slots-a" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-3"><h3 class="font-black text-purple-300">Team B</h3><span id="group-b-count" class="text-xs text-slate-500"></span></div>
+                        <div class="flex items-center justify-between mb-3"><h3 class="font-black text-purple-300">Ocean B</h3><span id="group-b-count" class="text-xs text-slate-500"></span></div>
                         <div id="tourney-slots-b" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                     </div>
                 </div>
@@ -569,11 +1169,11 @@
 
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
                 <div class="custom-card !p-0 overflow-hidden">
-                    <div class="p-5 border-b border-white/10 flex items-center justify-between"><div><h2 class="text-xl font-black text-cyan-300">League Table A</h2><p class="text-xs text-slate-500 mt-1">Top 8 qualify for BO3 knockout</p></div><span id="league-a-progress" class="text-xs text-slate-500"></span></div>
+                    <div class="p-5 border-b border-white/10 flex items-center justify-between"><div><h2 class="text-xl font-black text-cyan-300">Ocean A Points Table</h2><p class="text-xs text-slate-500 mt-1">Top 8 qualify for Lake Knockout</p></div><span id="league-a-progress" class="text-xs text-slate-500"></span></div>
                     <div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="text-[11px] uppercase text-slate-500 bg-white/5"><th class="p-4">#</th><th class="p-4">Team</th><th class="p-4 text-center">M</th><th class="p-4 text-center">W</th><th class="p-4 text-center">L</th><th class="p-4 text-center">D</th><th class="p-4 text-center">RD</th><th class="p-4 text-center">Pts</th></tr></thead><tbody id="league-tbody-a"></tbody></table></div>
                 </div>
                 <div class="custom-card !p-0 overflow-hidden">
-                    <div class="p-5 border-b border-white/10 flex items-center justify-between"><div><h2 class="text-xl font-black text-purple-300">League Table B</h2><p class="text-xs text-slate-500 mt-1">Top 8 qualify for BO3 knockout</p></div><span id="league-b-progress" class="text-xs text-slate-500"></span></div>
+                    <div class="p-5 border-b border-white/10 flex items-center justify-between"><div><h2 class="text-xl font-black text-purple-300">Ocean B Points Table</h2><p class="text-xs text-slate-500 mt-1">Top 8 qualify for Lake Knockout</p></div><span id="league-b-progress" class="text-xs text-slate-500"></span></div>
                     <div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="text-[11px] uppercase text-slate-500 bg-white/5"><th class="p-4">#</th><th class="p-4">Team</th><th class="p-4 text-center">M</th><th class="p-4 text-center">W</th><th class="p-4 text-center">L</th><th class="p-4 text-center">D</th><th class="p-4 text-center">RD</th><th class="p-4 text-center">Pts</th></tr></thead><tbody id="league-tbody-b"></tbody></table></div>
                 </div>
             </div>
@@ -587,21 +1187,21 @@
             </div>
 
             <div class="custom-card mb-8">
-                <div class="mb-5"><h2 class="text-2xl font-black text-yellow-300">BO3 Knockout · 16 → 8</h2><p class="text-xs text-slate-500 mt-1">8 matches · 2 BO3 matches per day · 4 days</p></div>
-                <div id="knockout-bracket" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"></div>
+                <div class="mb-5"><h2 class="text-2xl font-black text-yellow-300">Lake Knockout · 16 → 8</h2><p class="text-xs text-slate-500 mt-1">8 matches · 2 BO3 matches per day · 4 days</p></div>
+                <div id="knockout-bracket" class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4"></div>
             </div>
 
             <div class="custom-card mb-8">
-                <div class="mb-5"><h2 class="text-2xl font-black text-white">Playoffs · 8 Teams</h2><p class="text-xs text-slate-500 mt-1">Group A = Rank 1–4 · Group B = Rank 5–8 · Semifinals → Group Finals → W_A / W_B</p></div>
+                <div class="mb-5"><h2 class="text-2xl font-black text-white">River Playoffs · 8 Teams</h2><p class="text-xs text-slate-500 mt-1">River A = Rank 1–4 · River B = Rank 5–8 · Semifinals → Group Finals → W_A / W_B</p></div>
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <div class="tourney-bracket p-5"><h3 class="font-black text-cyan-300 mb-4">Group A · Rank 1–4</h3><div id="playoff-group-a"></div></div>
-                    <div class="tourney-bracket p-5"><h3 class="font-black text-purple-300 mb-4">Group B · Rank 5–8</h3><div id="playoff-group-b"></div></div>
+                    <div class="tourney-bracket p-5"><h3 class="font-black text-cyan-300 mb-4">River A · Rank 1–4</h3><div id="playoff-group-a"></div></div>
+                    <div class="tourney-bracket p-5"><h3 class="font-black text-purple-300 mb-4">River B · Rank 5–8</h3><div id="playoff-group-b"></div></div>
                 </div>
             </div>
 
             <div class="custom-card champion-card text-center">
-                <div class="text-xs uppercase tracking-[.25em] text-yellow-500 font-black mb-2">Grand Final</div>
-                <div id="grand-final-card"><div class="text-slate-500 text-sm">W_A vs W_B — waiting for both playoff winners.</div></div>
+                <div class="text-xs uppercase tracking-[.25em] text-yellow-500 font-black mb-2">Waterfall Grand Final</div>
+                <div id="grand-final-card"><div class="text-slate-500 text-sm">W_A vs W_B · Waterfall Final — waiting for both playoff winners.</div></div>
             </div>
         </div>
 
@@ -610,6 +1210,114 @@
         <!-- ============================== -->
         <div id="view-past-season" class="max-w-5xl mx-auto hidden pb-20 mt-2 md:mt-4">
             <div id="hof-content-container"></div>
+        </div>
+
+
+        <!-- ============================== -->
+        <!-- 3. SAVE WATER / SEASON 5 THEME  -->
+        <!-- ============================== -->
+        <div id="view-save-water" class="max-w-5xl mx-auto hidden pb-20 mt-2 md:mt-4">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+                <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                        <span class="auto-badge"><i class="fas fa-droplet"></i> Season 5 Theme</span>
+                        <span class="cs-pill">Water Conservation</span>
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-black tracking-tight glow-title text-white">Save Water</h1>
+                    <p class="text-sm text-slate-400 mt-2 max-w-2xl">
+                        This season, SRP-ESPORTS is using its platform to encourage responsible water use
+                        and awareness of the oceans, lakes and rivers that connect us.
+                    </p>
+                </div>
+                <button type="button" onclick="copySaveWaterDiscord()" class="custom-btn discord-btn flex items-center justify-center gap-2">
+                    <i class="fab fa-discord"></i> Copy Theme for Discord
+                </button>
+            </div>
+
+            <!-- Season 5 Mission -->
+            <div class="custom-card !p-5 sm:!p-6 mb-6 water-hero-card">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-cyan-300/10 border border-cyan-200/20 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-water text-2xl sm:text-3xl text-cyan-200"></i>
+                    </div>
+                    <div>
+                        <div class="text-[11px] uppercase tracking-[0.18em] text-cyan-200/70 font-black">Our Season 5 Mission</div>
+                        <h2 class="text-2xl sm:text-3xl font-black text-white mt-1">COMPETE • CONSERVE • PROTECT</h2>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed max-w-3xl">
+                            SRP-ESPORTS Season 5 is more than a competition. We’re pairing the tournament with a simple message:
+                            use water responsibly, avoid unnecessary waste, and help protect the water sources around us.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Why it matters + quick actions -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                <div class="custom-card !p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fas fa-globe-americas text-cyan-300"></i>
+                        <h2 class="text-lg font-black text-white">Why Water Matters</h2>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                        Water supports people, food systems, ecosystems and the water cycle. Yet most of the water on Earth
+                        is salty ocean water, while only a small share is freshwater.
+                    </p>
+                    <p class="text-[11px] text-slate-500 mt-3">
+                        Source: U.S. Geological Survey
+                    </p>
+                </div>
+
+                <div class="custom-card !p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fas fa-faucet-drip text-cyan-300"></i>
+                        <h2 class="text-lg font-black text-white">Small Things We Can Do</h2>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-slate-300">
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/5"><i class="fas fa-check text-cyan-300 mr-2"></i>Turn off taps when not needed</div>
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/5"><i class="fas fa-check text-cyan-300 mr-2"></i>Fix leaks when you spot them</div>
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/5"><i class="fas fa-check text-cyan-300 mr-2"></i>Use only the water you need</div>
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/5"><i class="fas fa-check text-cyan-300 mr-2"></i>Keep waste and plastic out of waterways</div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-3">
+                        Practical guidance adapted from UNICEF India
+                    </p>
+                </div>
+            </div>
+
+            <!-- Fun Fact rotator -->
+            <div class="custom-card !p-5 sm:!p-6 mb-6 water-fact-card">
+                <div class="flex items-center justify-between gap-3 mb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-lightbulb text-cyan-300"></i>
+                        <h2 class="text-lg font-black text-white">Water Fact</h2>
+                    </div>
+                    <button type="button" onclick="nextWaterFact()" class="custom-btn secondary !py-1.5 !px-3 text-[11px]">
+                        Next Fact
+                    </button>
+                </div>
+                <div id="water-fact-number" class="text-[10px] uppercase tracking-[0.16em] text-cyan-200/70 font-black">FACT 1</div>
+                <div id="water-fact-text" class="text-base sm:text-lg font-bold text-white mt-1 leading-relaxed"></div>
+                <div id="water-fact-source" class="text-[11px] text-slate-500 mt-2"></div>
+                <div class="mt-4 h-1 rounded-full bg-white/5 overflow-hidden">
+                    <div id="water-fact-progress" class="h-full bg-cyan-300/70 rounded-full transition-all duration-500" style="width:12.5%"></div>
+                </div>
+            </div>
+
+            <div class="custom-card !p-4 sm:!p-5">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="fas fa-link text-cyan-300"></i>
+                    <h2 class="text-base font-black text-white">Learn More</h2>
+                </div>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Educational figures on this page are drawn from public information published by the U.S. Geological Survey,
+                    UNICEF and UN-Water.
+                </p>
+                <div class="flex flex-wrap gap-3 mt-3 text-[11px]">
+                    <a href="https://www.usgs.gov/water-science-school/science/how-much-water-there-earth" target="_blank" rel="noopener noreferrer" class="text-cyan-300 hover:underline">USGS Water Science School</a>
+                    <a href="https://www.unicef.org/stories/10-things-you-didnt-know-about-water" target="_blank" rel="noopener noreferrer" class="text-cyan-300 hover:underline">UNICEF Water</a>
+                    <a href="https://www.unwater.org/water-facts" target="_blank" rel="noopener noreferrer" class="text-cyan-300 hover:underline">UN-Water Facts</a>
+                </div>
+            </div>
         </div>
 
         <!-- ============================== -->
@@ -869,6 +1577,7 @@
                                 <option value="midnight-blue">Midnight Blue (Original Backup)</option>
                                 <option value="crimson-void">Crimson Void (New Esports Theme)</option>
                                 <option value="cyber-emerald">Cyber Emerald (Matrix Green)</option>
+                                <option value="save-our-oceans">Save Our Oceans (Water Conservation)</option>
                             </select>
                         </div>
 
@@ -1033,16 +1742,73 @@
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
                     <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Registered</div><div id="admin-tour-registered" class="text-xl font-black text-white mt-1">0</div></div>
                     <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Remaining</div><div id="admin-tour-remaining" class="text-xl font-black text-yellow-400 mt-1">24</div></div>
-                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Group A</div><div id="admin-tour-group-a" class="text-xl font-black text-cyan-300 mt-1">12</div></div>
-                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Group B</div><div id="admin-tour-group-b" class="text-xl font-black text-purple-300 mt-1">12</div></div>
+                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">River A</div><div id="admin-tour-group-a" class="text-xl font-black text-cyan-300 mt-1">12</div></div>
+                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">River B</div><div id="admin-tour-group-b" class="text-xl font-black text-purple-300 mt-1">12</div></div>
                     <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">League Matches</div><div id="admin-tour-league" class="text-xl font-black text-blue-300 mt-1">60</div></div>
                 </div>
 
                 <div class="mt-6 p-4 rounded-xl bg-blue-500/5 border border-blue-500/15">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div><div class="text-sm font-bold text-white">Automatic qualification flow</div><div class="text-xs text-slate-500 mt-1">24 slots → 12/12 groups → top 8 each → 16-team BO3 → 8 → playoff rank 1–8 → W_A vs W_B</div></div>
+                        <div><div class="text-sm font-bold text-white">Automatic qualification flow</div><div class="text-xs text-slate-500 mt-1">24 slots → 12/12 groups → top 8 each → 16-team BO3 → 8 → playoff rank 1–8 → W_A vs W_B · Waterfall Final</div></div>
                         <button type="button" onclick="assignTournamentSlots(true)" class="custom-btn secondary !py-2.5 !px-4 text-sm"><i class="fas fa-magic mr-1"></i> Assign New Teams Now</button>
                     </div>
+                </div>
+            </div>
+
+
+            <!-- ============================== -->
+            <!-- ADMIN LEAGUE SCHEDULE BUILDER   -->
+            <!-- ============================== -->
+            <div class="custom-card schedule-builder-card mb-10" style="animation-delay:.092s;">
+                <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4 mb-5">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h2 class="text-2xl font-black text-cyan-300 flex items-center gap-2">
+                                <i class="fas fa-calendar-days"></i> Ocean League Schedule Builder
+                            </h2>
+                            <span id="schedule-builder-mode" class="schedule-save-status auto">
+                                <i class="fas fa-magic"></i> Automatic
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1 max-w-3xl">
+                            Admin-only editor for the 60 league matches. The tournament stays 24 teams,
+                            12 in Ocean A and 12 in Ocean B, but you control the exact match day, round and opponents.
+                        </p>
+                    </div>
+
+                    <div class="schedule-toolbar">
+                        <button type="button" onclick="s5ScheduleGenerateBalancedDraft(true)" class="custom-btn secondary !py-2 !px-3 text-xs">
+                            <i class="fas fa-wand-magic-sparkles mr-1"></i> Generate Balanced Draft
+                        </button>
+                        <button type="button" onclick="s5ScheduleLoadFromFirebase()" class="custom-btn secondary !py-2 !px-3 text-xs">
+                            <i class="fas fa-rotate mr-1"></i> Reload
+                        </button>
+                        <button type="button" onclick="s5ScheduleValidateOnly()" class="custom-btn secondary !py-2 !px-3 text-xs">
+                            <i class="fas fa-check-double mr-1"></i> Validate
+                        </button>
+                        <button type="button" onclick="s5ScheduleSave()" class="custom-btn !py-2 !px-3 text-xs">
+                            <i class="fas fa-save mr-1"></i> Save Schedule
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
+                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Matches</div><div id="schedule-stat-matches" class="text-xl font-black text-white mt-1">60</div></div>
+                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Per Day</div><div id="schedule-stat-per-day" class="text-xl font-black text-cyan-300 mt-1">4</div></div>
+                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Ocean A</div><div id="schedule-stat-a" class="text-xl font-black text-cyan-300 mt-1">30</div></div>
+                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Ocean B</div><div id="schedule-stat-b" class="text-xl font-black text-purple-300 mt-1">30</div></div>
+                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Mode</div><div id="schedule-stat-mode" class="text-sm font-black text-green-300 mt-2">AUTOMATIC</div></div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-blue-500/5 border border-blue-500/15 text-[11px] text-slate-400 leading-relaxed mb-5">
+                    <strong class="text-cyan-300">What you can edit:</strong>
+                    day 1–15, round 1–5, Ocean A/B and the two opponents. You can prepare the complete schedule
+                    before all 24 teams register because the editor uses the locked slot numbers.
+                    <strong class="text-yellow-300">Completed matches are locked and cannot be moved after a result is entered.</strong>
+                </div>
+
+                <div id="schedule-builder-container" class="space-y-4">
+                    <div class="p-8 text-center text-slate-500">Loading schedule editor…</div>
                 </div>
             </div>
 
@@ -1387,7 +2153,7 @@
                 <div class="overflow-y-auto flex-1 pr-1 space-y-6">
                     <div>
                         <h4 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                            <i class="fas fa-shield-alt"></i> <span id="heading-team-a-name">Team A</span> Players
+                            <i class="fas fa-shield-alt"></i> <span id="heading-team-a-name">Ocean A</span> Players
                         </h4>
                         <div class="border border-white/10 rounded-xl overflow-hidden bg-white/5">
                             <table class="w-full text-left border-collapse text-sm">
@@ -1408,7 +2174,7 @@
 
                     <div>
                         <h4 class="text-sm font-bold text-red-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                            <i class="fas fa-shield-alt"></i> <span id="heading-team-b-name">Team B</span> Players
+                            <i class="fas fa-shield-alt"></i> <span id="heading-team-b-name">Ocean B</span> Players
                         </h4>
                         <div class="border border-white/10 rounded-xl overflow-hidden bg-white/5">
                             <table class="w-full text-left border-collapse text-sm">
@@ -1454,7 +2220,7 @@
             
             <div class="overflow-y-auto pr-2 space-y-6 flex-1">
                 <div>
-                    <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-2" id="public-team-a-title">Team A</h3>
+                    <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-2" id="public-team-a-title">Ocean A</h3>
                     <div class="overflow-x-auto rounded-xl border border-white/10">
                         <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
                             <thead class="bg-black/50 text-[#94a3b8] text-xs uppercase">
@@ -1472,7 +2238,7 @@
                 </div>
 
                 <div>
-                    <h3 class="text-sm font-bold text-red-400 uppercase tracking-wider mb-2" id="public-team-b-title">Team B</h3>
+                    <h3 class="text-sm font-bold text-red-400 uppercase tracking-wider mb-2" id="public-team-b-title">Ocean B</h3>
                     <div class="overflow-x-auto rounded-xl border border-white/10">
                         <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
                             <thead class="bg-black/50 text-[#94a3b8] text-xs uppercase">
@@ -1757,8 +2523,17 @@
         });
 
         // --- TOURNAMENT FIRESTORE LISTENERS ---
-        setupTournamentListeners();
-        loadTournamentConfig();
+        // IMPORTANT: the tournament engine variables are declared later in this
+        // single-file app, so defer initialization until the current script has
+        // finished executing.
+        setTimeout(() => {
+            try {
+                setupTournamentListeners();
+                loadTournamentConfig();
+            } catch (err) {
+                console.error('Tournament initialization failed:', err);
+            }
+        }, 0);
 
         // --- POPULATE CLASH SQUAD TEAM DROPDOWNS ---
         function populateTeamDropdowns() {
@@ -1912,7 +2687,8 @@
             }
 
             if (themeSelect && document.activeElement !== themeSelect) {
-                themeSelect.value = activeTheme;
+                const supportedThemes = Array.from(themeSelect.options).map(o => o.value);
+                themeSelect.value = supportedThemes.includes(activeTheme) ? activeTheme : 'save-our-oceans';
             }
 
             if (toggleInput && document.activeElement !== toggleInput) {
@@ -2488,7 +3264,7 @@
                                         ${getTeamBadge({ name: rName, logoUrl: pastSeasonData.runnerLogo }, 'w-12 h-12', 'text-base')}
                                         <div>
                                             <h3 class="text-2xl font-bold text-white">${rName}</h3>
-                                            <p class="text-xs text-slate-400 mt-0.5">Grand Finalists</p>
+                                            <p class="text-xs text-slate-400 mt-0.5">Waterfall Grand Finalists</p>
                                         </div>
                                     </div>
                                 </div>
@@ -3399,7 +4175,7 @@
 
         // --- NAVIGATION ---
         function switchTab(tab) {
-            const views = ['view-leaderboard', 'view-tournament', 'view-team-registration', 'view-past-season', 'view-admin', 'view-login'];
+            const views = ['view-leaderboard', 'view-tournament', 'view-save-water', 'view-team-registration', 'view-past-season', 'view-admin', 'view-login'];
             views.forEach(v => {
                 const el = document.getElementById(v);
                 if (el) el.classList.add('hidden');
@@ -3428,12 +4204,27 @@
             } else {
                 const el = document.getElementById(`view-${tab}`);
                 if (el) el.classList.remove('hidden');
+
+                // Force a fresh read when Tournament is opened. This guarantees
+                // existing Firebase teams are visible even if the realtime listener
+                // has not delivered its first snapshot yet.
+                if (tab === 'tournament' && typeof db !== 'undefined') {
+                    db.collection('teams').get().then(snapshot => {
+                        teams = [];
+                        snapshot.forEach(doc => teams.push({ id: doc.id, ...doc.data() }));
+                        populateTeamDropdowns();
+                        if (typeof renderTournamentPage === 'function') renderTournamentPage();
+                    }).catch(err => console.error('Tournament team refresh failed:', err));
+                }
             }
 
             const navLeaderboard = document.getElementById('nav-leaderboard');
             if (navLeaderboard) navLeaderboard.classList.toggle('active', tab === 'leaderboard');
             const navTournament = document.getElementById('nav-tournament');
             if (navTournament) navTournament.classList.toggle('active', tab === 'tournament');
+
+            const navSaveWater = document.getElementById('nav-save-water');
+            if (navSaveWater) navSaveWater.classList.toggle('active', tab === 'save-water');
 
             const navTeamRegistration = document.getElementById('nav-team-registration');
             if (navTeamRegistration) navTeamRegistration.classList.toggle('active', tab === 'team-registration');
@@ -3449,6 +4240,11 @@
                 sidebar.classList.add('-translate-x-full');
             }
             updateUI();
+
+            if (tab === 'save-water') {
+                renderWaterFact();
+                restartWaterFactTimer();
+            }
         }
 
         function toggleMobileMenu() { 
@@ -3592,16 +4388,24 @@
         }
 
         async function loadTournamentConfig() {
-            try {
-                const doc = await db.collection('settings').doc('tournament_format').get();
-                if (doc.exists) tournamentConfig = { ...tournamentDefaultConfig(), ...doc.data() };
-                else tournamentConfig = tournamentDefaultConfig();
-            } catch (err) {
-                console.error('Tournament config read error:', err);
-                tournamentConfig = tournamentDefaultConfig();
-            }
+            // S-5 is intentionally fixed. Legacy/old tournament_format data cannot
+            // change the 24-team structure.
+            tournamentConfig = tournamentDefaultConfig();
             renderTournamentAdminSummary();
             renderTournamentPage();
+
+            if (currentUserRole === 'admin') {
+                // Safe initialization: create the fixed slots/schedule and then
+                // persist the current Firebase teams into the next free slots.
+                try {
+                    await ensureTournamentSlots(24);
+                    await generateLeagueSchedule(24, 5, false);
+                    await assignTournamentSlots(false);
+                } catch (err) {
+                    console.error('Fixed S-5 plan initialization:', err);
+                }
+                renderTournamentPage();
+            }
         }
 
         function setupTournamentListeners() {
@@ -3609,10 +4413,11 @@
             tournamentListenersReady = true;
 
             db.collection('settings').doc('tournament_format').onSnapshot(doc => {
-                tournamentConfig = doc.exists ? { ...tournamentDefaultConfig(), ...doc.data() } : tournamentDefaultConfig();
+                // Ignore legacy editable settings for S-5.
+                tournamentConfig = tournamentDefaultConfig();
                 renderTournamentAdminSummary();
                 renderTournamentPage();
-                if (currentUserRole === 'admin' && tournamentConfig.autoAssign) assignTournamentSlots(false);
+                if (currentUserRole === 'admin') assignTournamentSlots(false);
             }, err => console.error('Tournament config listener:', err));
 
             db.collection('tournament_slots').onSnapshot(snapshot => {
@@ -3857,9 +4662,10 @@
         }
 
         function renderTournamentPage() {
-            const total = Math.max(2, parseInt(tournamentConfig.totalTeams) || 24);
+            // S-5 is fixed: 24 teams, 12 + 12, 5 matches/team, 60 league matches.
+            const total = 24;
             const registered = teams.filter(t => !t.disqualified).length;
-            const leagueTotal = expectedLeagueMatches(total, parseInt(tournamentConfig.matchesPerTeam) || 5);
+            const leagueTotal = 60;
             const plannedSlots = deriveTournamentSlots();
             const remaining = Math.max(0, total - Math.min(registered, total));
             const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
@@ -3903,6 +4709,9 @@
             renderPlayoffGroup('A');
             renderPlayoffGroup('B');
             renderGrandFinal();
+            if (currentUserRole === 'admin' && typeof s5ScheduleBuilderRefresh === 'function') {
+                s5ScheduleBuilderRefresh();
+            }
         }
 
         function renderTournamentSlotCard(slot) {
@@ -3914,19 +4723,97 @@
             </div>`;
         }
 
-        function renderLeagueSchedule() {
+                function renderLeagueSchedule() {
             const wrap = document.getElementById('league-schedule-container');
             if (!wrap) return;
-            const league = tournamentMatches.filter(m => m.stage === 'league').sort((a,b) => (a.day||99)-(b.day||99) || String(a.group).localeCompare(String(b.group)) || (a.round||0)-(b.round||0) || a.id.localeCompare(b.id));
-            if (!league.length) { wrap.innerHTML = `<div class="md:col-span-2 p-10 text-center text-slate-500">League schedule will appear after the admin generates the tournament plan.</div>`; return; }
+
+            const publicGroupName = (group) => group === 'A' ? 'Ocean A' : 'Ocean B';
+            const publicSlotLabel = (group, slot) => {
+                const gs = getTournamentSlot(slot)?.groupSlot;
+                return `${group === 'A' ? 'OCEAN A' : 'OCEAN B'} ${gs || '?'}`;
+            };
+
+            const league = tournamentMatches
+                .filter(m => m.stage === 'league')
+                .sort((a,b) =>
+                    (a.day||99)-(b.day||99) ||
+                    String(a.group).localeCompare(String(b.group)) ||
+                    (a.round||0)-(b.round||0) ||
+                    a.id.localeCompare(b.id)
+                );
+
+            if (!league.length) {
+                wrap.innerHTML = `<div class="p-10 text-center text-slate-500">League schedule will appear after the tournament plan is generated.</div>`;
+                return;
+            }
+
+            const teamMarkup = (team, side, seedLabel) => {
+                const name = team ? escapeTournamentHtml(team.name) : 'TBD';
+                const logo = team?.logoUrl || '';
+                const avatar = logo
+                    ? `<div class="match-team-avatar-v2"><img src="${escapeTournamentHtml(logo)}" alt=""></div>`
+                    : `<div class="match-team-avatar-v2"><i class="fas fa-shield-alt text-sm text-slate-600"></i></div>`;
+
+                const info = `
+                    <div class="match-team-info-v2">
+                        <span class="match-seed-v2">${escapeTournamentHtml(seedLabel)}</span>
+                        <span class="match-team-name-v2 ${team ? '' : 'tbd'}" title="${name}">${name}</span>
+                    </div>
+                `;
+
+                return side === 'away'
+                    ? info + avatar
+                    : avatar + info;
+            };
+
             wrap.innerHTML = league.map(m => {
-                const a=getTournamentTeamBySlot(m.slotA), b=getTournamentTeamBySlot(m.slotB);
-                const done=m.resultStatus==='completed';
-                return `<div class="tourney-match ${done?'complete':'waiting'} p-4">
-                    <div class="flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-500 mb-3"><span>Day ${m.day||'—'} · ${m.group}${m.round?` · Round ${m.round}`:''}</span><span>${done?'Completed':'Pending'}</span></div>
-                    <div class="flex items-center justify-between gap-3"><div class="min-w-0 flex-1"><span class="text-xs text-slate-500 mr-2">${m.group}${getTournamentSlot(m.slotA)?.groupSlot||'?'}</span><span class="font-bold text-white truncate">${a?escapeTournamentHtml(a.name):'TBD'}</span></div><div class="font-black text-yellow-300 min-w-[64px] text-center">${done?`${m.teamAScore} : ${m.teamBScore}`:'VS'}</div><div class="min-w-0 flex-1 text-right"><span class="font-bold text-white truncate">${b?escapeTournamentHtml(b.name):'TBD'}</span><span class="text-xs text-slate-500 ml-2">${m.group}${getTournamentSlot(m.slotB)?.groupSlot||'?'}</span></div></div>
-                    ${currentUserRole==='admin' && a && b ? `<div class="mt-3 text-right"><button type="button" onclick="recordTournamentLeagueResult('${m.id}')" class="custom-btn secondary !py-1.5 !px-3 text-xs">${done?'Edit Result':'Enter Result'}</button></div>`:''}
-                </div>`;
+                const a = getTournamentTeamBySlot(m.slotA);
+                const b = getTournamentTeamBySlot(m.slotB);
+                const done = m.resultStatus === 'completed';
+                const stageName = publicGroupName(m.group);
+                const seedA = publicSlotLabel(m.group, m.slotA);
+                const seedB = publicSlotLabel(m.group, m.slotB);
+                const result = done ? `${m.teamAScore} : ${m.teamBScore}` : 'VS';
+
+                return `
+                    <div class="match-card-v2 ${done ? 'complete' : 'waiting'}">
+                        <div class="match-meta-v2">
+                            <div class="match-stage-v2">
+                                <span class="dot"></span>
+                                <span>Day ${m.day || '—'} · ${stageName}${m.round ? ` · Round ${m.round}` : ''}</span>
+                            </div>
+                            <span class="match-status-v2 ${done ? 'done' : 'pending'}">
+                                <i class="fas ${done ? 'fa-check-circle' : 'fa-clock'}"></i>
+                                ${done ? 'Completed' : 'Pending'}
+                            </span>
+                        </div>
+
+                        <div class="matchup-v2">
+                            <div class="match-team-v2">
+                                ${teamMarkup(a, 'home', seedA)}
+                            </div>
+
+                            <div class="match-center-v2">
+                                <div class="${done ? 'match-score-v2' : 'match-vs-v2'}">${result}</div>
+                            </div>
+
+                            <div class="match-team-v2 away">
+                                ${teamMarkup(b, 'away', seedB)}
+                            </div>
+                        </div>
+
+                        ${currentUserRole === 'admin' && a && b ? `
+                            <div class="match-card-action-v2">
+                                <button type="button"
+                                    onclick="recordTournamentLeagueResult('${m.id}')"
+                                    class="custom-btn secondary">
+                                    <i class="fas ${done ? 'fa-pen' : 'fa-plus'} mr-1"></i>
+                                    ${done ? 'Edit Result' : 'Enter Result'}
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
             }).join('');
         }
 
@@ -3938,8 +4825,67 @@
         }
 
         function renderTournamentBracketMatch(m, isBo3=false){
-            const a=resolveTournamentMatchTeam(m,'A'), b=resolveTournamentMatchTeam(m,'B'), done=m.resultStatus==='completed';
-            return `<div class="tourney-match ${done?'complete':'waiting'} p-4"><div class="flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-500 mb-3"><span>${m.label||'BO3'}${m.day?` · Day ${m.day}`:''}</span><span>${done?'Completed':'Pending'}</span></div><div class="space-y-2"><div class="flex justify-between gap-3 items-center"><span class="text-sm font-bold ${m.winnerTeamId===a?.id?'text-green-300':'text-white'} truncate">${a?escapeTournamentHtml(a.name):'TBD'}</span><span class="font-black text-yellow-300">${done?m.teamAScore:'-'}</span></div><div class="flex justify-between gap-3 items-center"><span class="text-sm font-bold ${m.winnerTeamId===b?.id?'text-green-300':'text-white'} truncate">${b?escapeTournamentHtml(b.name):'TBD'}</span><span class="font-black text-yellow-300">${done?m.teamBScore:'-'}</span></div></div>${currentUserRole==='admin' && a && b ? `<div class="mt-3 text-right"><button type="button" onclick="recordTournamentBo3Result('${m.id}')" class="custom-btn secondary !py-1.5 !px-3 text-xs">${done?'Edit BO3':'Enter BO3'}</button></div>`:''}</div>`;
+            const a = resolveTournamentMatchTeam(m,'A');
+            const b = resolveTournamentMatchTeam(m,'B');
+            const done = m.resultStatus === 'completed';
+
+            const stageLabel = m.stage === 'knockout'
+                ? 'Lake Knockout'
+                : (m.playoffGroup === 'A' ? 'River A' : 'River B');
+
+            const substage = m.substage === 'semi'
+                ? 'Semifinal'
+                : (m.substage === 'final' ? 'River Final' : (isBo3 ? 'BO3' : 'Match'));
+
+            const teamMarkup = (team, side, seed) => {
+                const name = team ? escapeTournamentHtml(team.name) : 'TBD';
+                const logo = team?.logoUrl || '';
+                const avatar = logo
+                    ? `<div class="match-team-avatar-v2"><img src="${escapeTournamentHtml(logo)}" alt=""></div>`
+                    : `<div class="match-team-avatar-v2"><i class="fas fa-shield-alt text-sm text-slate-600"></i></div>`;
+                const info = `<div class="match-team-info-v2">
+                    <span class="match-seed-v2">${escapeTournamentHtml(seed)}</span>
+                    <span class="match-team-name-v2 ${team ? '' : 'tbd'}" title="${name}">${name}</span>
+                </div>`;
+                return side === 'away' ? info + avatar : avatar + info;
+            };
+
+            const seedA = a ? 'SIDE A' : 'SIDE A · TBD';
+            const seedB = b ? 'SIDE B' : 'SIDE B · TBD';
+
+            return `
+                <div class="match-card-v2 ${done ? 'complete' : 'waiting'}">
+                    <div class="match-meta-v2">
+                        <div class="match-stage-v2">
+                            <span class="dot"></span>
+                            <span>${escapeTournamentHtml(stageLabel)} · ${escapeTournamentHtml(substage)}${m.day ? ` · Day ${m.day}` : ''}</span>
+                        </div>
+                        <span class="match-status-v2 ${done ? 'done' : 'pending'}">
+                            <i class="fas ${done ? 'fa-check-circle' : 'fa-clock'}"></i>
+                            ${done ? 'Completed' : 'Pending'}
+                        </span>
+                    </div>
+
+                    <div class="matchup-v2">
+                        <div class="match-team-v2">${teamMarkup(a,'home',seedA)}</div>
+                        <div class="match-center-v2">
+                            <div class="${done ? 'match-score-v2' : 'match-vs-v2'}">${done ? `${m.teamAScore} : ${m.teamBScore}` : 'VS'}</div>
+                        </div>
+                        <div class="match-team-v2 away">${teamMarkup(b,'away',seedB)}</div>
+                    </div>
+
+                    ${currentUserRole === 'admin' && a && b ? `
+                        <div class="match-card-action-v2">
+                            <button type="button"
+                                onclick="recordTournamentBo3Result('${m.id}')"
+                                class="custom-btn secondary">
+                                <i class="fas ${done ? 'fa-pen' : 'fa-plus'} mr-1"></i>
+                                ${done ? 'Edit BO3' : 'Enter BO3'}
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
         }
 
         function resolveTournamentMatchTeam(match, side){
@@ -3968,9 +4914,9 @@
         function renderGrandFinal(){
             const wrap=document.getElementById('grand-final-card'); if(!wrap) return;
             const m=tournamentMatches.find(x=>x.stage==='grand_final');
-            if(!m){wrap.innerHTML=`<div class="text-slate-500 text-sm">W_A vs W_B — waiting for both playoff winners.</div>`;return;}
+            if(!m){wrap.innerHTML=`<div class="text-slate-500 text-sm">W_A vs W_B · Waterfall Final — waiting for both playoff winners.</div>`;return;}
             const a=resolveTournamentMatchTeam(m,'A'), b=resolveTournamentMatchTeam(m,'B');
-            wrap.innerHTML=`<div class="max-w-xl mx-auto"><div class="flex items-center justify-center gap-4 md:gap-8"><div class="flex-1"><div class="text-[10px] uppercase tracking-widest text-cyan-300 mb-1">W_A</div><div class="text-xl md:text-2xl font-black text-white truncate">${a?escapeTournamentHtml(a.name):'TBD'}</div></div><div class="text-2xl font-black text-yellow-300">VS</div><div class="flex-1"><div class="text-[10px] uppercase tracking-widest text-purple-300 mb-1">W_B</div><div class="text-xl md:text-2xl font-black text-white truncate">${b?escapeTournamentHtml(b.name):'TBD'}</div></div></div>${currentUserRole==='admin' && a && b ? `<div class="mt-5"><button type="button" onclick="recordTournamentBo3Result('${m.id}')" class="custom-btn gold-btn">${m.resultStatus==='completed'?'Edit Grand Final':'Enter Grand Final Result'}</button></div>`:''}${m.resultStatus==='completed'?`<div class="mt-5 text-green-300 font-black">Champion: ${escapeTournamentHtml((teams.find(t=>t.id===m.winnerTeamId)||{}).name||'—')}</div>`:''}</div>`;
+            wrap.innerHTML=`<div class="max-w-xl mx-auto"><div class="flex items-center justify-center gap-4 md:gap-8"><div class="flex-1"><div class="text-[10px] uppercase tracking-widest text-cyan-300 mb-1">W_A</div><div class="text-xl md:text-2xl font-black text-white truncate">${a?escapeTournamentHtml(a.name):'TBD'}</div></div><div class="text-2xl font-black text-yellow-300">VS</div><div class="flex-1"><div class="text-[10px] uppercase tracking-widest text-purple-300 mb-1">W_B</div><div class="text-xl md:text-2xl font-black text-white truncate">${b?escapeTournamentHtml(b.name):'TBD'}</div></div></div>${currentUserRole==='admin' && a && b ? `<div class="mt-5"><button type="button" onclick="recordTournamentBo3Result('${m.id}')" class="custom-btn gold-btn">${m.resultStatus==='completed'?'Edit Waterfall Grand Final':'Enter Waterfall Grand Final Result'}</button></div>`:''}${m.resultStatus==='completed'?`<div class="mt-5 text-green-300 font-black">Champion: ${escapeTournamentHtml((teams.find(t=>t.id===m.winnerTeamId)||{}).name||'—')}</div>`:''}</div>`;
         }
 
         function recordTournamentLeagueResult(id){
@@ -3991,7 +4937,7 @@
         function recordTournamentBo3Result(id){
             const match=tournamentMatches.find(m=>m.id===id); if(!match) return;
             const a=resolveTournamentMatchTeam(match,'A'), b=resolveTournamentMatchTeam(match,'B'); if(!a||!b) return showToast('Both sides of this BO3 are not ready yet.', 'error');
-            const label=match.stage==='grand_final'?'Grand Final':'BO3';
+            const label=match.stage==='grand_final'?'Waterfall Grand Final':'BO3';
             const sa=prompt(`${label}\n${a.name} vs ${b.name}\nEnter games won by ${a.name}:`, match.resultStatus==='completed'?match.teamAScore:''); if(sa===null)return;
             const sb=prompt(`${label}\n${a.name} vs ${b.name}\nEnter games won by ${b.name}:`, match.resultStatus==='completed'?match.teamBScore:''); if(sb===null)return;
             const scoreA=parseInt(sa), scoreB=parseInt(sb);
@@ -4067,8 +5013,8 @@
             if(exists) return true;
             const A=finals.find(m=>m.playoffGroup==='A'),B=finals.find(m=>m.playoffGroup==='B');
             if(!A||!B||!A.winnerTeamId||!B.winnerTeamId) return false;
-            await db.collection('tournament_matches').doc('GF-01').set({stage:'grand_final',format:'BO3',label:'Grand Final · W_A vs W_B',sourceA:{matchId:A.id},sourceB:{matchId:B.id},resultStatus:'pending',teamAScore:null,teamBScore:null,winnerTeamId:null,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-            showToast('Grand Final generated: W_A vs W_B.','success');
+            await db.collection('tournament_matches').doc('GF-01').set({stage:'grand_final',format:'BO3',label:'Waterfall Grand Final · W_A vs W_B · Waterfall Final',sourceA:{matchId:A.id},sourceB:{matchId:B.id},resultStatus:'pending',teamAScore:null,teamBScore:null,winnerTeamId:null,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+            showToast('Waterfall Grand Final generated: W_A vs W_B · Waterfall Final.','success');
             return true;
         }
 
@@ -4092,14 +5038,626 @@
                 `🏆 SRP-ESPORTS ${currentSeason} — Tournament Update`,
                 `Teams: ${registered}/${total} registered`,
                 `League: ${completed}/${expectedLeagueMatches(total,parseInt(tournamentConfig.matchesPerTeam)||5)} matches completed`,
-                `Group A: ${A.length} teams`,
-                `Group B: ${B.length} teams`,
-                `BO3 Knockout: ${tournamentMatches.filter(m=>m.stage==='knockout').length}/8 generated`,
-                `Playoffs: ${tournamentMatches.filter(m=>m.stage==='playoff').length} matches generated`,
-                `Grand Final: W_A vs W_B`
+                `River A: ${A.length} teams`,
+                `River B: ${B.length} teams`,
+                `🏞️ Lake Knockout: ${tournamentMatches.filter(m=>m.stage==='knockout').length}/8 generated`,
+                `🏞️ River Playoffs: ${tournamentMatches.filter(m=>m.stage==='playoff').length} matches generated`,
+                `Waterfall Grand Final: W_A vs W_B · Waterfall Final`
             ].join('\n');
             copyToClipboard(text);
         }
+
+
+
+        // ============================================================
+        // ADMIN OCEAN LEAGUE SCHEDULE BUILDER
+        // ============================================================
+        let s5ScheduleDraft = [];
+        let s5ScheduleDraftLoaded = false;
+
+        function s5ScheduleSlotOptions(group, selected) {
+            const start = group === 'A' ? 1 : 13;
+            const end = group === 'A' ? 12 : 24;
+            let html = `<option value="">OPEN SLOT</option>`;
+
+            for (let globalSlot = start; globalSlot <= end; globalSlot++) {
+                const slot = getTournamentSlot(globalSlot);
+                const teamName = slot?.team?.name;
+                const slotLabel = `${group === 'A' ? 'A' : 'B'}${slot?.groupSlot || '?'}${teamName ? ` · ${teamName}` : ' · OPEN'}`;
+                html += `<option value="${globalSlot}" ${Number(selected) === globalSlot ? 'selected' : ''}>${escapeTournamentHtml(slotLabel)}</option>`;
+            }
+            return html;
+        }
+
+        function s5ScheduleNormalize(matches) {
+            const league = (matches || [])
+                .filter(m => m.stage === 'league')
+                .sort((a,b) =>
+                    (Number(a.day)||99) - (Number(b.day)||99) ||
+                    (Number(a.group)==='B'?1:0) - (Number(b.group)==='B'?1:0) ||
+                    (Number(a.round)||99) - (Number(b.round)||99) ||
+                    String(a.id).localeCompare(String(b.id))
+                );
+
+            return Array.from({length:60}, (_, i) => {
+                const m = league[i];
+                return {
+                    id: m?.id || `L-${String(i+1).padStart(3,'0')}`,
+                    stage:'league',
+                    group: m?.group === 'B' ? 'B' : 'A',
+                    day: Number(m?.day) || Math.floor(i/4)+1,
+                    round: Number(m?.round) || Math.floor(i/12)+1,
+                    slotA: Number(m?.slotA) || null,
+                    slotB: Number(m?.slotB) || null,
+                    resultStatus: m?.resultStatus || 'pending',
+                    teamAScore: m?.teamAScore ?? null,
+                    teamBScore: m?.teamBScore ?? null,
+                    winnerTeamId: m?.winnerTeamId || null
+                };
+            });
+        }
+
+        function s5ScheduleBalancedDraft() {
+            const makeGroup = (group, startSlot) => {
+                const slots = Array.from({length:12}, (_, i) => startSlot + i);
+                const pairs = leagueScheduleForSlots(slots, 5);
+                return pairs.map((p, i) => ({
+                    stage:'league',
+                    group,
+                    day: Math.floor(i/2)+1,
+                    round:Number(p.round)||Math.floor(i/12)+1,
+                    slotA:p.slotA,
+                    slotB:p.slotB,
+                    resultStatus:'pending',
+                    teamAScore:null,
+                    teamBScore:null,
+                    winnerTeamId:null
+                }));
+            };
+
+            const a = makeGroup('A',1);
+            const b = makeGroup('B',13);
+            const merged = [];
+
+            for (let day=1; day<=15; day++) {
+                merged.push(a[(day-1)*2], a[(day-1)*2+1], b[(day-1)*2], b[(day-1)*2+1]);
+            }
+
+            return merged.map((m,i) => ({
+                ...m,
+                id:`L-${String(i+1).padStart(3,'0')}`,
+                day:Math.floor(i/4)+1
+            }));
+        }
+
+        function s5ScheduleEdit(index, key, value) {
+            const row = s5ScheduleDraft[index];
+            if (!row) return;
+
+            if (key === 'group') {
+                row.group = value === 'B' ? 'B' : 'A';
+                const start = row.group === 'A' ? 1 : 13;
+                const end = row.group === 'A' ? 12 : 24;
+                if (!(Number(row.slotA) >= start && Number(row.slotA) <= end)) row.slotA = start;
+                if (!(Number(row.slotB) >= start && Number(row.slotB) <= end)) row.slotB = start+1;
+            } else {
+                row[key] = Number(value);
+            }
+
+            renderS5ScheduleBuilder();
+        }
+
+        function s5ScheduleOptions(options, selected) {
+            return options.map(o => `<option value="${o.value}" ${Number(o.value)===Number(selected)?'selected':''}>${escapeTournamentHtml(o.label)}</option>`).join('');
+        }
+
+        function s5DayOptions(selected) {
+            return s5ScheduleOptions(
+                Array.from({length:15},(_,i)=>({value:i+1,label:`Day ${i+1}`})),
+                selected
+            );
+        }
+
+        function s5RoundOptions(selected) {
+            return s5ScheduleOptions(
+                Array.from({length:5},(_,i)=>({value:i+1,label:`Round ${i+1}`})),
+                selected
+            );
+        }
+
+        function s5ScheduleExistingMap() {
+            return Object.fromEntries(
+                tournamentMatches
+                    .filter(m=>m.stage==='league')
+                    .map(m=>[m.id,m])
+            );
+        }
+
+        function renderS5ScheduleBuilder() {
+            const wrap = document.getElementById('schedule-builder-container');
+            if (!wrap || currentUserRole !== 'admin') return;
+
+            if (!Array.isArray(s5ScheduleDraft) || s5ScheduleDraft.length !== 60) {
+                s5ScheduleDraft = s5ScheduleNormalize(tournamentMatches);
+                s5ScheduleDraftLoaded = true;
+            }
+
+            const existingMap = s5ScheduleExistingMap();
+
+            wrap.innerHTML = Array.from({ length: 15 }, (_, dayIndex) => {
+                const day = dayIndex + 1;
+                const rows = s5ScheduleDraft
+                    .map((m, index) => ({ m, index }))
+                    .filter(x => Number(x.m.day) === day)
+                    .sort((a, b) => a.index - b.index);
+
+                return `
+                    <div class="schedule-day-panel">
+                        <div class="schedule-day-head">
+                            <div>
+                                <div class="font-black text-white">Day ${day}</div>
+                                <div class="text-[10px] text-slate-500">${rows.length}/4 matches</div>
+                            </div>
+                            <span class="seed-pill">${rows.length === 4 ? 'READY' : 'INCOMPLETE'}</span>
+                        </div>
+
+                        <div class="schedule-day-list">
+                            ${rows.map(({ m, index }) => {
+                                const existing = existingMap[m.id];
+                                const locked = existing?.resultStatus === 'completed';
+
+                                const slotA = m.slotA ? getTournamentSlot(m.slotA) : null;
+                                const slotB = m.slotB ? getTournamentSlot(m.slotB) : null;
+
+                                const nameA = slotA?.team?.name || 'OPEN SLOT';
+                                const nameB = slotB?.team?.name || 'OPEN SLOT';
+                                const groupName = m.group === 'B' ? 'Ocean B' : 'Ocean A';
+
+                                return `
+                                    <div class="schedule-match-editor ${locked ? 'locked' : ''}">
+                                        <div class="schedule-match-top">
+                                            <div class="schedule-match-number">
+                                                <span class="schedule-match-number-badge">#${String(index + 1).padStart(2, '0')}</span>
+                                                <span class="schedule-match-label">
+                                                    ${groupName} · Match ${index + 1}
+                                                </span>
+                                            </div>
+                                            <span class="schedule-status-pill ${locked ? 'done' : 'pending'}">
+                                                <i class="fas ${locked ? 'fa-lock' : 'fa-clock'}"></i>
+                                                ${locked ? 'Locked' : 'Pending'}
+                                            </span>
+                                        </div>
+
+                                        <div class="schedule-meta-fields">
+                                            <div>
+                                                <label class="schedule-field-label">Day</label>
+                                                <select class="custom-select" ${locked ? 'disabled' : ''}
+                                                    onchange="s5ScheduleEdit(${index},'day',this.value)">
+                                                    ${s5DayOptions(m.day)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label class="schedule-field-label">Round</label>
+                                                <select class="custom-select" ${locked ? 'disabled' : ''}
+                                                    onchange="s5ScheduleEdit(${index},'round',this.value)">
+                                                    ${s5RoundOptions(m.round)}
+                                                </select>
+                                            </div>
+
+                                            <div class="ocean-field">
+                                                <label class="schedule-field-label">Ocean</label>
+                                                <select class="custom-select" ${locked ? 'disabled' : ''}
+                                                    onchange="s5ScheduleEdit(${index},'group',this.value)">
+                                                    <option value="A" ${m.group === 'A' ? 'selected' : ''}>Ocean A</option>
+                                                    <option value="B" ${m.group === 'B' ? 'selected' : ''}>Ocean B</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="schedule-matchup-editor">
+                                            <div class="schedule-team-editor">
+                                                <label class="schedule-field-label">Team A</label>
+                                                <select class="custom-select schedule-team-select" ${locked ? 'disabled' : ''}
+                                                    onchange="s5ScheduleEdit(${index},'slotA',this.value)">
+                                                    ${s5ScheduleSlotOptions(m.group, m.slotA)}
+                                                </select>
+                                                <div class="schedule-team-name-preview" title="${escapeTournamentHtml(nameA)}">
+                                                    ${escapeTournamentHtml(nameA)}
+                                                </div>
+                                            </div>
+
+                                            <div class="schedule-vs-center">VS</div>
+
+                                            <div class="schedule-team-editor">
+                                                <label class="schedule-field-label">Team B</label>
+                                                <select class="custom-select schedule-team-select" ${locked ? 'disabled' : ''}
+                                                    onchange="s5ScheduleEdit(${index},'slotB',this.value)">
+                                                    ${s5ScheduleSlotOptions(m.group, m.slotB)}
+                                                </select>
+                                                <div class="schedule-team-name-preview" title="${escapeTournamentHtml(nameB)}">
+                                                    ${escapeTournamentHtml(nameB)}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="schedule-match-bottom">
+                                            <span class="schedule-editor-hint">
+                                                ${locked
+                                                    ? `${m.teamAScore ?? '—'} : ${m.teamBScore ?? '—'} · completed result`
+                                                    : 'Choose both teams, then save the schedule.'}
+                                            </span>
+
+                                            ${locked
+                                                ? `<span class="schedule-lock"><i class="fas fa-shield-halved mr-1"></i> Result locked</span>`
+                                                : `<button type="button"
+                                                    onclick="s5ScheduleQuickEdit(${index})"
+                                                    class="custom-btn secondary !py-1.5 !px-3 text-[10px]">
+                                                    <i class="fas fa-pen mr-1"></i> Quick Edit
+                                                  </button>`}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const manual = !!window.__SRP_S5_MANUAL_SCHEDULE__;
+            const mode = document.getElementById('schedule-builder-mode');
+            const modeText = document.getElementById('schedule-stat-mode');
+
+            if (mode) {
+                mode.className = `schedule-save-status ${manual ? 'manual' : 'auto'}`;
+                mode.innerHTML = manual
+                    ? `<i class="fas fa-pen"></i> Manual`
+                    : `<i class="fas fa-magic"></i> Automatic`;
+            }
+
+            if (modeText) modeText.textContent = manual ? 'MANUAL' : 'AUTOMATIC';
+
+            const matchesEl = document.getElementById('schedule-stat-matches');
+            const perDayEl = document.getElementById('schedule-stat-per-day');
+            const aEl = document.getElementById('schedule-stat-a');
+            const bEl = document.getElementById('schedule-stat-b');
+
+            if (matchesEl) matchesEl.textContent = '60';
+            if (perDayEl) perDayEl.textContent = '4';
+            if (aEl) aEl.textContent = s5ScheduleDraft.filter(m => m.group === 'A').length;
+            if (bEl) bEl.textContent = s5ScheduleDraft.filter(m => m.group === 'B').length;
+        }
+
+        function s5ScheduleValidate() {
+            const errors = [];
+            const draft = s5ScheduleDraft || [];
+
+            if (draft.length !== 60) errors.push(`Exactly 60 matches are required.`);
+
+            const dayCounts = {};
+            const groupCounts = {A:0,B:0};
+            const appearances = {};
+            const pairs = {A:new Set(),B:new Set()};
+
+            draft.forEach((m,i)=>{
+                const day = Number(m.day);
+                const round = Number(m.round);
+                const group = m.group === 'B' ? 'B' : 'A';
+                const a = Number(m.slotA);
+                const b = Number(m.slotB);
+                const start = group === 'A' ? 1 : 13;
+                const end = group === 'A' ? 12 : 24;
+
+                if (!Number.isInteger(day) || day<1 || day>15) errors.push(`Match ${i+1}: invalid day.`);
+                if (!Number.isInteger(round) || round<1 || round>5) errors.push(`Match ${i+1}: invalid round.`);
+                if (!(a>=start && a<=end) || !(b>=start && b<=end)) errors.push(`Match ${i+1}: slots must belong to ${group==='A'?'Ocean A':'Ocean B'}.`);
+                if (a===b) errors.push(`Match ${i+1}: a team cannot play itself.`);
+
+                dayCounts[day]=(dayCounts[day]||0)+1;
+                groupCounts[group]++;
+
+                if (a) appearances[a]=(appearances[a]||0)+1;
+                if (b) appearances[b]=(appearances[b]||0)+1;
+
+                const pair=[a,b].sort((x,y)=>x-y).join('-');
+                if (pairs[group].has(pair)) errors.push(`Match ${i+1}: duplicate pairing ${group}${a} vs ${group}${b}.`);
+                pairs[group].add(pair);
+            });
+
+            for (let d=1;d<=15;d++) {
+                if ((dayCounts[d]||0)!==4) errors.push(`Day ${d}: exactly 4 matches required.`);
+            }
+
+            if (groupCounts.A!==30) errors.push(`Ocean A must contain exactly 30 matches.`);
+            if (groupCounts.B!==30) errors.push(`Ocean B must contain exactly 30 matches.`);
+
+            for (let slot=1;slot<=24;slot++) {
+                if ((appearances[slot]||0)!==5) {
+                    const group = slot<=12 ? 'Ocean A' : 'Ocean B';
+                    const number = slot<=12 ? slot : slot-12;
+                    errors.push(`${group} ${number} must play exactly 5 matches; found ${appearances[slot]||0}.`);
+                }
+            }
+
+            return {valid:errors.length===0,errors,totalErrors:errors.length};
+        }
+
+        function s5ScheduleValidateLocks(existingMap) {
+            for (const draft of s5ScheduleDraft) {
+                const old = existingMap[draft.id];
+                if (!old || old.resultStatus!=='completed') continue;
+
+                const changed =
+                    Number(old.day)!==Number(draft.day) ||
+                    Number(old.round)!==Number(draft.round) ||
+                    String(old.group)!==String(draft.group) ||
+                    Number(old.slotA)!==Number(draft.slotA) ||
+                    Number(old.slotB)!==Number(draft.slotB);
+
+                if (changed) {
+                    return {valid:false,message:`Completed match ${draft.id} is locked and cannot be moved.`};
+                }
+            }
+            return {valid:true};
+        }
+
+        function s5ScheduleNotifyValidation(v) {
+            if (v.valid) {
+                showToast('✅ Ocean League schedule is valid.', 'success');
+                return;
+            }
+
+            const shown = v.errors.slice(0,8).join(' ');
+            const more = v.totalErrors > 8 ? ` +${v.totalErrors-8} more.` : '';
+            showToast('❌ ' + shown + more, 'error');
+        }
+
+        async function s5ScheduleLoadFromFirebase() {
+            if (currentUserRole !== 'admin') {
+                showToast('Admin access required.', 'error');
+                return;
+            }
+
+            try {
+                const [matchSnap, settingSnap] = await Promise.all([
+                    db.collection('tournament_matches').where('stage','==','league').get(),
+                    db.collection('settings').doc('tournament_format').get()
+                ]);
+
+                const loaded=[];
+                matchSnap.forEach(doc=>loaded.push({id:doc.id,...doc.data()}));
+
+                s5ScheduleDraft = s5ScheduleNormalize(loaded);
+                s5ScheduleDraftLoaded = true;
+                window.__SRP_S5_MANUAL_SCHEDULE__ =
+                    settingSnap.exists && settingSnap.data()?.leagueScheduleMode==='manual';
+
+                renderS5ScheduleBuilder();
+                showToast(`Loaded ${loaded.length} league matches from Firebase.`, 'success');
+            } catch (err) {
+                console.error('Schedule reload:',err);
+                showToast('Could not load the schedule: '+err.message,'error');
+            }
+        }
+
+        function s5ScheduleGenerateBalancedDraft(confirmReplace=true) {
+            if (currentUserRole !== 'admin') {
+                showToast('Admin access required.', 'error');
+                return;
+            }
+
+            if (tournamentMatches.some(m=>m.stage==='league' && m.resultStatus==='completed')) {
+                showToast('A new balanced draft cannot replace a league after results have been recorded.', 'error');
+                return;
+            }
+
+            if (confirmReplace && s5ScheduleDraft.length===60) {
+                if (!confirm('Replace the current schedule with a fresh balanced 60-match draft?')) return;
+            }
+
+            s5ScheduleDraft = s5ScheduleBalancedDraft();
+            s5ScheduleDraftLoaded = true;
+            renderS5ScheduleBuilder();
+            showToast('Balanced 60-match draft prepared. Click Save Schedule to publish it.', 'success');
+        }
+
+        async function s5ScheduleSave() {
+            if (currentUserRole !== 'admin') {
+                showToast('Admin access required.', 'error');
+                return;
+            }
+
+            const validation = s5ScheduleValidate();
+            if (!validation.valid) {
+                s5ScheduleNotifyValidation(validation);
+                return;
+            }
+
+            const existingMap = s5ScheduleExistingMap();
+            const lockValidation = s5ScheduleValidateLocks(existingMap);
+            if (!lockValidation.valid) {
+                showToast('❌ '+lockValidation.message,'error');
+                return;
+            }
+
+            if (!confirm('Save this 60-match Ocean League schedule? All pending league matches will use the new schedule.')) return;
+
+            try {
+                // Preserve results on completed matches; pending matches receive the schedule.
+                const batch = db.batch();
+
+                s5ScheduleDraft.forEach((m,i)=>{
+                    const existing = existingMap[m.id];
+                    const id = existing ? m.id : `L-${String(i+1).padStart(3,'0')}`;
+                    const ref = db.collection('tournament_matches').doc(id);
+
+                    const data = {
+                        stage:'league',
+                        format:'league',
+                        group:m.group,
+                        day:Number(m.day),
+                        round:Number(m.round),
+                        slotA:Number(m.slotA),
+                        slotB:Number(m.slotB),
+                        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    if (existing?.resultStatus==='completed') {
+                        data.resultStatus='completed';
+                        data.teamAId=existing.teamAId||null;
+                        data.teamBId=existing.teamBId||null;
+                        data.teamAName=existing.teamAName||null;
+                        data.teamBName=existing.teamBName||null;
+                        data.teamAScore=existing.teamAScore??null;
+                        data.teamBScore=existing.teamBScore??null;
+                        data.winnerTeamId=existing.winnerTeamId||null;
+                    } else {
+                        data.resultStatus='pending';
+                        data.teamAId=null;
+                        data.teamBId=null;
+                        data.teamAName=null;
+                        data.teamBName=null;
+                        data.teamAScore=null;
+                        data.teamBScore=null;
+                        data.winnerTeamId=null;
+                    }
+
+                    if (!existing) {
+                        data.label=`League Match ${i+1}`;
+                        data.createdAt=firebase.firestore.FieldValue.serverTimestamp();
+                    }
+
+                    batch.set(ref,data,{merge:true});
+                });
+
+                // Mark the schedule mode as manual so future page refreshes do not
+                // silently regenerate the admin's schedule.
+                const settingsRef=db.collection('settings').doc('tournament_format');
+                batch.set(settingsRef,{
+                    leagueScheduleMode:'manual',
+                    leagueScheduleVersion:Date.now(),
+                    leagueScheduleUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()
+                },{merge:true});
+
+                await batch.commit();
+
+                window.__SRP_S5_MANUAL_SCHEDULE__=true;
+                await s5ScheduleLoadFromFirebase();
+                if (typeof renderTournamentPage==='function') renderTournamentPage();
+                showToast('✅ Ocean League schedule saved. Automatic schedule generation is now OFF.', 'success');
+            } catch(err) {
+                console.error('Schedule save error:',err);
+                showToast('Could not save schedule: '+err.message,'error');
+            }
+        }
+
+        function s5ScheduleBuilderRefresh() {
+            if (currentUserRole !== 'admin') return;
+            if (!s5ScheduleDraftLoaded) {
+                s5ScheduleDraft=s5ScheduleNormalize(tournamentMatches);
+                s5ScheduleDraftLoaded=true;
+            }
+            renderS5ScheduleBuilder();
+        }
+
+        setTimeout(s5ScheduleBuilderRefresh, 700);
+        setTimeout(s5ScheduleBuilderRefresh, 1800);
+        setTimeout(s5ScheduleBuilderRefresh, 3500);
+
+        // ============================================================
+        // SAVE WATER — SEASON 5 AWARENESS
+        // ============================================================
+        const WATER_FACTS = [
+            {
+                text: "About 71% of Earth's surface is covered by water.",
+                source: "Source: U.S. Geological Survey (USGS)"
+            },
+            {
+                text: "The oceans hold about 96.5% of all the water on Earth.",
+                source: "Source: U.S. Geological Survey (USGS)"
+            },
+            {
+                text: "More than 68% of Earth's freshwater is stored in ice and glaciers.",
+                source: "Source: U.S. Geological Survey (USGS)"
+            },
+            {
+                text: "Rivers contain only about 0.0002% of all the water on Earth — tiny compared with the planet's total supply.",
+                source: "Source: U.S. Geological Survey (USGS)"
+            },
+            {
+                text: "The oceans supply about 90% of the evaporated water that enters the water cycle.",
+                source: "Source: U.S. Geological Survey (USGS)"
+            },
+            {
+                text: "UNICEF reported in 2024 that 2.2 billion people still lacked safely managed drinking water.",
+                source: "Source: UNICEF, 2024"
+            },
+            {
+                text: "Safe water is not only about being clean — it also needs to be available when needed and protected from contamination.",
+                source: "Source: UNICEF"
+            },
+            {
+                text: "Water moves continuously through the water cycle, shifting between the ocean, air, land, ice and groundwater.",
+                source: "Source: U.S. Geological Survey (USGS)"
+            }
+        ];
+
+        let currentWaterFactIndex = 0;
+        let waterFactTimer = null;
+
+        function renderWaterFact() {
+            const fact = WATER_FACTS[currentWaterFactIndex];
+            const numberEl = document.getElementById('water-fact-number');
+            const textEl = document.getElementById('water-fact-text');
+            const sourceEl = document.getElementById('water-fact-source');
+            const progressEl = document.getElementById('water-fact-progress');
+
+            if (numberEl) numberEl.textContent = `FACT ${currentWaterFactIndex + 1} / ${WATER_FACTS.length}`;
+            if (textEl) textEl.textContent = fact.text;
+            if (sourceEl) sourceEl.textContent = fact.source;
+            if (progressEl) progressEl.style.width = `${((currentWaterFactIndex + 1) / WATER_FACTS.length) * 100}%`;
+        }
+
+        function nextWaterFact() {
+            currentWaterFactIndex = (currentWaterFactIndex + 1) % WATER_FACTS.length;
+            renderWaterFact();
+            restartWaterFactTimer();
+        }
+
+        function restartWaterFactTimer() {
+            if (waterFactTimer) clearInterval(waterFactTimer);
+            waterFactTimer = setInterval(() => {
+                // Only auto-rotate while the Save Water page is visible.
+                const view = document.getElementById('view-save-water');
+                if (view && !view.classList.contains('hidden')) {
+                    currentWaterFactIndex = (currentWaterFactIndex + 1) % WATER_FACTS.length;
+                    renderWaterFact();
+                }
+            }, 7000);
+        }
+
+        function copySaveWaterDiscord() {
+            const text = [
+                `🌊 SRP-ESPORTS ${currentSeason} — SEASON 5`,
+                ``,
+                `💧 THIS SEASON: SAVE WATER`,
+                `Compete • Conserve • Protect`,
+                ``,
+                `Every drop matters.`,
+                `We're using the SRP-ESPORTS platform to spread awareness about responsible water use and protecting our oceans, lakes and rivers.`,
+                ``,
+                `#SaveWater #WaterConservation #SRPEsports`
+            ].join('\n');
+
+            copyToClipboard(text);
+        }
+
+        // Initialize the fact card once the page exists.
+        function initSaveWaterTheme() {
+            renderWaterFact();
+            restartWaterFactTimer();
+        }
+        setTimeout(initSaveWaterTheme, 0);
 
         function escapeTournamentHtml(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
 
@@ -4677,5 +6235,373 @@
 
         updateUI();
     </script>
+
+<script>
+(function () {
+    'use strict';
+
+    // ============================================================
+    // SRP MAC TT S-5 — FIXED 24-TEAM AUTOMATION
+    // ============================================================
+    const S5_FIXED = Object.freeze({
+        totalTeams: 24,
+        groupA: 12,
+        groupB: 12,
+        matchesPerTeam: 5,
+        matchesPerGroup: 30,
+        totalLeagueMatches: 60,
+        leagueMatchesPerDay: 4,
+        leagueDays: 15,
+        knockoutTeams: 16,
+        knockoutMatches: 8,
+        knockoutDays: 4,
+        playoffTeams: 8,
+        playoffDays: 2
+    });
+
+    let s5PlanRunning = false;
+
+    function s5ForceConfig() {
+        if (typeof tournamentConfig !== 'undefined') {
+            tournamentConfig = {
+                totalTeams: S5_FIXED.totalTeams,
+                matchesPerTeam: S5_FIXED.matchesPerTeam,
+                autoAssign: true,
+                enabled: true
+            };
+        }
+    }
+
+    function s5HideEditableConfig() {
+        const form = document.getElementById('tournament-config-form');
+        if (!form) return;
+
+        const card = form.closest('.custom-card');
+        if (card) {
+            card.style.display = 'none';
+        }
+
+        // Add a clear read-only fixed plan card immediately after the hidden card.
+        if (document.getElementById('s5-fixed-plan-info')) return;
+
+        const info = document.createElement('div');
+        info.id = 's5-fixed-plan-info';
+        info.className = 'custom-card mb-10';
+        info.innerHTML = `
+            <div class="flex flex-col lg:flex-row justify-between lg:items-start gap-5 mb-5">
+                <div>
+                    <h2 class="text-2xl font-black text-cyan-300 flex items-center gap-2">
+                        <i class="fas fa-lock"></i> SRP MAC TT S-5 — Fixed Format
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">
+                        The tournament format is locked. Admins do not need to configure or regenerate it manually.
+                    </p>
+                </div>
+                <span class="auto-badge"><i class="fas fa-check-circle"></i> AUTOMATIC</span>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+                <div class="s5-stage"><div class="text-[10px] uppercase tracking-widest text-slate-500">Teams</div><div class="text-2xl font-black text-white mt-1">24</div></div>
+                <div class="s5-stage"><div class="text-[10px] uppercase tracking-widest text-slate-500">River A</div><div class="text-2xl font-black text-cyan-300 mt-1">12</div></div>
+                <div class="s5-stage"><div class="text-[10px] uppercase tracking-widest text-slate-500">River B</div><div class="text-2xl font-black text-purple-300 mt-1">12</div></div>
+                <div class="s5-stage"><div class="text-[10px] uppercase tracking-widest text-slate-500">League</div><div class="text-2xl font-black text-blue-300 mt-1">60</div></div>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                <div class="s5-stage">
+                    <div class="font-black text-cyan-300">Stage 1 · Ocean League</div>
+                    <div class="text-xs text-slate-400 mt-1">Ocean A: 12 teams · 30 matches</div>
+                    <div class="text-xs text-slate-400">Ocean B: 12 teams · 30 matches</div>
+                    <div class="text-[11px] text-slate-500 mt-2">4 matches/day · 15 days</div>
+                </div>
+                <div class="s5-stage">
+                    <div class="font-black text-blue-300">Stage 2 · Lake Knockout</div>
+                    <div class="text-xs text-slate-400 mt-1">Top 8 from Ocean A + Top 8 from Ocean B</div>
+                    <div class="text-xs text-slate-400">16 teams → 8 teams</div>
+                    <div class="text-[11px] text-slate-500 mt-2">8 BO3 · 2/day · 4 days</div>
+                </div>
+                <div class="s5-stage">
+                    <div class="font-black text-purple-300">Stage 3 · River Playoffs</div>
+                    <div class="text-xs text-slate-400 mt-1">8 teams</div>
+                    <div class="text-xs text-slate-400">River A = Rank 1–4 · River B = Rank 5–8</div>
+                    <div class="text-[11px] text-slate-500 mt-2">Semifinals day 1 · Finals day 2 → W_A vs W_B · Waterfall Final</div>
+                </div>
+            </div>
+
+            <div class="mt-5 p-3.5 rounded-xl bg-blue-500/5 border border-blue-500/15 text-xs text-slate-400">
+                <strong class="text-white">Team slots:</strong>
+                all 24 slots exist from the beginning. Existing registered teams appear automatically,
+                and future token registrations or admin-added teams take the next available slot.
+                Locked assignments are preserved once the admin dashboard persists them.
+            </div>
+        `;
+        card.insertAdjacentElement('afterend', info);
+    }
+
+    function s5BuildLeaguePairs(slotIds, roundsWanted) {
+        if (typeof leagueScheduleForSlots === 'function') {
+            return leagueScheduleForSlots(slotIds, roundsWanted);
+        }
+
+        const arr = [...slotIds];
+        const output = [];
+        const n = arr.length;
+        if (n < 2) return output;
+
+        let cur = [...arr];
+        for (let round = 0; round < Math.min(roundsWanted, n - 1); round++) {
+            for (let i = 0; i < n / 2; i++) {
+                const a = cur[i];
+                const b = cur[n - 1 - i];
+                if (a != null && b != null) output.push({ round: round + 1, slotA: a, slotB: b });
+            }
+            cur = [cur[0], cur[cur.length - 1], ...cur.slice(1, cur.length - 1)];
+        }
+        return output;
+    }
+
+    async function s5GenerateFixedLeagueSchedule() {
+        if (!db) return;
+
+        try {
+            const control = await db.collection('settings').doc('tournament_format').get();
+            if (control.exists && control.data()?.leagueScheduleMode === 'manual') {
+                return;
+            }
+        } catch (e) {
+            console.warn('Could not read leagueScheduleMode:', e);
+        }
+
+        const groupAIds = Array.from({ length: 12 }, (_, i) => i + 1);
+        const groupBIds = Array.from({ length: 12 }, (_, i) => i + 13);
+
+        const aPairs = s5BuildLeaguePairs(groupAIds, 5);
+        const bPairs = s5BuildLeaguePairs(groupBIds, 5);
+
+        if (aPairs.length !== 30 || bPairs.length !== 30) {
+            throw new Error('S-5 league schedule validation failed.');
+        }
+
+        // Exactly four matches every day: 2 A + 2 B.
+        const schedule = [];
+        for (let day = 1; day <= 15; day++) {
+            const offset = (day - 1) * 2;
+
+            [aPairs[offset], aPairs[offset + 1]].forEach(pair => {
+                schedule.push({
+                    stage: 'league',
+                    group: 'A',
+                    day,
+                    round: pair.round,
+                    slotA: pair.slotA,
+                    slotB: pair.slotB
+                });
+            });
+
+            [bPairs[offset], bPairs[offset + 1]].forEach(pair => {
+                schedule.push({
+                    stage: 'league',
+                    group: 'B',
+                    day,
+                    round: pair.round,
+                    slotA: pair.slotA,
+                    slotB: pair.slotB
+                });
+            });
+        }
+
+        if (schedule.length !== 60) {
+            throw new Error('S-5 must contain exactly 60 league matches.');
+        }
+
+        const existing = await db.collection('tournament_matches')
+            .where('stage', '==', 'league')
+            .get();
+
+        const existingDocs = [];
+        existing.forEach(doc => existingDocs.push({ id: doc.id, data: doc.data() }));
+
+        const completed = existingDocs.some(x => x.data?.resultStatus === 'completed');
+
+        // Never erase a real league once results have been recorded.
+        if (completed) return;
+
+        const existingValid = existingDocs.length === 60 &&
+            existingDocs.every(x => x.data?.stage === 'league');
+
+        if (existingValid) {
+            const dayCounts = {};
+            existingDocs.forEach(x => {
+                const day = Number(x.data?.day);
+                dayCounts[day] = (dayCounts[day] || 0) + 1;
+            });
+            const daysCorrect = Array.from({ length: 15 }, (_, i) => i + 1)
+                .every(day => dayCounts[day] === 4);
+
+            if (daysCorrect) return;
+        }
+
+        if (existingDocs.length) {
+            const deleteBatch = db.batch();
+            existingDocs.forEach(x => {
+                deleteBatch.delete(db.collection('tournament_matches').doc(x.id));
+            });
+            await deleteBatch.commit();
+        }
+
+        const batch = db.batch();
+
+        schedule.forEach((m, index) => {
+            const ref = db.collection('tournament_matches').doc(
+                `L-${String(index + 1).padStart(3, '0')}`
+            );
+
+            batch.set(ref, {
+                ...m,
+                label: `League Match ${index + 1}`,
+                format: 'league',
+                resultStatus: 'pending',
+                teamAId: null,
+                teamBId: null,
+                teamAName: null,
+                teamBName: null,
+                teamAScore: null,
+                teamBScore: null,
+                winnerTeamId: null,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        });
+
+        await batch.commit();
+    }
+
+    async function s5EnsurePlan() {
+        if (!db || s5PlanRunning) return;
+        s5PlanRunning = true;
+
+        try {
+            s5ForceConfig();
+
+            // Only the admin creates/persists plan documents.
+            if (currentUserRole === 'admin') {
+                if (typeof ensureTournamentSlots === 'function') {
+                    await ensureTournamentSlots(S5_FIXED.totalTeams);
+                }
+                await s5GenerateFixedLeagueSchedule();
+
+                // Existing function persists locked sequential assignments.
+                if (typeof assignTournamentSlots === 'function') {
+                    await assignTournamentSlots(false);
+                }
+            }
+
+            if (typeof renderTournamentPage === 'function') {
+                renderTournamentPage();
+            }
+            if (typeof renderTournamentAdminSummary === 'function') {
+                renderTournamentAdminSummary();
+            }
+        } catch (error) {
+            console.error('S-5 fixed plan:', error);
+        } finally {
+            s5PlanRunning = false;
+        }
+    }
+
+    function s5RefreshCurrentTeams() {
+        s5ForceConfig();
+        if (typeof renderTournamentPage === 'function') {
+            renderTournamentPage();
+        }
+        if (typeof renderTournamentAdminSummary === 'function' && currentUserRole === 'admin') {
+            renderTournamentAdminSummary();
+        }
+    }
+
+    // Replace the old editable handler so it can never change the S-5 format.
+    window.saveTournamentAutomation = function (e) {
+        if (e && e.preventDefault) e.preventDefault();
+        s5ForceConfig();
+        if (typeof showToast === 'function') {
+            showToast('SRP MAC TT S-5 is fixed at 24 teams with 5 league matches per team.', 'error');
+        }
+    };
+
+    function s5InstallTeamWatcher() {
+        if (!db || window.__SRP_S5_TEAM_WATCHER__) return;
+        window.__SRP_S5_TEAM_WATCHER__ = true;
+
+        // This is read-only. It makes existing and future registrations appear
+        // instantly in the S-5 chart.
+        db.collection('teams').onSnapshot(snapshot => {
+            s5RefreshCurrentTeams();
+
+            // When an admin is online, persist the next available locked slot.
+            if (currentUserRole === 'admin' && typeof assignTournamentSlots === 'function') {
+                assignTournamentSlots(false);
+            }
+        }, err => console.error('S-5 team watcher:', err));
+    }
+
+    function s5PatchAdminLogin() {
+        // The existing login function can remain untouched; we only make a small
+        // post-login watcher that notices the admin role and initializes the plan.
+        if (window.__SRP_S5_LOGIN_PATCH__) return;
+        window.__SRP_S5_LOGIN_PATCH__ = true;
+
+        const original = window.handleLogin;
+        if (typeof original !== 'function') return;
+
+        window.handleLogin = async function (e) {
+            const result = await original(e);
+            if (currentUserRole === 'admin') {
+                s5EnsurePlan();
+            }
+            return result;
+        };
+    }
+
+    function s5Init() {
+        s5HideEditableConfig();
+        s5ForceConfig();
+        s5InstallTeamWatcher();
+        s5PatchAdminLogin();
+        s5RefreshCurrentTeams();
+
+        // If already logged in as admin, initialize immediately.
+        if (currentUserRole === 'admin' && typeof ensureTournamentSlots === 'function') {
+            s5EnsurePlan();
+        }
+
+        // Retry after Firebase/team listeners have finished their first pass.
+        setTimeout(() => {
+            s5HideEditableConfig();
+            s5RefreshCurrentTeams();
+            if (currentUserRole === 'admin') s5EnsurePlan();
+        }, 1200);
+
+        setTimeout(() => {
+            s5HideEditableConfig();
+            s5RefreshCurrentTeams();
+            // Final authoritative refresh from the existing Firebase team collection.
+            if (typeof db !== 'undefined') {
+                db.collection('teams').get().then(snapshot => {
+                    teams = [];
+                    snapshot.forEach(doc => teams.push({ id: doc.id, ...doc.data() }));
+                    s5RefreshCurrentTeams();
+                }).catch(err => console.error('Final S-5 team refresh failed:', err));
+            }
+        }, 3000);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', s5Init);
+    } else {
+        s5Init();
+    }
+})();
+</script>
+
 </body>
 </html>
