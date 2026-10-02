@@ -640,6 +640,158 @@
             }
         }
 
+
+        /* ============================================================
+           GLITCH-FREE ADMIN PICKERS
+           Native <select> popups are intentionally avoided in the
+           schedule editor because Chrome/Windows may render their
+           option panel outside our dark theme.
+           ============================================================ */
+        .s5-custom-picker-trigger {
+            width:100%;
+            min-height:38px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:8px;
+            padding:8px 10px;
+            border-radius:10px;
+            border:1px solid rgba(255,255,255,.08);
+            background:#020617;
+            color:#e2e8f0;
+            cursor:pointer;
+            text-align:left;
+            transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+        }
+        .s5-custom-picker-trigger:hover,
+        .s5-custom-picker-trigger:focus {
+            outline:none;
+            border-color:rgba(34,211,238,.42);
+            box-shadow:0 0 0 3px rgba(34,211,238,.07);
+            background:#071525;
+        }
+        .s5-custom-picker-trigger:disabled {
+            opacity:.55;
+            cursor:not-allowed;
+        }
+        .s5-custom-picker-value {
+            min-width:0;
+            overflow:hidden;
+            white-space:nowrap;
+            text-overflow:ellipsis;
+            font-size:11px;
+            font-weight:800;
+        }
+        .s5-custom-picker-chevron {
+            flex:0 0 auto;
+            color:#67e8f9;
+            font-size:9px;
+        }
+        .s5-custom-picker-menu {
+            position:fixed;
+            z-index:2147483000;
+            width:min(320px,calc(100vw - 24px));
+            max-height:min(420px,calc(100vh - 24px));
+            overflow:hidden;
+            border:1px solid rgba(103,232,249,.22);
+            border-radius:14px;
+            background:#020617;
+            box-shadow:0 24px 60px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.2);
+        }
+        .s5-custom-picker-search-wrap {
+            display:flex;
+            align-items:center;
+            gap:7px;
+            padding:9px;
+            border-bottom:1px solid rgba(255,255,255,.07);
+            background:#071525;
+        }
+        .s5-custom-picker-search-wrap i {
+            color:#64748b;
+            font-size:10px;
+        }
+        .s5-custom-picker-search {
+            min-width:0;
+            flex:1;
+            height:32px;
+            padding:0 9px;
+            border-radius:8px;
+            border:1px solid rgba(255,255,255,.08);
+            background:#020617;
+            color:#f8fafc;
+            font-size:11px;
+            outline:none;
+        }
+        .s5-custom-picker-search:focus {
+            border-color:rgba(34,211,238,.35);
+        }
+        .s5-custom-picker-list {
+            max-height:350px;
+            overflow-y:auto;
+            padding:6px;
+            overscroll-behavior:contain;
+        }
+        .s5-custom-picker-option {
+            width:100%;
+            min-height:36px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:7px 8px;
+            border:0;
+            border-radius:8px;
+            background:transparent;
+            color:#cbd5e1;
+            cursor:pointer;
+            text-align:left;
+        }
+        .s5-custom-picker-option:hover {
+            background:rgba(34,211,238,.08);
+            color:#ecfeff;
+        }
+        .s5-custom-picker-option.selected {
+            background:rgba(34,211,238,.10);
+            color:#f8fafc;
+        }
+        .s5-custom-picker-option.disabled {
+            opacity:.4;
+            cursor:not-allowed;
+        }
+        .s5-custom-picker-option-value {
+            min-width:32px;
+            color:#67e8f9;
+            font-size:9px;
+            font-weight:900;
+        }
+        .s5-custom-picker-option-label {
+            min-width:0;
+            flex:1;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            font-size:11px;
+            font-weight:700;
+        }
+        .s5-custom-picker-check {
+            color:#4ade80;
+            font-size:10px;
+        }
+        .s5-custom-picker-option-note {
+            flex:0 0 auto;
+            color:#fca5a5;
+            font-size:8px;
+            font-weight:900;
+        }
+        @media(max-width:700px){
+            .s5-custom-picker-menu {
+                width:min(340px,calc(100vw - 20px));
+                border-radius:12px;
+            }
+            .s5-custom-picker-list {
+                max-height:calc(100vh - 80px);
+            }
+        }
+
         .match-card-v2 {
             position: relative;
             overflow: hidden;
@@ -5985,14 +6137,16 @@
                                 const nameB = slotB?.team?.name || 'OPEN SLOT';
                                 const groupName = m.group === 'B' ? 'Indian Ocean' : 'Pacific Ocean';
 
+                                const dayLabel = `Day ${Number(m.day) || 1}`;
+                                const roundLabel = `Round ${Number(m.round) || 1}`;
+                                const oceanLabel = m.group === 'B' ? 'Indian Ocean' : 'Pacific Ocean';
+
                                 return `
                                     <div class="schedule-match-editor ${locked ? 'locked' : ''}">
                                         <div class="schedule-match-top">
                                             <div class="schedule-match-number">
                                                 <span class="schedule-match-number-badge">#${String(index + 1).padStart(2, '0')}</span>
-                                                <span class="schedule-match-label">
-                                                    ${groupName} · Match ${index + 1}
-                                                </span>
+                                                <span class="schedule-match-label">${groupName} · Match ${index + 1}</span>
                                             </div>
                                             <span class="schedule-status-pill ${locked ? 'done' : 'pending'}">
                                                 <i class="fas ${locked ? 'fa-lock' : 'fa-clock'}"></i>
@@ -6003,37 +6157,44 @@
                                         <div class="schedule-meta-fields">
                                             <div>
                                                 <label class="schedule-field-label">Day</label>
-                                                <select class="custom-select" ${locked ? 'disabled' : ''}
-                                                    onchange="s5ScheduleEdit(${index},'day',this.value)">
-                                                    ${s5DayOptions(m.day)}
-                                                </select>
+                                                ${s5SchedulePickerButton(
+                                                    `day-${index}`,
+                                                    dayLabel,
+                                                    `s5OpenSchedulePicker(${index},'day',this)`,
+                                                    locked
+                                                )}
                                             </div>
 
                                             <div>
                                                 <label class="schedule-field-label">Round</label>
-                                                <select class="custom-select" ${locked ? 'disabled' : ''}
-                                                    onchange="s5ScheduleEdit(${index},'round',this.value)">
-                                                    ${s5RoundOptions(m.round)}
-                                                </select>
+                                                ${s5SchedulePickerButton(
+                                                    `round-${index}`,
+                                                    roundLabel,
+                                                    `s5OpenSchedulePicker(${index},'round',this)`,
+                                                    locked
+                                                )}
                                             </div>
 
                                             <div class="ocean-field">
                                                 <label class="schedule-field-label">Ocean</label>
-                                                <select class="custom-select" ${locked ? 'disabled' : ''}
-                                                    onchange="s5ScheduleEdit(${index},'group',this.value)">
-                                                    <option value="A" ${m.group === 'A' ? 'selected' : ''}>Pacific Ocean</option>
-                                                    <option value="B" ${m.group === 'B' ? 'selected' : ''}>Indian Ocean</option>
-                                                </select>
+                                                ${s5SchedulePickerButton(
+                                                    `group-${index}`,
+                                                    oceanLabel,
+                                                    `s5OpenSchedulePicker(${index},'group',this)`,
+                                                    locked
+                                                )}
                                             </div>
                                         </div>
 
                                         <div class="schedule-matchup-editor">
                                             <div class="schedule-team-editor">
                                                 <label class="schedule-field-label">Team A</label>
-                                                <select class="custom-select schedule-team-select" ${locked ? 'disabled' : ''}
-                                                    onchange="s5ScheduleEdit(${index},'slotA',this.value)">
-                                                    ${s5ScheduleSlotOptions(m.group, m.slotA)}
-                                                </select>
+                                                ${s5SchedulePickerButton(
+                                                    `team-a-${index}`,
+                                                    m.slotA ? `${slotA?.group || 'A'}${slotA?.groupSlot || '?'} · ${nameA}` : 'OPEN SLOT',
+                                                    `s5OpenSchedulePicker(${index},'slotA',this)`,
+                                                    locked
+                                                )}
                                                 <div class="schedule-team-name-preview" title="${escapeTournamentHtml(nameA)}">
                                                     ${escapeTournamentHtml(nameA)}
                                                 </div>
@@ -6043,10 +6204,12 @@
 
                                             <div class="schedule-team-editor">
                                                 <label class="schedule-field-label">Team B</label>
-                                                <select class="custom-select schedule-team-select" ${locked ? 'disabled' : ''}
-                                                    onchange="s5ScheduleEdit(${index},'slotB',this.value)">
-                                                    ${s5ScheduleSlotOptions(m.group, m.slotB)}
-                                                </select>
+                                                ${s5SchedulePickerButton(
+                                                    `team-b-${index}`,
+                                                    m.slotB ? `${slotB?.group || 'A'}${slotB?.groupSlot || '?'} · ${nameB}` : 'OPEN SLOT',
+                                                    `s5OpenSchedulePicker(${index},'slotB',this)`,
+                                                    locked
+                                                )}
                                                 <div class="schedule-team-name-preview" title="${escapeTournamentHtml(nameB)}">
                                                     ${escapeTournamentHtml(nameB)}
                                                 </div>
@@ -6057,7 +6220,7 @@
                                             <span class="schedule-editor-hint">
                                                 ${locked
                                                     ? `${m.teamAScore ?? '—'} : ${m.teamBScore ?? '—'} · completed result`
-                                                    : 'Choose both teams, then save the schedule.'}
+                                                    : 'Click a field to edit. Save Schedule when finished.'}
                                             </span>
 
                                             ${locked
@@ -6099,6 +6262,245 @@
             if (aEl) aEl.textContent = s5ScheduleDraft.filter(m => m.group === 'A').length;
             if (bEl) bEl.textContent = s5ScheduleDraft.filter(m => m.group === 'B').length;
         }
+
+        function s5SchedulePickerButton(id, label, onClick, disabled) {
+            return `
+                <button type="button"
+                    id="s5-schedule-trigger-${id}"
+                    class="s5-custom-picker-trigger"
+                    ${disabled ? 'disabled' : ''}
+                    onclick="${onClick}"
+                    aria-haspopup="listbox"
+                    aria-expanded="false">
+                    <span class="s5-custom-picker-value" title="${escapeTournamentHtml(label)}">${escapeTournamentHtml(label)}</span>
+                    <i class="fas fa-chevron-down s5-custom-picker-chevron"></i>
+                </button>
+            `;
+        }
+
+        let s5SchedulePickerOpenId = null;
+
+        function s5CloseSchedulePicker() {
+            if (s5SchedulePickerOpenId) {
+                const menu = document.getElementById(s5SchedulePickerOpenId);
+                if (menu) menu.remove();
+                s5SchedulePickerOpenId = null;
+            }
+        }
+
+        function s5SchedulePickerOption(label, value, selected, onClick, prefix='', disabled=false, note='') {
+            return `
+                <button type="button"
+                    class="s5-custom-picker-option ${selected ? 'selected' : ''} ${disabled ? 'disabled' : ''}"
+                    ${disabled ? 'disabled' : ''}
+                    onclick="${onClick}">
+                    <span class="s5-custom-picker-option-value">${escapeTournamentHtml(prefix)}</span>
+                    <span class="s5-custom-picker-option-label">${escapeTournamentHtml(label)}</span>
+                    ${note ? `<span class="s5-custom-picker-option-note">${escapeTournamentHtml(note)}</span>` : ''}
+                    ${selected ? '<i class="fas fa-check s5-custom-picker-check"></i>' : ''}
+                </button>
+            `;
+        }
+
+        function s5OpenSchedulePicker(index, field, triggerEl) {
+            if (!triggerEl || triggerEl.disabled) return;
+
+            const pickerId = `s5-schedule-picker-${field}-${index}`;
+
+            if (s5SchedulePickerOpenId === pickerId) {
+                s5CloseSchedulePicker();
+                return;
+            }
+
+            s5CloseSchedulePicker();
+
+            const row = s5ScheduleDraft[index];
+            if (!row) return;
+
+            let options = '';
+            let searchable = false;
+
+            if (field === 'day') {
+                for (let d = 1; d <= 15; d++) {
+                    options += s5SchedulePickerOption(
+                        `Day ${d}`,
+                        d,
+                        Number(row.day) === d,
+                        `s5SchedulePick(${index},'day',${d})`,
+                        String(d).padStart(2,'0')
+                    );
+                }
+            } else if (field === 'round') {
+                for (let r = 1; r <= 5; r++) {
+                    options += s5SchedulePickerOption(
+                        `Round ${r}`,
+                        r,
+                        Number(row.round) === r,
+                        `s5SchedulePick(${index},'round',${r})`,
+                        `R${r}`
+                    );
+                }
+            } else if (field === 'group') {
+                options += s5SchedulePickerOption(
+                    'Pacific Ocean',
+                    'A',
+                    row.group === 'A',
+                    `s5SchedulePick(${index},'group','A')`,
+                    'PAC'
+                );
+                options += s5SchedulePickerOption(
+                    'Indian Ocean',
+                    'B',
+                    row.group === 'B',
+                    `s5SchedulePick(${index},'group','B')`,
+                    'IND'
+                );
+            } else if (field === 'slotA' || field === 'slotB') {
+                searchable = true;
+
+                const group = row.group === 'B' ? 'B' : 'A';
+                const start = group === 'A' ? 1 : 13;
+                const end = group === 'A' ? 12 : 24;
+                const selected = Number(field === 'slotA' ? row.slotA : row.slotB);
+
+                options += s5SchedulePickerOption(
+                    'Open Slot',
+                    '',
+                    !selected,
+                    `s5SchedulePick(${index},'${field}',null)`,
+                    'OPEN'
+                );
+
+                const otherSlot = Number(field === 'slotA' ? row.slotB : row.slotA);
+
+                for (let slotNumber = start; slotNumber <= end; slotNumber++) {
+                    const slot = getTournamentSlot(slotNumber);
+                    const teamName = slot?.team?.name || 'OPEN SLOT';
+                    const slotCode = `${group}${slot?.groupSlot || (group === 'A' ? slotNumber : slotNumber - 12)}`;
+                    const isOther = slotNumber === otherSlot;
+                    const selectedHere = slotNumber === selected;
+
+                    options += s5SchedulePickerOption(
+                        teamName,
+                        slotNumber,
+                        selectedHere,
+                        `s5SchedulePick(${index},'${field}',${slotNumber})`,
+                        slotCode,
+                        isOther,
+                        isOther ? 'VS' : ''
+                    );
+                }
+            }
+
+            const menu = document.createElement('div');
+            menu.id = pickerId;
+            menu.className = 's5-custom-picker-menu';
+
+            menu.innerHTML = `
+                ${searchable ? `
+                    <div class="s5-custom-picker-search-wrap">
+                        <i class="fas fa-search"></i>
+                        <input type="text"
+                            class="s5-custom-picker-search"
+                            placeholder="Search team..."
+                            autocomplete="off"
+                            oninput="s5FilterSchedulePicker('${pickerId}',this.value)">
+                    </div>
+                ` : ''}
+                <div class="s5-custom-picker-list" id="${pickerId}-list">
+                    ${options}
+                </div>
+            `;
+
+            document.body.appendChild(menu);
+
+            const rect = triggerEl.getBoundingClientRect();
+            const width = Math.min(340, Math.max(250, window.innerWidth - 20));
+            menu.style.width = `${width}px`;
+
+            let left = Math.max(10, Math.min(rect.left, window.innerWidth - width - 10));
+            let top = rect.bottom + 7;
+            const estimatedHeight = Math.min(430, window.innerHeight - 20);
+
+            if (top + estimatedHeight > window.innerHeight - 10) {
+                top = Math.max(10, rect.top - Math.min(estimatedHeight, 380) - 7);
+            }
+
+            menu.style.left = `${left}px`;
+            menu.style.top = `${top}px`;
+            s5SchedulePickerOpenId = pickerId;
+
+            if (searchable) {
+                const input = menu.querySelector('.s5-custom-picker-search');
+                if (input) setTimeout(() => input.focus(), 20);
+            }
+
+            triggerEl.setAttribute('aria-expanded','true');
+        }
+
+        function s5FilterSchedulePicker(pickerId, value) {
+            const menu = document.getElementById(pickerId);
+            if (!menu) return;
+
+            const q = String(value || '').trim().toLowerCase();
+
+            menu.querySelectorAll('.s5-custom-picker-option').forEach(option => {
+                const label = option.querySelector('.s5-custom-picker-option-label')?.textContent?.toLowerCase() || '';
+                const code = option.querySelector('.s5-custom-picker-option-value')?.textContent?.toLowerCase() || '';
+
+                option.style.display =
+                    (!q || label.includes(q) || code.includes(q)) ? 'flex' : 'none';
+            });
+        }
+
+        function s5SchedulePick(index, field, value) {
+            s5CloseSchedulePicker();
+
+            const row = s5ScheduleDraft[index];
+            if (!row) return;
+
+            if (field === 'group') {
+                row.group = value === 'B' ? 'B' : 'A';
+
+                const start = row.group === 'A' ? 1 : 13;
+                const end = row.group === 'A' ? 12 : 24;
+
+                if (!(Number(row.slotA) >= start && Number(row.slotA) <= end)) {
+                    row.slotA = start;
+                }
+                if (!(Number(row.slotB) >= start && Number(row.slotB) <= end)) {
+                    row.slotB = start + 1;
+                }
+            } else if (field === 'slotA' || field === 'slotB') {
+                row[field] = value === null || value === '' ? null : Number(value);
+            } else {
+                row[field] = Number(value);
+            }
+
+            renderS5ScheduleBuilder();
+        }
+
+        document.addEventListener('click', function(event){
+            const picker = s5SchedulePickerOpenId ? document.getElementById(s5SchedulePickerOpenId) : null;
+            if (!picker) return;
+
+            const clickedPicker = picker.contains(event.target);
+            const clickedTrigger = event.target.closest?.('.s5-custom-picker-trigger');
+
+            if (!clickedPicker && !clickedTrigger) {
+                s5CloseSchedulePicker();
+            }
+        });
+
+        document.addEventListener('keydown', function(event){
+            if (event.key === 'Escape') {
+                s5CloseSchedulePicker();
+            }
+        });
+
+        window.addEventListener('resize', function(){
+            s5CloseSchedulePicker();
+        });
 
         function s5ScheduleValidate() {
             const errors = [];
@@ -6335,6 +6737,12 @@
         setTimeout(s5ScheduleBuilderRefresh, 700);
         setTimeout(s5ScheduleBuilderRefresh, 1800);
         setTimeout(s5ScheduleBuilderRefresh, 3500);
+
+
+        window.s5OpenSchedulePicker = s5OpenSchedulePicker;
+        window.s5SchedulePick = s5SchedulePick;
+        window.s5FilterSchedulePicker = s5FilterSchedulePicker;
+        window.s5CloseSchedulePicker = s5CloseSchedulePicker;
 
         // ============================================================
         // SAVE WATER — SEASON 5 AWARENESS
