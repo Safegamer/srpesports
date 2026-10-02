@@ -133,10 +133,9 @@
             margin-bottom: 25px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
             transition: all 0.4s var(--bouncy-spring);
-            animation: fadeUp 0.8s var(--smooth-spring) forwards;
             border: 1px solid var(--theme-card-border);
-            opacity: 0;
-            transform: translateY(30px);
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .custom-card:hover {
@@ -172,9 +171,8 @@
         }
 
         .row-entrance {
-            opacity: 0;
-            transform: translateY(30px);
-            animation: rowEnter 0.6s var(--smooth-spring) forwards;
+            opacity: 1;
+            transform: translateY(0);
             will-change: transform, opacity;
         }
 
@@ -349,6 +347,8 @@
         .tourney-match.complete { border-color: rgba(34,197,94,.28); }
         .tourney-match.waiting { border-color: rgba(245,158,11,.20); }
 
+        /* Visibility safety: cards use a visible base state so hidden-tab/local-file
+           rendering can never leave the UI stuck at opacity:0. */
         /* --- MATCH CARD REDESIGN --- */
 
 
@@ -896,6 +896,317 @@
             }
         }
 
+
+        /* --- S5 TOURNAMENT PROGRESSION CONTROL --- */
+        .s5-progression-card {
+            background:linear-gradient(135deg,rgba(14,116,144,.08),rgba(59,130,246,.035));
+            border:1px solid rgba(103,232,249,.16);
+        }
+        .s5-progress-stage {
+            border:1px solid rgba(255,255,255,.07);
+            background:rgba(2,6,23,.22);
+            border-radius:15px;
+            padding:14px;
+        }
+        .s5-team-grid {
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:8px;
+        }
+        .s5-team-row {
+            display:grid;
+            grid-template-columns:48px minmax(0,1fr);
+            gap:8px;
+            align-items:center;
+        }
+        .s5-slot-label {
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            height:36px;
+            border-radius:10px;
+            background:rgba(34,211,238,.06);
+            border:1px solid rgba(103,232,249,.15);
+            color:#67e8f9;
+            font-size:10px;
+            font-weight:900;
+        }
+        .s5-progression-select {
+            min-width:0;
+            width:100%;
+            padding:9px 10px;
+            font-size:11px;
+        }
+        .s5-mini-list {
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:7px;
+        }
+        .s5-mini-item {
+            display:flex;
+            align-items:center;
+            gap:8px;
+            min-width:0;
+            padding:8px 9px;
+            border-radius:10px;
+            background:rgba(255,255,255,.025);
+            border:1px solid rgba(255,255,255,.06);
+        }
+        .s5-mini-rank {
+            min-width:24px;
+            height:24px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border-radius:7px;
+            background:rgba(59,130,246,.10);
+            color:#93c5fd;
+            font-size:9px;
+            font-weight:900;
+        }
+        .s5-mini-name {
+            min-width:0;
+            font-size:11px;
+            font-weight:800;
+            color:#e2e8f0;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .s5-control-actions {
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            align-items:center;
+        }
+        .s5-warning {
+            padding:10px 12px;
+            border-radius:11px;
+            background:rgba(245,158,11,.05);
+            border:1px solid rgba(245,158,11,.14);
+            color:#a5a5a5;
+            font-size:10px;
+            line-height:1.5;
+        }
+        .ocean-standings-note {
+            background:linear-gradient(135deg,rgba(14,116,144,.06),rgba(59,130,246,.025));
+            border-color:rgba(103,232,249,.13);
+        }
+        .s5-elim {
+            color:#fca5a5 !important;
+            border-color:rgba(239,68,68,.24) !important;
+            background:rgba(239,68,68,.05) !important;
+        }
+        @media(max-width:700px){
+            .s5-team-grid,.s5-mini-list{grid-template-columns:1fr;}
+            .s5-progression-card{padding:13px !important;}
+        }
+
+
+        .s5-ocean-mode {
+            display:inline-flex;
+            align-items:center;
+            gap:4px;
+            padding:4px;
+            border-radius:11px;
+            background:rgba(2,6,23,.35);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .s5-ocean-mode button {
+            border:0;
+            border-radius:8px;
+            padding:7px 10px;
+            font-size:10px;
+            font-weight:900;
+            color:#64748b;
+            background:transparent;
+            cursor:pointer;
+            transition:.2s ease;
+        }
+        .s5-ocean-mode button.active {
+            color:#ecfeff;
+            background:rgba(34,211,238,.12);
+            box-shadow:inset 0 0 0 1px rgba(103,232,249,.14);
+        }
+        .s5-ocean-manual-note {
+            padding:9px 11px;
+            border-radius:10px;
+            background:rgba(34,211,238,.045);
+            border:1px solid rgba(103,232,249,.13);
+            color:#94a3b8;
+            font-size:10px;
+            line-height:1.45;
+        }
+
+
+        /* --- EDITABLE OCEAN SLOT CHART --- */
+        .s5-ocean-slot-card {
+            display:grid;
+            grid-template-columns:46px minmax(0,1fr);
+            gap:9px;
+            align-items:center;
+        }
+        .s5-ocean-slot-badge {
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            min-height:38px;
+            border-radius:10px;
+            background:rgba(34,211,238,.055);
+            border:1px solid rgba(103,232,249,.16);
+            color:#67e8f9;
+            font-weight:900;
+            font-size:10px;
+        }
+        .s5-ocean-team-select {
+            width:100%;
+            min-width:0;
+        }
+        .s5-ocean-team-preview {
+            margin-top:3px;
+            padding-left:2px;
+            color:#64748b;
+            font-size:9px;
+            overflow:hidden;
+            white-space:nowrap;
+            text-overflow:ellipsis;
+        }
+        .s5-ocean-conflict {
+            color:#fca5a5;
+            font-size:9px;
+            margin-top:3px;
+        }
+        @media(max-width:700px){
+            .s5-ocean-slot-card{grid-template-columns:40px minmax(0,1fr);gap:7px;}
+        }
+
+
+        /* --- OCEAN STANDINGS PAGE --- */
+        .ocean-standing-card {
+            background: linear-gradient(135deg, rgba(8,145,178,.075), rgba(59,130,246,.035));
+            border: 1px solid rgba(103,232,249,.16);
+        }
+        .ocean-table-wrap {
+            overflow-x:auto;
+            -webkit-overflow-scrolling:touch;
+            border-radius:13px;
+            border:1px solid rgba(255,255,255,.06);
+        }
+        .ocean-table {
+            width:100%;
+            min-width:720px;
+            border-collapse:collapse;
+        }
+        .ocean-table th {
+            padding:10px 11px;
+            text-align:left;
+            font-size:9px;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+            color:#64748b;
+            background:rgba(255,255,255,.03);
+            border-bottom:1px solid rgba(255,255,255,.06);
+        }
+        .ocean-table td {
+            padding:10px 11px;
+            border-bottom:1px solid rgba(255,255,255,.045);
+            font-size:11px;
+            color:#cbd5e1;
+        }
+        .ocean-table tbody tr:last-child td {
+            border-bottom:0;
+        }
+        .ocean-table tbody tr:hover {
+            background:rgba(34,211,238,.035);
+        }
+        .ocean-rank {
+            font-weight:900;
+            color:#94a3b8;
+            width:44px;
+        }
+        .ocean-team-cell {
+            min-width:180px;
+            color:#fff;
+            font-weight:800;
+        }
+        .ocean-stat-win { color:#4ade80; font-weight:900; }
+        .ocean-stat-loss { color:#f87171; font-weight:900; }
+        .ocean-stat-rd { color:#cbd5e1; font-weight:800; }
+        .ocean-stat-pts { color:#60a5fa; font-weight:1000; }
+        .ocean-top8 {
+            background:linear-gradient(90deg, rgba(34,197,94,.075), transparent);
+        }
+        .ocean-pick-btn {
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:8px;
+            padding:6px 9px;
+            font-size:9px;
+            font-weight:900;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+            color:#67e8f9;
+            border:1px solid rgba(103,232,249,.16);
+            background:rgba(34,211,238,.045);
+            cursor:pointer;
+        }
+        .ocean-pick-btn:hover {
+            background:rgba(34,211,238,.09);
+        }
+        .ocean-selected-badge {
+            display:inline-flex;
+            align-items:center;
+            gap:5px;
+            padding:4px 7px;
+            border-radius:999px;
+            font-size:8px;
+            font-weight:900;
+            color:#86efac;
+            background:rgba(34,197,94,.06);
+            border:1px solid rgba(34,197,94,.15);
+        }
+        .ocean-info-strip {
+            padding:10px 12px;
+            border-radius:11px;
+            background:rgba(59,130,246,.045);
+            border:1px solid rgba(59,130,246,.12);
+            font-size:10px;
+            line-height:1.45;
+            color:#94a3b8;
+        }
+        .ocean-tabs {
+            display:flex;
+            gap:6px;
+            padding:4px;
+            border-radius:12px;
+            background:rgba(2,6,23,.35);
+            border:1px solid rgba(255,255,255,.07);
+        }
+        .ocean-tab-btn {
+            border:0;
+            border-radius:9px;
+            padding:8px 11px;
+            background:transparent;
+            color:#64748b;
+            font-size:10px;
+            font-weight:900;
+            cursor:pointer;
+        }
+        .ocean-tab-btn.active {
+            color:#ecfeff;
+            background:rgba(34,211,238,.10);
+            box-shadow:inset 0 0 0 1px rgba(103,232,249,.14);
+        }
+        @media(max-width:700px){
+            .ocean-table { min-width:650px; }
+            .ocean-standing-card { padding:14px !important; }
+        }
+
+
+        .ocean-tab-btn.pacific-active { color:#cffafe; }
+        .ocean-tab-btn.indian-active { color:#e0f2fe; }
+
 </style>
 </head>
 <body class="flex h-screen overflow-hidden text-slate-200" data-theme="midnight-blue">
@@ -928,6 +1239,10 @@
                 <!-- Public Team Registration Tab -->
                 <a onclick="switchTab('tournament')" id="nav-tournament" class="nav-link">
                     <i class="fas fa-sitemap w-8 text-center text-xl text-cyan-400"></i> <span class="font-semibold text-lg">Tournament</span>
+                </a>
+                <a onclick="switchTab('ocean-standings')" id="nav-ocean-standings" class="nav-link">
+                    <i class="fas fa-ranking-star w-8 text-center text-xl text-cyan-300"></i>
+                    <span class="font-semibold text-lg">Ocean Standings</span>
                 </a>
 
                 <!-- Season Theme / Water Conservation -->
@@ -1157,26 +1472,34 @@
                 </div>
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     <div>
-                        <div class="flex items-center justify-between mb-3"><h3 class="font-black text-cyan-300">Ocean A</h3><span id="group-a-count" class="text-xs text-slate-500"></span></div>
+                        <div class="flex items-center justify-between mb-3"><h3 class="font-black text-cyan-300">Pacific Ocean</h3><span id="group-a-count" class="text-xs text-slate-500"></span></div>
                         <div id="tourney-slots-a" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                     </div>
                     <div>
-                        <div class="flex items-center justify-between mb-3"><h3 class="font-black text-purple-300">Ocean B</h3><span id="group-b-count" class="text-xs text-slate-500"></span></div>
+                        <div class="flex items-center justify-between mb-3"><h3 class="font-black text-purple-300">Indian Ocean</h3><span id="group-b-count" class="text-xs text-slate-500"></span></div>
                         <div id="tourney-slots-b" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
-                <div class="custom-card !p-0 overflow-hidden">
-                    <div class="p-5 border-b border-white/10 flex items-center justify-between"><div><h2 class="text-xl font-black text-cyan-300">Ocean A Points Table</h2><p class="text-xs text-slate-500 mt-1">Top 8 qualify for Lake Knockout</p></div><span id="league-a-progress" class="text-xs text-slate-500"></span></div>
-                    <div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="text-[11px] uppercase text-slate-500 bg-white/5"><th class="p-4">#</th><th class="p-4">Team</th><th class="p-4 text-center">M</th><th class="p-4 text-center">W</th><th class="p-4 text-center">L</th><th class="p-4 text-center">D</th><th class="p-4 text-center">RD</th><th class="p-4 text-center">Pts</th></tr></thead><tbody id="league-tbody-a"></tbody></table></div>
-                </div>
-                <div class="custom-card !p-0 overflow-hidden">
-                    <div class="p-5 border-b border-white/10 flex items-center justify-between"><div><h2 class="text-xl font-black text-purple-300">Ocean B Points Table</h2><p class="text-xs text-slate-500 mt-1">Top 8 qualify for Lake Knockout</p></div><span id="league-b-progress" class="text-xs text-slate-500"></span></div>
-                    <div class="overflow-x-auto"><table class="w-full text-left whitespace-nowrap"><thead><tr class="text-[11px] uppercase text-slate-500 bg-white/5"><th class="p-4">#</th><th class="p-4">Team</th><th class="p-4 text-center">M</th><th class="p-4 text-center">W</th><th class="p-4 text-center">L</th><th class="p-4 text-center">D</th><th class="p-4 text-center">RD</th><th class="p-4 text-center">Pts</th></tr></thead><tbody id="league-tbody-b"></tbody></table></div>
+
+            <div class="custom-card mb-8 ocean-standings-note">
+                <div class="flex items-start gap-4">
+                    <div class="w-11 h-11 rounded-xl bg-cyan-400/10 border border-cyan-300/20 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-ranking-star text-xl text-cyan-300"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h2 class="text-lg sm:text-xl font-black text-white">Season 5 Standings</h2>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                            Pacific Ocean and Indian Ocean are the tournament charts, not separate points tables.
+                            Season 5 qualification uses the main <strong class="text-white">Leaderboard</strong>.
+                            When the league is complete, an admin can select the Top 16 teams and move them into the
+                            Lake Knockout.
+                        </p>
+                    </div>
                 </div>
             </div>
+>
 
             <div class="custom-card mb-8">
                 <div class="p-5 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -1192,10 +1515,10 @@
             </div>
 
             <div class="custom-card mb-8">
-                <div class="mb-5"><h2 class="text-2xl font-black text-white">River Playoffs · 8 Teams</h2><p class="text-xs text-slate-500 mt-1">River A = Rank 1–4 · River B = Rank 5–8 · Semifinals → Group Finals → W_A / W_B</p></div>
+                <div class="mb-5"><h2 class="text-2xl font-black text-white">Ganga & Yamuna Playoffs · 8 Teams</h2><p class="text-xs text-slate-500 mt-1">Group Ganga = Rank 1–4 · Group Yamuna = Rank 5–8 · Semifinals → Group Finals → W_A / W_B</p></div>
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <div class="tourney-bracket p-5"><h3 class="font-black text-cyan-300 mb-4">River A · Rank 1–4</h3><div id="playoff-group-a"></div></div>
-                    <div class="tourney-bracket p-5"><h3 class="font-black text-purple-300 mb-4">River B · Rank 5–8</h3><div id="playoff-group-b"></div></div>
+                    <div class="tourney-bracket p-5"><h3 class="font-black text-cyan-300 mb-4">Group Ganga · Rank 1–4</h3><div id="playoff-group-a"></div></div>
+                    <div class="tourney-bracket p-5"><h3 class="font-black text-purple-300 mb-4">Group Yamuna · Rank 5–8</h3><div id="playoff-group-b"></div></div>
                 </div>
             </div>
 
@@ -1212,6 +1535,92 @@
             <div id="hof-content-container"></div>
         </div>
 
+
+
+        <!-- ============================== -->
+        <!-- OCEAN STANDINGS / TOP 8 PICK    -->
+        <!-- ============================== -->
+        <div id="view-ocean-standings" class="max-w-6xl mx-auto hidden pb-20 mt-2 md:mt-4">
+            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6">
+                <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                        <span class="auto-badge"><i class="fas fa-ranking-star"></i> Season 5 Qualification</span>
+                        <span class="cs-pill">24 Teams</span>
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-black tracking-tight glow-title text-white">Ocean Standings</h1>
+                    <p class="text-sm text-slate-400 mt-2 max-w-3xl">
+                        Split the 24-team competition into two 12-team ocean groups: Pacific Ocean and Indian Ocean. Each side has its own table.
+                        The Top 8 from Pacific Ocean and Top 8 from Indian Ocean qualify for the Lake Knockout.
+                    </p>
+                </div>
+                <div class="ocean-tabs">
+                    <button type="button" id="ocean-view-a-btn" class="ocean-tab-btn active" aria-selected="true" onclick="window.s5ShowOceanTable('A')">Pacific Ocean</button>
+                    <button type="button" id="ocean-view-b-btn" class="ocean-tab-btn" aria-selected="false" onclick="window.s5ShowOceanTable('B')">Indian Ocean</button>
+                </div>
+            </div>
+
+            <div class="ocean-info-strip mb-5">
+                <strong class="text-cyan-300">How it works:</strong>
+                rankings come from the normal Leaderboard statistics, but only the teams assigned to the selected Ocean are shown.
+                Ranks 1–8 are the qualifying places; ranks 9–12 are outside the Top 8.
+            </div>
+
+            <div id="ocean-table-a-card" class="custom-card ocean-standing-card">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <div>
+                        <h2 class="text-xl font-black text-cyan-300">Pacific Ocean · 12 Teams</h2>
+                        <p class="text-[11px] text-slate-500 mt-1">Top 8 qualify for Lake Knockout.</p>
+                    </div>
+                    <span id="ocean-a-qualify-count" class="ocean-selected-badge">0 / 8 QUALIFIED</span>
+                </div>
+                <div class="ocean-table-wrap">
+                    <table class="ocean-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Team</th>
+                                <th>M</th>
+                                <th>W</th>
+                                <th>L</th>
+                                <th>D</th>
+                                <th>RD</th>
+                                <th>PTS</th>
+                                <th>Qualification</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ocean-standings-tbody-a"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="ocean-table-b-card" class="custom-card ocean-standing-card hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <div>
+                        <h2 class="text-xl font-black text-purple-300">Indian Ocean · 12 Teams</h2>
+                        <p class="text-[11px] text-slate-500 mt-1">Top 8 qualify for Lake Knockout.</p>
+                    </div>
+                    <span id="ocean-b-qualify-count" class="ocean-selected-badge">0 / 8 QUALIFIED</span>
+                </div>
+                <div class="ocean-table-wrap">
+                    <table class="ocean-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Team</th>
+                                <th>M</th>
+                                <th>W</th>
+                                <th>L</th>
+                                <th>D</th>
+                                <th>RD</th>
+                                <th>PTS</th>
+                                <th>Qualification</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ocean-standings-tbody-b"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
         <!-- ============================== -->
         <!-- 3. SAVE WATER / SEASON 5 THEME  -->
@@ -1742,8 +2151,8 @@
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
                     <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Registered</div><div id="admin-tour-registered" class="text-xl font-black text-white mt-1">0</div></div>
                     <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Remaining</div><div id="admin-tour-remaining" class="text-xl font-black text-yellow-400 mt-1">24</div></div>
-                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">River A</div><div id="admin-tour-group-a" class="text-xl font-black text-cyan-300 mt-1">12</div></div>
-                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">River B</div><div id="admin-tour-group-b" class="text-xl font-black text-purple-300 mt-1">12</div></div>
+                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Group Ganga</div><div id="admin-tour-group-a" class="text-xl font-black text-cyan-300 mt-1">12</div></div>
+                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Group Yamuna</div><div id="admin-tour-group-b" class="text-xl font-black text-purple-300 mt-1">12</div></div>
                     <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">League Matches</div><div id="admin-tour-league" class="text-xl font-black text-blue-300 mt-1">60</div></div>
                 </div>
 
@@ -1772,7 +2181,7 @@
                         </div>
                         <p class="text-xs text-slate-400 mt-1 max-w-3xl">
                             Admin-only editor for the 60 league matches. The tournament stays 24 teams,
-                            12 in Ocean A and 12 in Ocean B, but you control the exact match day, round and opponents.
+                            12 in Pacific Ocean and 12 in Indian Ocean, but you control the exact match day, round and opponents.
                         </p>
                     </div>
 
@@ -1795,20 +2204,209 @@
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
                     <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Matches</div><div id="schedule-stat-matches" class="text-xl font-black text-white mt-1">60</div></div>
                     <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Per Day</div><div id="schedule-stat-per-day" class="text-xl font-black text-cyan-300 mt-1">4</div></div>
-                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Ocean A</div><div id="schedule-stat-a" class="text-xl font-black text-cyan-300 mt-1">30</div></div>
-                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Ocean B</div><div id="schedule-stat-b" class="text-xl font-black text-purple-300 mt-1">30</div></div>
+                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Pacific Ocean</div><div id="schedule-stat-a" class="text-xl font-black text-cyan-300 mt-1">30</div></div>
+                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Indian Ocean</div><div id="schedule-stat-b" class="text-xl font-black text-purple-300 mt-1">30</div></div>
                     <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Mode</div><div id="schedule-stat-mode" class="text-sm font-black text-green-300 mt-2">AUTOMATIC</div></div>
                 </div>
 
                 <div class="p-3 rounded-xl bg-blue-500/5 border border-blue-500/15 text-[11px] text-slate-400 leading-relaxed mb-5">
                     <strong class="text-cyan-300">What you can edit:</strong>
-                    day 1–15, round 1–5, Ocean A/B and the two opponents. You can prepare the complete schedule
+                    day 1–15, round 1–5, Pacific Ocean/B and the two opponents. You can prepare the complete schedule
                     before all 24 teams register because the editor uses the locked slot numbers.
                     <strong class="text-yellow-300">Completed matches are locked and cannot be moved after a result is entered.</strong>
                 </div>
 
                 <div id="schedule-builder-container" class="space-y-4">
                     <div class="p-8 text-center text-slate-500">Loading schedule editor…</div>
+                </div>
+            </div>
+
+
+            <!-- ============================== -->
+            <!-- S5 TOURNAMENT PROGRESSION       -->
+            <!-- ============================== -->
+            <div class="custom-card s5-progression-card mb-10">
+                <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4 mb-5">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h2 class="text-2xl font-black text-cyan-300 flex items-center gap-2">
+                                <i class="fas fa-route"></i> S-5 Tournament Progression
+                            </h2>
+                            <span class="auto-badge"><i class="fas fa-hand-pointer"></i> Admin Controlled</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1 max-w-4xl">
+                            The normal Leaderboard decides advancement. Ocean charts are editable. You manually move
+                            teams from stage to stage, while the site creates the required match structure.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- OCEAN CHART EDITOR -->
+                <div class="s5-progress-stage mb-4">
+                    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h3 class="font-black text-white"><i class="fas fa-water text-cyan-300 mr-2"></i>Ocean Slot Chart</h3>
+                            <p class="text-[11px] text-slate-500 mt-1">Choose exactly which registered team goes into each Pacific Ocean/B slot. Every slot can be changed manually.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="s5-ocean-mode" role="group" aria-label="Ocean assignment mode">
+                                <button type="button" id="s5-ocean-auto-btn" onclick="s5SetOceanMode('auto')">
+                                    <i class="fas fa-magic mr-1"></i> Auto
+                                </button>
+                                <button type="button" id="s5-ocean-manual-btn" onclick="s5SetOceanMode('manual')">
+                                    <i class="fas fa-pen mr-1"></i> Manual
+                                </button>
+                            </div>
+                            <button type="button" onclick="s5LoadOceanChartsFromFirebase()" class="custom-btn secondary !py-2 !px-3 text-xs">
+                                <i class="fas fa-rotate"></i> Reload
+                            </button>
+                            <button type="button" onclick="s5SaveOceanCharts()" class="custom-btn !py-2 !px-3 text-xs">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                    <div id="s5-ocean-manual-note" class="s5-ocean-manual-note mb-4">
+                        <strong class="text-cyan-300">Manual mode:</strong> you choose every Pacific Ocean/B slot yourself.
+                        New registrations will not reshuffle the chart. Use <strong>Auto</strong> only when you want
+                        the next eligible teams assigned sequentially.
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-black text-cyan-300">Pacific Ocean</h4>
+                                <span id="s5-ocean-a-count" class="text-[10px] text-slate-500">0/12</span>
+                            </div>
+                            <div id="s5-ocean-a-editor" class="s5-team-grid"></div>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-black text-purple-300">Indian Ocean</h4>
+                                <span id="s5-ocean-b-count" class="text-[10px] text-slate-500">0/12</span>
+                            </div>
+                            <div id="s5-ocean-b-editor" class="s5-team-grid"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOP 16 -->
+                <div class="s5-progress-stage mb-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h3 class="font-black text-white"><i class="fas fa-ranking-star text-yellow-300 mr-2"></i>Top 16 from Leaderboard</h3>
+                            <p class="text-[11px] text-slate-500 mt-1">Uses the current normal Leaderboard ranking, excluding disqualified/eliminated teams.</p>
+                        </div>
+                        <div class="s5-control-actions">
+                            <button type="button" onclick="s5SelectTop16()" class="custom-btn secondary !py-2 !px-3 text-xs">
+                                <i class="fas fa-list-ol"></i> Select Top 16
+                            </button>
+                            <button type="button" onclick="s5DistributeTop16ToLake()" class="custom-btn gold-btn !py-2 !px-3 text-xs">
+                                <i class="fas fa-water"></i> Distribute 8 + 8
+                            </button>
+                        </div>
+                    </div>
+                    <div id="s5-top16-list" class="s5-mini-list">
+                        <div class="text-xs text-slate-500">Click Select Top 16 to capture the current leaderboard ranks.</div>
+                    </div>
+                </div>
+
+                <!-- LAKE KNOCKOUT -->
+                <div class="s5-progress-stage mb-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h3 class="font-black text-white"><i class="fas fa-mountain-sun text-blue-300 mr-2"></i>Lake Knockout · 16 → 8</h3>
+                            <p class="text-[11px] text-slate-500 mt-1">8 BO3 matches. Choose 8 teams for Lake A and 8 for Lake B, or use the 8 + 8 distribution button.</p>
+                        </div>
+                        <div class="s5-control-actions">
+                            <button type="button" onclick="s5LoadLakeFromTop16()" class="custom-btn secondary !py-2 !px-3 text-xs">
+                                <i class="fas fa-wand-magic-sparkles"></i> Load Top 16
+                            </button>
+                            <button type="button" onclick="s5SaveLakeKnockout()" class="custom-btn !py-2 !px-3 text-xs">
+                                <i class="fas fa-save"></i> Save & Create 8 BO3
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-black text-blue-300">Lake A · 8 Teams</h4>
+                                <span id="s5-lake-a-count" class="text-[10px] text-slate-500">0/8</span>
+                            </div>
+                            <div id="s5-lake-a-editor" class="s5-team-grid"></div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-black text-blue-300">Lake B · 8 Teams</h4>
+                                <span id="s5-lake-b-count" class="text-[10px] text-slate-500">0/8</span>
+                            </div>
+                            <div id="s5-lake-b-editor" class="s5-team-grid"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 s5-warning">
+                        Lake match seed is fixed as A1 vs B8, A2 vs B7 … A8 vs B1. BO3 results determine the eight winners.
+                    </div>
+                </div>
+
+                <!-- GANGA / YAMUNA -->
+                <div class="s5-progress-stage mb-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h3 class="font-black text-white"><i class="fas fa-water text-purple-300 mr-2"></i>Group Ganga & Group Yamuna · 8 Teams</h3>
+                            <p class="text-[11px] text-slate-500 mt-1">After Lake finishes, place 4 winners in Ganga and 4 in Yamuna, manually or with the distribution button.</p>
+                        </div>
+                        <div class="s5-control-actions">
+                            <button type="button" onclick="s5LoadLakeWinnersToGroups()" class="custom-btn secondary !py-2 !px-3 text-xs">
+                                <i class="fas fa-trophy"></i> Load 8 Winners
+                            </button>
+                            <button type="button" onclick="s5DistributeWinnersToGroups()" class="custom-btn gold-btn !py-2 !px-3 text-xs">
+                                <i class="fas fa-arrows-split-up-and-left"></i> Distribute 4 + 4
+                            </button>
+                            <button type="button" onclick="s5CreateGroupSemifinals()" class="custom-btn !py-2 !px-3 text-xs">
+                                <i class="fas fa-code-branch"></i> Create Semifinals
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-black text-emerald-300">Group Ganga · 4 Teams</h4>
+                                <span id="s5-ganga-count" class="text-[10px] text-slate-500">0/4</span>
+                            </div>
+                            <div id="s5-ganga-editor" class="s5-team-grid"></div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-black text-violet-300">Group Yamuna · 4 Teams</h4>
+                                <span id="s5-yamuna-count" class="text-[10px] text-slate-500">0/4</span>
+                            </div>
+                            <div id="s5-yamuna-editor" class="s5-team-grid"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FINAL PROGRESSION -->
+                <div class="s5-progress-stage">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div>
+                            <h3 class="font-black text-white"><i class="fas fa-flag-checkered text-yellow-300 mr-2"></i>Final Progression</h3>
+                            <p class="text-[11px] text-slate-500 mt-1">Create group finals after semifinals, then create the Waterfall Grand Final after both group winners are decided.</p>
+                        </div>
+                        <div class="s5-control-actions">
+                            <button type="button" onclick="s5CreateGroupFinals()" class="custom-btn secondary !py-2 !px-3 text-xs">
+                                <i class="fas fa-forward"></i> Create Group Finals
+                            </button>
+                            <button type="button" onclick="s5CreateWaterfallFinal()" class="custom-btn gold-btn !py-2 !px-3 text-xs">
+                                <i class="fas fa-crown"></i> Create Waterfall Final
+                            </button>
+                        </div>
+                    </div>
+                    <div id="s5-progression-status" class="mt-4 text-xs text-slate-500">
+                        No manual progression changes made yet.
+                    </div>
                 </div>
             </div>
 
@@ -2153,7 +2751,7 @@
                 <div class="overflow-y-auto flex-1 pr-1 space-y-6">
                     <div>
                         <h4 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                            <i class="fas fa-shield-alt"></i> <span id="heading-team-a-name">Ocean A</span> Players
+                            <i class="fas fa-shield-alt"></i> <span id="heading-team-a-name">Pacific Ocean</span> Players
                         </h4>
                         <div class="border border-white/10 rounded-xl overflow-hidden bg-white/5">
                             <table class="w-full text-left border-collapse text-sm">
@@ -2174,7 +2772,7 @@
 
                     <div>
                         <h4 class="text-sm font-bold text-red-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                            <i class="fas fa-shield-alt"></i> <span id="heading-team-b-name">Ocean B</span> Players
+                            <i class="fas fa-shield-alt"></i> <span id="heading-team-b-name">Indian Ocean</span> Players
                         </h4>
                         <div class="border border-white/10 rounded-xl overflow-hidden bg-white/5">
                             <table class="w-full text-left border-collapse text-sm">
@@ -2220,7 +2818,7 @@
             
             <div class="overflow-y-auto pr-2 space-y-6 flex-1">
                 <div>
-                    <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-2" id="public-team-a-title">Ocean A</h3>
+                    <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-2" id="public-team-a-title">Pacific Ocean</h3>
                     <div class="overflow-x-auto rounded-xl border border-white/10">
                         <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
                             <thead class="bg-black/50 text-[#94a3b8] text-xs uppercase">
@@ -2238,7 +2836,7 @@
                 </div>
 
                 <div>
-                    <h3 class="text-sm font-bold text-red-400 uppercase tracking-wider mb-2" id="public-team-b-title">Ocean B</h3>
+                    <h3 class="text-sm font-bold text-red-400 uppercase tracking-wider mb-2" id="public-team-b-title">Indian Ocean</h3>
                     <div class="overflow-x-auto rounded-xl border border-white/10">
                         <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
                             <thead class="bg-black/50 text-[#94a3b8] text-xs uppercase">
@@ -2508,6 +3106,9 @@
             });
             populateTeamDropdowns();
             updateUI();
+            if (typeof window.s5RenderOceanStandings === 'function') {
+                window.s5RenderOceanStandings();
+            }
             if (currentUserRole === 'admin' && tournamentConfig.autoAssign) assignTournamentSlots(false);
         }, (err) => {
             console.error("Database access error: ", err);
@@ -2520,6 +3121,9 @@
                 matches.push({ id: doc.id, ...doc.data() });
             });
             updateUI();
+            if (typeof window.s5RenderOceanStandings === 'function') {
+                window.s5RenderOceanStandings();
+            }
         });
 
         // --- TOURNAMENT FIRESTORE LISTENERS ---
@@ -3610,6 +4214,9 @@
             renderLeaderboard();
             renderRecentMatches();
             renderPastSeasonData();
+            if (typeof window.s5RenderOceanStandings === 'function') {
+                window.s5RenderOceanStandings();
+            }
             if (currentUserRole === 'admin') {
                 renderAdminTeams();
                 renderAdminMatches();
@@ -4175,7 +4782,7 @@
 
         // --- NAVIGATION ---
         function switchTab(tab) {
-            const views = ['view-leaderboard', 'view-tournament', 'view-save-water', 'view-team-registration', 'view-past-season', 'view-admin', 'view-login'];
+            const views = ['view-leaderboard', 'view-tournament', 'view-ocean-standings', 'view-save-water', 'view-team-registration', 'view-past-season', 'view-admin', 'view-login'];
             views.forEach(v => {
                 const el = document.getElementById(v);
                 if (el) el.classList.add('hidden');
@@ -4226,6 +4833,9 @@
             const navSaveWater = document.getElementById('nav-save-water');
             if (navSaveWater) navSaveWater.classList.toggle('active', tab === 'save-water');
 
+            const navOceanStandings = document.getElementById('nav-ocean-standings');
+            if (navOceanStandings) navOceanStandings.classList.toggle('active', tab === 'ocean-standings');
+
             const navTeamRegistration = document.getElementById('nav-team-registration');
             if (navTeamRegistration) navTeamRegistration.classList.toggle('active', tab === 'team-registration');
 
@@ -4244,6 +4854,10 @@
             if (tab === 'save-water') {
                 renderWaterFact();
                 restartWaterFactTimer();
+            }
+
+            if (tab === 'ocean-standings') {
+                window.s5ShowOceanTable(s5OceanVisible);
             }
         }
 
@@ -4727,7 +5341,7 @@
             const wrap = document.getElementById('league-schedule-container');
             if (!wrap) return;
 
-            const publicGroupName = (group) => group === 'A' ? 'Ocean A' : 'Ocean B';
+            const publicGroupName = (group) => group === 'A' ? 'Pacific Ocean' : 'Indian Ocean';
             const publicSlotLabel = (group, slot) => {
                 const gs = getTournamentSlot(slot)?.groupSlot;
                 return `${group === 'A' ? 'OCEAN A' : 'OCEAN B'} ${gs || '?'}`;
@@ -4831,11 +5445,11 @@
 
             const stageLabel = m.stage === 'knockout'
                 ? 'Lake Knockout'
-                : (m.playoffGroup === 'A' ? 'River A' : 'River B');
+                : (m.playoffGroup === 'A' ? 'Group Ganga' : 'Group Yamuna');
 
             const substage = m.substage === 'semi'
                 ? 'Semifinal'
-                : (m.substage === 'final' ? 'River Final' : (isBo3 ? 'BO3' : 'Match'));
+                : (m.substage === 'final' ? 'Ganga/Yamuna Final' : (isBo3 ? 'BO3' : 'Match'));
 
             const teamMarkup = (team, side, seed) => {
                 const name = team ? escapeTournamentHtml(team.name) : 'TBD';
@@ -5038,8 +5652,8 @@
                 `🏆 SRP-ESPORTS ${currentSeason} — Tournament Update`,
                 `Teams: ${registered}/${total} registered`,
                 `League: ${completed}/${expectedLeagueMatches(total,parseInt(tournamentConfig.matchesPerTeam)||5)} matches completed`,
-                `River A: ${A.length} teams`,
-                `River B: ${B.length} teams`,
+                `Group Ganga: ${A.length} teams`,
+                `Group Yamuna: ${B.length} teams`,
                 `🏞️ Lake Knockout: ${tournamentMatches.filter(m=>m.stage==='knockout').length}/8 generated`,
                 `🏞️ River Playoffs: ${tournamentMatches.filter(m=>m.stage==='playoff').length} matches generated`,
                 `Waterfall Grand Final: W_A vs W_B · Waterfall Final`
@@ -5211,7 +5825,7 @@
 
                                 const nameA = slotA?.team?.name || 'OPEN SLOT';
                                 const nameB = slotB?.team?.name || 'OPEN SLOT';
-                                const groupName = m.group === 'B' ? 'Ocean B' : 'Ocean A';
+                                const groupName = m.group === 'B' ? 'Indian Ocean' : 'Pacific Ocean';
 
                                 return `
                                     <div class="schedule-match-editor ${locked ? 'locked' : ''}">
@@ -5249,8 +5863,8 @@
                                                 <label class="schedule-field-label">Ocean</label>
                                                 <select class="custom-select" ${locked ? 'disabled' : ''}
                                                     onchange="s5ScheduleEdit(${index},'group',this.value)">
-                                                    <option value="A" ${m.group === 'A' ? 'selected' : ''}>Ocean A</option>
-                                                    <option value="B" ${m.group === 'B' ? 'selected' : ''}>Ocean B</option>
+                                                    <option value="A" ${m.group === 'A' ? 'selected' : ''}>Pacific Ocean</option>
+                                                    <option value="B" ${m.group === 'B' ? 'selected' : ''}>Indian Ocean</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -5350,7 +5964,7 @@
 
                 if (!Number.isInteger(day) || day<1 || day>15) errors.push(`Match ${i+1}: invalid day.`);
                 if (!Number.isInteger(round) || round<1 || round>5) errors.push(`Match ${i+1}: invalid round.`);
-                if (!(a>=start && a<=end) || !(b>=start && b<=end)) errors.push(`Match ${i+1}: slots must belong to ${group==='A'?'Ocean A':'Ocean B'}.`);
+                if (!(a>=start && a<=end) || !(b>=start && b<=end)) errors.push(`Match ${i+1}: slots must belong to ${group==='A'?'Pacific Ocean':'Indian Ocean'}.`);
                 if (a===b) errors.push(`Match ${i+1}: a team cannot play itself.`);
 
                 dayCounts[day]=(dayCounts[day]||0)+1;
@@ -5368,12 +5982,12 @@
                 if ((dayCounts[d]||0)!==4) errors.push(`Day ${d}: exactly 4 matches required.`);
             }
 
-            if (groupCounts.A!==30) errors.push(`Ocean A must contain exactly 30 matches.`);
-            if (groupCounts.B!==30) errors.push(`Ocean B must contain exactly 30 matches.`);
+            if (groupCounts.A!==30) errors.push(`Pacific Ocean must contain exactly 30 matches.`);
+            if (groupCounts.B!==30) errors.push(`Indian Ocean must contain exactly 30 matches.`);
 
             for (let slot=1;slot<=24;slot++) {
                 if ((appearances[slot]||0)!==5) {
-                    const group = slot<=12 ? 'Ocean A' : 'Ocean B';
+                    const group = slot<=12 ? 'Pacific Ocean' : 'Indian Ocean';
                     const number = slot<=12 ? slot : slot-12;
                     errors.push(`${group} ${number} must play exactly 5 matches; found ${appearances[slot]||0}.`);
                 }
@@ -6302,28 +6916,28 @@
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
                 <div class="s5-stage"><div class="text-[10px] uppercase tracking-widest text-slate-500">Teams</div><div class="text-2xl font-black text-white mt-1">24</div></div>
-                <div class="s5-stage"><div class="text-[10px] uppercase tracking-widest text-slate-500">River A</div><div class="text-2xl font-black text-cyan-300 mt-1">12</div></div>
-                <div class="s5-stage"><div class="text-[10px] uppercase tracking-widest text-slate-500">River B</div><div class="text-2xl font-black text-purple-300 mt-1">12</div></div>
+                <div class="s5-stage"><div class="text-[10px] uppercase tracking-widest text-slate-500">Group Ganga</div><div class="text-2xl font-black text-cyan-300 mt-1">12</div></div>
+                <div class="s5-stage"><div class="text-[10px] uppercase tracking-widest text-slate-500">Group Yamuna</div><div class="text-2xl font-black text-purple-300 mt-1">12</div></div>
                 <div class="s5-stage"><div class="text-[10px] uppercase tracking-widest text-slate-500">League</div><div class="text-2xl font-black text-blue-300 mt-1">60</div></div>
             </div>
 
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
                 <div class="s5-stage">
                     <div class="font-black text-cyan-300">Stage 1 · Ocean League</div>
-                    <div class="text-xs text-slate-400 mt-1">Ocean A: 12 teams · 30 matches</div>
-                    <div class="text-xs text-slate-400">Ocean B: 12 teams · 30 matches</div>
+                    <div class="text-xs text-slate-400 mt-1">Pacific Ocean: 12 teams · 30 matches</div>
+                    <div class="text-xs text-slate-400">Indian Ocean: 12 teams · 30 matches</div>
                     <div class="text-[11px] text-slate-500 mt-2">4 matches/day · 15 days</div>
                 </div>
                 <div class="s5-stage">
                     <div class="font-black text-blue-300">Stage 2 · Lake Knockout</div>
-                    <div class="text-xs text-slate-400 mt-1">Top 8 from Ocean A + Top 8 from Ocean B</div>
+                    <div class="text-xs text-slate-400 mt-1">Top 8 from Pacific Ocean + Top 8 from Indian Ocean</div>
                     <div class="text-xs text-slate-400">16 teams → 8 teams</div>
                     <div class="text-[11px] text-slate-500 mt-2">8 BO3 · 2/day · 4 days</div>
                 </div>
                 <div class="s5-stage">
                     <div class="font-black text-purple-300">Stage 3 · River Playoffs</div>
                     <div class="text-xs text-slate-400 mt-1">8 teams</div>
-                    <div class="text-xs text-slate-400">River A = Rank 1–4 · River B = Rank 5–8</div>
+                    <div class="text-xs text-slate-400">Group Ganga = Rank 1–4 · Group Yamuna = Rank 5–8</div>
                     <div class="text-[11px] text-slate-500 mt-2">Semifinals day 1 · Finals day 2 → W_A vs W_B · Waterfall Final</div>
                 </div>
             </div>
@@ -6600,6 +7214,1007 @@
     } else {
         s5Init();
     }
+})();
+</script>
+
+
+<script>
+(function(){
+    'use strict';
+
+    const S5P_KEY = 'srp_s5_progression';
+    let s5Progression = {
+        selectedTop16: [],
+        lakeA: Array(8).fill(null),
+        lakeB: Array(8).fill(null),
+        ganga: Array(4).fill(null),
+        yamuna: Array(4).fill(null),
+        oceanMode: 'manual',
+        updatedAt: null
+    };
+
+    function s5Clone(v){
+        try { return JSON.parse(JSON.stringify(v)); } catch(e) { return v; }
+    }
+
+    function s5Escape(v){
+        return String(v ?? '')
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;')
+            .replace(/'/g,'&#039;');
+    }
+
+    async function s5LoadProgression(){
+        if(!db) return;
+        try{
+            const doc = await db.collection('settings').doc('tournament_progression').get();
+            if(doc.exists){
+                const data = doc.data() || {};
+                s5Progression = {
+                    ...s5Progression,
+                    ...s5Clone(data),
+                    selectedTop16: Array.isArray(data.selectedTop16) ? data.selectedTop16 : [],
+                    lakeA: Array.isArray(data.lakeA) ? data.lakeA.slice(0,8) : Array(8).fill(null),
+                    lakeB: Array.isArray(data.lakeB) ? data.lakeB.slice(0,8) : Array(8).fill(null),
+                    ganga: Array.isArray(data.ganga) ? data.ganga.slice(0,4) : Array(4).fill(null),
+                    yamuna: Array.isArray(data.yamuna) ? data.yamuna.slice(0,4) : Array(4).fill(null),
+                    oceanMode: data.oceanMode === 'auto' ? 'auto' : 'manual'
+                };
+            }
+        }catch(e){ console.error('S5 progression load:',e); }
+        s5RenderAll();
+    }
+
+    async function s5SaveProgression(){
+        if(!db) throw new Error('Firebase is not connected.');
+        await db.collection('settings').doc('tournament_progression').set({
+            selectedTop16: s5Clone(s5Progression.selectedTop16 || []),
+            lakeA: s5Clone(s5Progression.lakeA || []),
+            lakeB: s5Clone(s5Progression.lakeB || []),
+            ganga: s5Clone(s5Progression.ganga || []),
+            yamuna: s5Clone(s5Progression.yamuna || []),
+            oceanMode: s5Progression.oceanMode === 'auto' ? 'auto' : 'manual',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, {merge:true});
+    }
+
+    function s5ActiveTeams(){
+        return getSortedTeams()
+            .filter(t => !t.disqualified && !t.tournamentEliminated)
+            .slice(0,24);
+    }
+
+    function s5AllSelectableTeams(){
+        return getSortedTeams().filter(t => !t.disqualified);
+    }
+
+    function s5TeamById(id){
+        return teams.find(t=>t.id===id) || null;
+    }
+
+    function s5Top16(){
+        return s5ActiveTeams().slice(0,16);
+    }
+
+    function s5GetLakeWinners(){
+        return tournamentMatches
+            .filter(m=>m.stage==='knockout' && m.resultStatus==='completed' && m.winnerTeamId)
+            .sort((a,b)=>(a.matchNumber||99)-(b.matchNumber||99))
+            .map(m=>m.winnerTeamId)
+            .filter(Boolean)
+            .slice(0,8);
+    }
+
+    function s5UniqueValid(ids, max){
+        const seen = new Set();
+        const result = [];
+        for(const id of (ids || [])){
+            if(!id || seen.has(id)) continue;
+            const team = s5TeamById(id);
+            if(!team || team.disqualified || team.tournamentEliminated) continue;
+            seen.add(id);
+            result.push(id);
+            if(result.length>=max) break;
+        }
+        return result;
+    }
+
+    function s5OptionHtml(ids, selected, includeOpen=true){
+        let out = includeOpen ? `<option value="">OPEN SLOT</option>` : '';
+        for(const id of ids){
+            const t=s5TeamById(id);
+            if(!t) continue;
+            const selectedAttr = t.id===selected ? 'selected' : '';
+            const rank = getSortedTeams().findIndex(x=>x.id===t.id)+1;
+            const label = rank>0 ? `#${rank} · ${t.name}` : t.name;
+            out += `<option value="${s5Escape(t.id)}" ${selectedAttr}>${s5Escape(label)}</option>`;
+        }
+        return out;
+    }
+
+    function s5RenderSelectEditor(containerId, count, values, options, prefix, changeFn, colorClass){
+        const wrap=document.getElementById(containerId);
+        if(!wrap) return;
+
+        const valueSet = new Set();
+        wrap.innerHTML = Array.from({length:count},(_,i)=>{
+            const selected=values[i] || '';
+            const team=s5TeamById(selected);
+            if(selected) valueSet.add(selected);
+            return `
+                <div class="s5-team-row">
+                    <span class="s5-slot-label ${colorClass||''}">${prefix}${i+1}</span>
+                    <select class="custom-select s5-progression-select"
+                        onchange="${changeFn}(${i},this.value)">
+                        ${s5OptionHtml(options, selected, true)}
+                    </select>
+                    <div class="hidden"></div>
+                    ${team ? `<span class="sr-only">${s5Escape(team.name)}</span>` : ''}
+                </div>
+            `;
+        }).join('');
+    }
+
+    function s5RenderTeamGrid(containerId, count, values, options, prefix, changeFn){
+        const wrap=document.getElementById(containerId);
+        if(!wrap) return;
+
+        wrap.innerHTML = Array.from({length:count},(_,i)=>{
+            const selected=values[i] || '';
+            const t=s5TeamById(selected);
+            return `
+                <div class="s5-team-row">
+                    <span class="s5-slot-label">${prefix}${i+1}</span>
+                    <div class="min-w-0">
+                        <select class="custom-select s5-progression-select"
+                            onchange="${changeFn}(${i},this.value)">
+                            ${s5OptionHtml(options, selected, true)}
+                        </select>
+                        <div class="text-[9px] text-slate-500 mt-1 truncate" title="${s5Escape(t?.name || 'OPEN SLOT')}">
+                            ${s5Escape(t?.name || 'OPEN SLOT')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function s5RenderOceanEditors(){
+        const slots = deriveTournamentSlots();
+        const ids = s5AllSelectableTeams().map(t=>t.id);
+
+        const a = slots.filter(s=>s.group==='A').map(s=>s.teamId||'');
+        const b = slots.filter(s=>s.group==='B').map(s=>s.teamId||'');
+
+        s5RenderTeamGrid('s5-ocean-a-editor',12,a,ids,'A','s5ChangeOceanA');
+        s5RenderTeamGrid('s5-ocean-b-editor',12,b,ids,'B','s5ChangeOceanB');
+
+        const ac=document.getElementById('s5-ocean-a-count');
+        const bc=document.getElementById('s5-ocean-b-count');
+        if(ac) ac.textContent=`${a.filter(Boolean).length}/12`;
+        if(bc) bc.textContent=`${b.filter(Boolean).length}/12`;
+    }
+
+    function s5ChangeOceanA(i,id){
+        if (s5Progression.oceanMode !== 'manual') {
+            showToast('Switch Ocean assignment to Manual before editing slots.', 'error');
+            s5RenderOceanDrafts();
+            return;
+        }
+        window.s5OceanDraftA=window.s5OceanDraftA || deriveTournamentSlots().filter(s=>s.group==='A').map(s=>s.teamId||'');
+        window.s5OceanDraftA[i]=id||null;
+        s5RenderOceanDrafts();
+    }
+
+    function s5ChangeOceanB(i,id){
+        if (s5Progression.oceanMode !== 'manual') {
+            showToast('Switch Ocean assignment to Manual before editing slots.', 'error');
+            s5RenderOceanDrafts();
+            return;
+        }
+        window.s5OceanDraftB=window.s5OceanDraftB || deriveTournamentSlots().filter(s=>s.group==='B').map(s=>s.teamId||'');
+        window.s5OceanDraftB[i]=id||null;
+        s5RenderOceanDrafts();
+    }
+
+    function s5OceanTeamOptions(selected, draftA, draftB){
+        const allTeams = s5AllSelectableTeams();
+        const usedOutsideThisSlot = new Set([...draftA, ...draftB].filter(Boolean));
+        let html = `<option value="">OPEN SLOT</option>`;
+
+        // Keep the selected team visible even if it is already used elsewhere
+        // while editing; validation/save will catch any duplicate.
+        allTeams.forEach(team => {
+            const isSelected = team.id === selected;
+            const isUsed = usedOutsideThisSlot.has(team.id) && !isSelected;
+            const rank = getSortedTeams().findIndex(t=>t.id===team.id) + 1;
+            const label = rank > 0 ? `#${rank} · ${team.name}` : team.name;
+
+            html += `<option value="${s5Escape(team.id)}" ${isSelected ? 'selected' : ''}>
+                ${s5Escape(label)}${isUsed ? ' · already selected' : ''}
+            </option>`;
+        });
+
+        return html;
+    }
+
+    function s5RenderOceanDrafts(){
+        const a = window.s5OceanDraftA || deriveTournamentSlots()
+            .filter(s=>s.group==='A')
+            .map(s=>s.teamId||'');
+        const b = window.s5OceanDraftB || deriveTournamentSlots()
+            .filter(s=>s.group==='B')
+            .map(s=>s.teamId||'');
+
+        window.s5OceanDraftA = [...a];
+        window.s5OceanDraftB = [...b];
+
+        const renderSide = (containerId, values, prefix, titleColor) => {
+            const wrap = document.getElementById(containerId);
+            if(!wrap) return;
+
+            wrap.innerHTML = Array.from({length:12}, (_, i) => {
+                const selected = values[i] || '';
+                const team = s5TeamById(selected);
+                const duplicate = selected &&
+                    ([...values].filter(v=>v===selected).length > 1);
+
+                return `
+                    <div class="s5-ocean-slot-card">
+                        <div class="s5-ocean-slot-badge">${prefix}${i+1}</div>
+                        <div class="min-w-0">
+                            <select class="custom-select s5-ocean-team-select"
+                                onchange="${prefix === 'A' ? `s5ChangeOceanA(${i},this.value)` : `s5ChangeOceanB(${i},this.value)`}">
+                                ${s5OceanTeamOptions(selected, a, b)}
+                            </select>
+                            <div class="s5-ocean-team-preview" title="${s5Escape(team?.name || 'OPEN SLOT')}">
+                                ${s5Escape(team?.name || 'OPEN SLOT')}
+                            </div>
+                            ${duplicate ? `<div class="s5-ocean-conflict"><i class="fas fa-triangle-exclamation mr-1"></i>Duplicate team — choose a different team.</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        renderSide('s5-ocean-a-editor', a, 'A', 'cyan');
+        renderSide('s5-ocean-b-editor', b, 'B', 'purple');
+
+        const ac=document.getElementById('s5-ocean-a-count');
+        const bc=document.getElementById('s5-ocean-b-count');
+        if(ac) ac.textContent=`${a.filter(Boolean).length}/12`;
+        if(bc) bc.textContent=`${b.filter(Boolean).length}/12`;
+
+        const autoBtn=document.getElementById('s5-ocean-auto-btn');
+        const manualBtn=document.getElementById('s5-ocean-manual-btn');
+        const note=document.getElementById('s5-ocean-manual-note');
+
+        if(autoBtn) autoBtn.classList.toggle('active', s5Progression.oceanMode==='auto');
+        if(manualBtn) manualBtn.classList.toggle('active', s5Progression.oceanMode==='manual');
+
+        if(note){
+            note.innerHTML = s5Progression.oceanMode==='manual'
+                ? `<strong class="text-cyan-300">Manual mode:</strong> choose the exact team for A1–A12 and B1–B12. Save when finished.`
+                : `<strong class="text-green-300">Auto mode:</strong> new eligible teams fill the next empty slot automatically.`;
+        }
+    }
+
+    function s5ChangeOceanA(i,id){
+        if (s5Progression.oceanMode !== 'manual') {
+            showToast('Switch Ocean assignment to Manual before editing slots.','error');
+            s5RenderOceanDrafts();
+            return;
+        }
+
+        window.s5OceanDraftA = window.s5OceanDraftA || deriveTournamentSlots()
+            .filter(s=>s.group==='A').map(s=>s.teamId||'');
+
+        window.s5OceanDraftB = window.s5OceanDraftB || deriveTournamentSlots()
+            .filter(s=>s.group==='B').map(s=>s.teamId||'');
+
+        window.s5OceanDraftA[i] = id || null;
+
+        // If the selected team already exists in Indian Ocean, clear that duplicate.
+        if (id) {
+            window.s5OceanDraftB = window.s5OceanDraftB.map((v,idx)=>v===id ? null : v);
+        }
+
+        s5RenderOceanDrafts();
+    }
+
+    function s5ChangeOceanB(i,id){
+        if (s5Progression.oceanMode !== 'manual') {
+            showToast('Switch Ocean assignment to Manual before editing slots.','error');
+            s5RenderOceanDrafts();
+            return;
+        }
+
+        window.s5OceanDraftA = window.s5OceanDraftA || deriveTournamentSlots()
+            .filter(s=>s.group==='A').map(s=>s.teamId||'');
+
+        window.s5OceanDraftB = window.s5OceanDraftB || deriveTournamentSlots()
+            .filter(s=>s.group==='B').map(s=>s.teamId||'');
+
+        window.s5OceanDraftB[i] = id || null;
+
+        // If the selected team already exists in Pacific Ocean, clear that duplicate.
+        if (id) {
+            window.s5OceanDraftA = window.s5OceanDraftA.map((v,idx)=>v===id ? null : v);
+        }
+
+        s5RenderOceanDrafts();
+    }
+
+    function s5OceanDraft(){
+        return {
+            a: window.s5OceanDraftA || deriveTournamentSlots().filter(s=>s.group==='A').map(s=>s.teamId||''),
+            b: window.s5OceanDraftB || deriveTournamentSlots().filter(s=>s.group==='B').map(s=>s.teamId||'')
+        };
+    }
+
+    async function s5LoadOceanChartsFromFirebase(){
+        try{
+            const snap=await db.collection('tournament_slots').get();
+            const map={};
+            snap.forEach(doc=>map[Number(doc.data().slotNumber)]=doc.data());
+            window.s5OceanDraftA=Array.from({length:12},(_,i)=>map[i+1]?.teamId||null);
+            window.s5OceanDraftB=Array.from({length:12},(_,i)=>map[i+13]?.teamId||null);
+            s5RenderOceanDrafts();
+            showToast(`Ocean charts reloaded (${s5Progression.oceanMode === 'auto' ? 'Auto' : 'Manual'} mode).`,'success');
+        }catch(e){ showToast('Could not reload Ocean charts: '+e.message,'error'); }
+    }
+
+    async function s5SaveOceanCharts(silent=false){
+        const {a,b}=s5OceanDraft();
+        const ids=[...a,...b].filter(Boolean);
+        if(new Set(ids).size!==ids.length){
+            showToast('A team cannot occupy more than one Ocean slot.','error');
+            return;
+        }
+        if(ids.length>24){
+            showToast('Ocean charts can contain only 24 teams.','error');
+            return;
+        }
+        if(ids.length < 24){
+            showToast(`Ocean charts currently have ${ids.length}/24 teams. Empty slots are allowed while registration is open.`, 'success');
+        }
+        try{
+            const batch=db.batch();
+            for(let i=0;i<12;i++){
+                const ref=db.collection('tournament_slots').doc(tournamentSlotId(i+1));
+                const team=s5TeamById(a[i]);
+                batch.set(ref,{slotNumber:i+1,group:'A',groupSlot:i+1,teamId:team?.id||null,teamName:team?.name||null,locked:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+            }
+            for(let i=0;i<12;i++){
+                const global=i+13;
+                const ref=db.collection('tournament_slots').doc(tournamentSlotId(global));
+                const team=s5TeamById(b[i]);
+                batch.set(ref,{slotNumber:global,group:'B',groupSlot:i+1,teamId:team?.id||null,teamName:team?.name||null,locked:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+            }
+            await batch.commit();
+            window.s5OceanDraftA=[...a];
+            window.s5OceanDraftB=[...b];
+            await s5SaveProgression();
+            if(!silent) showToast(`✅ Pacific Ocean & Indian Ocean charts saved (${s5Progression.oceanMode === 'auto' ? 'Auto' : 'Manual'} mode).`,'success');
+            renderTournamentPage();
+        }catch(e){ showToast('Could not save Ocean charts: '+e.message,'error'); }
+    }
+
+    async function s5SelectTop16(){
+        const top=s5Top16();
+        if(top.length<16){
+            showToast(`Only ${top.length} active teams are available. 16 teams are required.`, 'error');
+            return;
+        }
+        s5Progression.selectedTop16=top.map(t=>t.id);
+        await s5SaveProgression();
+        s5RenderTop16();
+        s5RenderStatus('Top 16 captured from the normal Leaderboard.');
+        showToast('✅ Top 16 teams selected from the Leaderboard.','success');
+    }
+
+    async function s5DistributeTop16ToLake(){
+        if(!s5Progression.selectedTop16?.length) await s5SelectTop16();
+        const ids=s5Progression.selectedTop16 || [];
+        if(ids.length!==16){
+            showToast('Select exactly 16 teams from the Leaderboard first.','error');
+            return;
+        }
+        s5Progression.lakeA=ids.slice(0,8);
+        s5Progression.lakeB=ids.slice(8,16);
+        await s5SaveProgression();
+        s5RenderLake();
+        s5RenderStatus('Top 16 distributed into Lake A and Lake B (8 + 8).');
+        showToast('✅ Top 16 distributed 8 + 8.','success');
+    }
+
+    async function s5LoadLakeFromTop16(){
+        await s5DistributeTop16ToLake();
+    }
+
+    function s5RenderTop16(){
+        const wrap=document.getElementById('s5-top16-list');
+        if(!wrap) return;
+        const ids=s5Progression.selectedTop16||[];
+        if(ids.length===0){
+            wrap.innerHTML=`<div class="text-xs text-slate-500">No Top 16 captured yet.</div>`;
+            return;
+        }
+        wrap.innerHTML=ids.map((id,i)=>{
+            const t=s5TeamById(id);
+            return `<div class="s5-mini-item"><span class="s5-mini-rank">${i+1}</span><span class="s5-mini-name" title="${s5Escape(t?.name||'Unknown')}">${s5Escape(t?.name||'Unknown')}</span></div>`;
+        }).join('');
+    }
+
+    function s5ChangeLakeA(i,id){ s5Progression.lakeA[i]=id||null; s5RenderLake(); }
+    function s5ChangeLakeB(i,id){ s5Progression.lakeB[i]=id||null; s5RenderLake(); }
+
+    function s5RenderLake(){
+        const options=s5Progression.selectedTop16?.length===16
+            ? s5Progression.selectedTop16
+            : s5AllSelectableTeams().map(t=>t.id);
+
+        s5RenderTeamGrid('s5-lake-a-editor',8,s5Progression.lakeA,options,'A','s5ChangeLakeA');
+        s5RenderTeamGrid('s5-lake-b-editor',8,s5Progression.lakeB,options,'B','s5ChangeLakeB');
+
+        const ca=document.getElementById('s5-lake-a-count');
+        const cb=document.getElementById('s5-lake-b-count');
+        if(ca) ca.textContent=`${s5Progression.lakeA.filter(Boolean).length}/8`;
+        if(cb) cb.textContent=`${s5Progression.lakeB.filter(Boolean).length}/8`;
+    }
+
+    async function s5SaveLakeKnockout(){
+        const A=s5Progression.lakeA.filter(Boolean);
+        const B=s5Progression.lakeB.filter(Boolean);
+
+        if(A.length!==8 || B.length!==8){
+            showToast('Lake Knockout needs 8 teams in Lake A and 8 teams in Lake B.','error');
+            return;
+        }
+
+        if(new Set([...A,...B]).size!==16){
+            showToast('A team cannot appear twice in the Lake Knockout.','error');
+            return;
+        }
+
+        // If completed matches exist, do not rewrite them.
+        if(tournamentMatches.some(m=>m.stage==='knockout' && m.resultStatus==='completed')){
+            showToast('Lake Knockout already has completed results. Existing matches are locked.','error');
+            return;
+        }
+
+        try{
+            const old=tournamentMatches.filter(m=>m.stage==='knockout');
+            if(old.length){
+                const del=db.batch();
+                old.forEach(m=>del.delete(db.collection('tournament_matches').doc(m.id)));
+                await del.commit();
+            }
+
+            const batch=db.batch();
+            for(let i=0;i<8;i++){
+                const a=s5TeamById(A[i]), b=s5TeamById(B[7-i]);
+                const ref=db.collection('tournament_matches').doc(`K-${String(i+1).padStart(2,'0')}`);
+                batch.set(ref,{
+                    stage:'knockout',
+                    format:'BO3',
+                    day:Math.floor(i/2)+1,
+                    matchNumber:i+1,
+                    label:`Lake BO3 ${i+1}`,
+                    sourceA:{teamId:a.id,seed:i+1,group:'A'},
+                    sourceB:{teamId:b.id,seed:8-i,group:'B'},
+                    teamAId:a.id,
+                    teamBId:b.id,
+                    teamAName:a.name,
+                    teamBName:b.name,
+                    resultStatus:'pending',
+                    teamAScore:null,
+                    teamBScore:null,
+                    winnerTeamId:null,
+                    createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+            await batch.commit();
+            await s5SaveProgression();
+            s5RenderStatus('Lake Knockout created: 8 BO3 matches.');
+            showToast('✅ 8 Lake BO3 matches created.','success');
+        }catch(e){ showToast('Could not create Lake Knockout: '+e.message,'error'); }
+    }
+
+    async function s5LoadLakeWinnersToGroups(){
+        const winners=s5GetLakeWinners();
+        if(winners.length!==8){
+            showToast(`Lake has ${winners.length}/8 completed BO3 winners.`, 'error');
+            return;
+        }
+        s5Progression.ganga=winners.slice(0,4);
+        s5Progression.yamuna=winners.slice(4,8);
+        await s5SaveProgression();
+        s5RenderGroups();
+        s5RenderStatus('The eight Lake winners are ready for Group Ganga/Yamuna.');
+        showToast('✅ 8 Lake winners loaded.','success');
+    }
+
+    async function s5DistributeWinnersToGroups(){
+        await s5LoadLakeWinnersToGroups();
+    }
+
+    function s5ChangeGanga(i,id){ s5Progression.ganga[i]=id||null; s5RenderGroups(); }
+    function s5ChangeYamuna(i,id){ s5Progression.yamuna[i]=id||null; s5RenderGroups(); }
+
+    function s5RenderGroups(){
+        const winners=s5GetLakeWinners();
+        const options=s5UniqueValid(
+            [...(s5Progression.ganga||[]),...(s5Progression.yamuna||[]),...winners],
+            8
+        );
+        s5RenderTeamGrid('s5-ganga-editor',4,s5Progression.ganga,options,'G','s5ChangeGanga');
+        s5RenderTeamGrid('s5-yamuna-editor',4,s5Progression.yamuna,options,'Y','s5ChangeYamuna');
+
+        const a=document.getElementById('s5-ganga-count');
+        const b=document.getElementById('s5-yamuna-count');
+        if(a) a.textContent=`${s5Progression.ganga.filter(Boolean).length}/4`;
+        if(b) b.textContent=`${s5Progression.yamuna.filter(Boolean).length}/4`;
+    }
+
+    async function s5CreateGroupSemifinals(){
+        const G=s5Progression.ganga.filter(Boolean);
+        const Y=s5Progression.yamuna.filter(Boolean);
+
+        if(G.length!==4 || Y.length!==4){
+            showToast('Ganga and Yamuna each need 4 teams.','error');
+            return;
+        }
+        if(new Set([...G,...Y]).size!==8){
+            showToast('A team cannot appear twice in Ganga/Yamuna.','error');
+            return;
+        }
+
+        if(tournamentMatches.some(m=>m.stage==='playoff' && m.substage==='semi')){
+            showToast('Playoff semifinals already exist.','error');
+            return;
+        }
+
+        try{
+            const batch=db.batch();
+            const pairs=[
+                {g:'A',a:G[0],b:G[3],label:'Ganga Semi 1'},
+                {g:'A',a:G[1],b:G[2],label:'Ganga Semi 2'},
+                {g:'B',a:Y[0],b:Y[3],label:'Yamuna Semi 1'},
+                {g:'B',a:Y[1],b:Y[2],label:'Yamuna Semi 2'}
+            ];
+
+            pairs.forEach((p,idx)=>{
+                const ta=s5TeamById(p.a),tb=s5TeamById(p.b);
+                const ref=db.collection('tournament_matches').doc(`P-${p.g}-SF${idx%2+1}`);
+                batch.set(ref,{
+                    stage:'playoff',
+                    format:'BO3',
+                    playoffGroup:p.g,
+                    substage:'semi',
+                    day:1,
+                    label:p.label,
+                    seedA:idx%2===0?1:2,
+                    seedB:idx%2===0?4:3,
+                    teamAId:ta.id,
+                    teamBId:tb.id,
+                    teamAName:ta.name,
+                    teamBName:tb.name,
+                    resultStatus:'pending',
+                    teamAScore:null,
+                    teamBScore:null,
+                    winnerTeamId:null,
+                    createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+                });
+            });
+
+            await batch.commit();
+            showToast('✅ Ganga and Yamuna semifinals created.','success');
+            s5RenderStatus('Ganga/Yamuna semifinals created. Enter their BO3 results normally.');
+        }catch(e){ showToast('Could not create semifinals: '+e.message,'error'); }
+    }
+
+    async function s5CreateGroupFinals(){
+        const semis=tournamentMatches.filter(m=>m.stage==='playoff'&&m.substage==='semi');
+        if(semis.length!==4 || semis.some(m=>m.resultStatus!=='completed')){
+            showToast('All 4 semifinals must be completed first.','error');
+            return;
+        }
+        if(tournamentMatches.some(m=>m.stage==='playoff'&&m.substage==='final')){
+            showToast('Group finals already exist.','error');
+            return;
+        }
+
+        const G=semis.filter(m=>m.playoffGroup==='A'),Y=semis.filter(m=>m.playoffGroup==='B');
+        if(G.length!==2 || Y.length!==2){ showToast('Could not identify both group semifinals.','error'); return; }
+
+        try{
+            const batch=db.batch();
+            [
+                ['A',G[0],G[1],'Ganga Final'],
+                ['B',Y[0],Y[1],'Yamuna Final']
+            ].forEach(([group,m1,m2,label])=>{
+                const ref=db.collection('tournament_matches').doc(`P-${group}-FINAL`);
+                batch.set(ref,{
+                    stage:'playoff',
+                    format:'BO3',
+                    playoffGroup:group,
+                    substage:'final',
+                    day:2,
+                    label,
+                    sourceA:{matchId:m1.id},
+                    sourceB:{matchId:m2.id},
+                    resultStatus:'pending',
+                    teamAScore:null,
+                    teamBScore:null,
+                    winnerTeamId:null,
+                    createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+                });
+            });
+            await batch.commit();
+            showToast('✅ Ganga and Yamuna finals created.','success');
+            s5RenderStatus('Group finals created. Complete both to unlock the Waterfall Final.');
+        }catch(e){ showToast('Could not create group finals: '+e.message,'error'); }
+    }
+
+    async function s5CreateWaterfallFinal(){
+        const finals=tournamentMatches.filter(m=>m.stage==='playoff'&&m.substage==='final');
+        if(finals.length!==2 || finals.some(m=>m.resultStatus!=='completed')){
+            showToast('Both Ganga and Yamuna finals must be completed first.','error');
+            return;
+        }
+        if(tournamentMatches.some(m=>m.stage==='grand_final')){
+            showToast('Waterfall Grand Final already exists.','error');
+            return;
+        }
+
+        const G=finals.find(m=>m.playoffGroup==='A');
+        const Y=finals.find(m=>m.playoffGroup==='B');
+
+        const winnerIdG=G?.winnerTeamId;
+        const winnerIdY=Y?.winnerTeamId;
+
+        if(!winnerIdG || !winnerIdY){
+            showToast('Both group winners are required.','error');
+            return;
+        }
+
+        try{
+            const a=s5TeamById(winnerIdG), b=s5TeamById(winnerIdY);
+            const ref=db.collection('tournament_matches').doc('GF-001');
+            await ref.set({
+                stage:'grand_final',
+                format:'BO3',
+                label:'Waterfall Grand Final',
+                day:2,
+                sourceA:{matchId:G.id},
+                sourceB:{matchId:Y.id},
+                teamAId:a.id,
+                teamBId:b.id,
+                teamAName:a.name,
+                teamBName:b.name,
+                resultStatus:'pending',
+                teamAScore:null,
+                teamBScore:null,
+                winnerTeamId:null,
+                createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+            },{merge:true});
+
+            showToast('✅ Waterfall Grand Final created.','success');
+            s5RenderStatus('Waterfall Grand Final created.');
+        }catch(e){ showToast('Could not create Waterfall Final: '+e.message,'error'); }
+    }
+
+    function s5RenderStatus(text){
+        const el=document.getElementById('s5-progression-status');
+        if(el) el.textContent=text;
+    }
+
+    function s5RenderAll(){
+        if(currentUserRole!=='admin') return;
+        s5RenderOceanDrafts();
+        s5RenderTop16();
+        s5RenderLake();
+        s5RenderGroups();
+    }
+
+    async function s5OceanAutoRefreshOnTeams(){
+        if(currentUserRole!=='admin' || s5Progression.oceanMode!=='auto') return;
+        try{
+            await s5AutoAssignOceanSlots(false);
+        }catch(e){
+            console.error('Ocean auto assignment:', e);
+        }
+    }
+
+
+    // ============================================================
+    // OCEAN STANDINGS — 12 + 12 FROM NORMAL LEADERBOARD
+    // ============================================================
+    let s5OceanVisible = 'A';
+
+    function s5OceanSlotAssignments(){
+        const slots = deriveTournamentSlots();
+        return {
+            A: slots.filter(s=>s.group==='A').map(s=>s.teamId).filter(Boolean).slice(0,12),
+            B: slots.filter(s=>s.group==='B').map(s=>s.teamId).filter(Boolean).slice(0,12)
+        };
+    }
+
+    function s5OceanRankedTeams(group){
+        const assigned = s5OceanSlotAssignments()[group] || [];
+        const ranked = getSortedTeams().filter(team =>
+            assigned.includes(team.id) &&
+            !team.disqualified &&
+            !team.tournamentEliminated
+        );
+
+        // The positions shown here are based on the normal Leaderboard ranking,
+        // but the membership of each Ocean is determined by the Ocean slot chart.
+        return ranked.sort((a,b)=>{
+            const pa = getSortedTeams().findIndex(t=>t.id===a.id);
+            const pb = getSortedTeams().findIndex(t=>t.id===b.id);
+            return pa-pb;
+        });
+    }
+
+    function s5RenderOceanTable(group){
+        const tbody = document.getElementById(`ocean-standings-tbody-${group.toLowerCase()}`);
+        if(!tbody) return;
+
+        const ranked = s5OceanRankedTeams(group);
+
+        if(!ranked.length){
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-12 text-slate-500 italic">No teams have been assigned to ${group === 'A' ? 'Pacific Ocean' : 'Indian Ocean'} yet.</td></tr>`;
+        }else{
+            tbody.innerHTML = ranked.slice(0,12).map((team,index)=>{
+                const globalRank = getSortedTeams().findIndex(t=>t.id===team.id)+1;
+                const qualifies = index < 8;
+
+                return `
+                    <tr class="${qualifies ? 'ocean-top8' : ''}">
+                        <td class="ocean-rank">${index+1}</td>
+                        <td class="ocean-team-cell">
+                            <div class="flex items-center gap-2 min-w-0">
+                                ${getTeamBadge(team,'w-8 h-8','text-[10px]')}
+                                <div class="min-w-0">
+                                    <div class="truncate" title="${s5Escape(team.name)}">${s5Escape(team.name)}</div>
+                                    <div class="text-[9px] text-slate-500">Overall Leaderboard #${globalRank}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${team.M||0}</td>
+                        <td class="ocean-stat-win">${team.W||0}</td>
+                        <td class="ocean-stat-loss">${team.L||0}</td>
+                        <td>${team.D||0}</td>
+                        <td class="ocean-stat-rd">${(team.RD||0)>0?`+${team.RD}`:team.RD||0}</td>
+                        <td class="ocean-stat-pts">${team.P||0}</td>
+                        <td>
+                            ${qualifies
+                                ? `<span class="ocean-selected-badge"><i class="fas fa-check"></i> Lake</span>`
+                                : `<span class="text-[9px] text-slate-500">Outside Top 8</span>`}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        const qualifyEl=document.getElementById(`ocean-${group.toLowerCase()}-qualify-count`);
+        if(qualifyEl) qualifyEl.textContent=`${Math.min(ranked.length,8)} / 8 QUALIFIED`;
+    }
+
+    window.s5ShowOceanTable = function(group){
+        s5OceanVisible = String(group).toUpperCase() === 'B' ? 'B' : 'A';
+
+        const aCard = document.getElementById('ocean-table-a-card');
+        const bCard = document.getElementById('ocean-table-b-card');
+        const aBtn = document.getElementById('ocean-view-a-btn');
+        const bBtn = document.getElementById('ocean-view-b-btn');
+
+        if (!aCard || !bCard || !aBtn || !bBtn) {
+            return;
+        }
+
+        aCard.classList.toggle('hidden', s5OceanVisible !== 'A');
+        bCard.classList.toggle('hidden', s5OceanVisible !== 'B');
+
+        aBtn.classList.toggle('active', s5OceanVisible === 'A');
+        bBtn.classList.toggle('active', s5OceanVisible === 'B');
+
+        aBtn.setAttribute('aria-selected', s5OceanVisible === 'A' ? 'true' : 'false');
+        bBtn.setAttribute('aria-selected', s5OceanVisible === 'B' ? 'true' : 'false');
+
+        s5RenderOceanTable('A');
+        s5RenderOceanTable('B');
+    };
+
+    window.s5RenderOceanStandings = function(){
+        s5RenderOceanTable('A');
+        s5RenderOceanTable('B');
+    };
+
+    // -------- TEAM ELIMINATION --------
+    window.eliminateTournamentTeam = async function(id, name){
+        if(currentUserRole!=='admin') return;
+        const team=s5TeamById(id);
+        if(!team) return;
+
+        const reason=prompt(`Eliminate ${name} from Season 5 tournament?\n\nEnter a reason (optional):`, team.eliminationReason||'');
+        if(reason===null) return;
+
+        if(!confirm(`Confirm elimination of ${name}? This does not delete the team and does not remove them from the normal Leaderboard.`)) return;
+
+        try{
+            await db.collection('teams').doc(id).update({
+                tournamentEliminated:true,
+                eliminationReason:reason.trim(),
+                eliminatedAt:firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showToast(`${name} eliminated from Season 5 tournament.`,'error');
+        }catch(e){ showToast('Could not eliminate team: '+e.message,'error'); }
+    };
+
+    window.restoreTournamentTeam = async function(id,name){
+        if(currentUserRole!=='admin') return;
+        if(!confirm(`Restore ${name} as active in the Season 5 tournament?`)) return;
+        try{
+            await db.collection('teams').doc(id).update({
+                tournamentEliminated:false,
+                eliminationReason:'',
+                eliminatedAt:firebase.firestore.FieldValue.delete()
+            });
+            showToast(`${name} restored to the Season 5 tournament.`,'success');
+        }catch(e){ showToast('Could not restore team: '+e.message,'error'); }
+    };
+
+    // Replace old admin team renderer with elimination controls.
+    window.renderAdminTeams = function(){
+        const tbody=document.getElementById('admin-tbody');
+        if(!tbody) return;
+
+        const sorted=getSortedTeams();
+        if(!sorted.length){
+            tbody.innerHTML=`<tr><td colspan="5" class="py-12 text-center text-slate-500">No registered teams.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML=sorted.map(team=>{
+            const elim=!!team.tournamentEliminated;
+            const status=team.disqualified ? 'DQ' : (elim ? 'Tournament Eliminated' : (team.rosterLocked ? 'Locked' : 'Open'));
+            const statusClass=team.disqualified ? 'bg-red-500/20 text-red-400' : (elim ? 'bg-orange-500/20 text-orange-300' : (team.rosterLocked ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'));
+
+            return `
+                <tr class="custom-tr ${team.disqualified?'disqualified-tr':''}">
+                    <td class="p-4 font-bold text-white">
+                        <div class="flex items-center gap-3">
+                            ${getTeamBadge(team,'w-8 h-8','text-xs')}
+                            <div class="min-w-0">
+                                <span class="${elim?'text-orange-200':''}">${s5Escape(team.name)}</span>
+                                ${team.disqualified ? `<span class="block text-[10px] text-red-400 font-bold uppercase">DQ · ${s5Escape(team.dqReason||'No reason')}</span>` : ''}
+                                ${elim ? `<span class="block text-[10px] text-orange-300 font-bold uppercase">Eliminated from S-5</span>` : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-4 text-center">
+                        <span class="px-2 py-0.5 rounded text-xs font-semibold ${statusClass}">${status}</span>
+                    </td>
+                    <td class="p-4 text-center text-xs font-medium">
+                        <span class="text-green-400">${team.W||0}W</span> -
+                        <span class="text-red-400">${team.L||0}L</span>
+                    </td>
+                    <td class="p-4 text-center font-bold text-blue-400">${team.P||0}</td>
+                    <td class="p-4 text-right space-x-2 whitespace-nowrap">
+                        <button type="button" onclick="openEditModal('${team.id}')" title="Edit Squad" class="custom-btn secondary !py-1 !px-2.5 text-xs">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${!team.disqualified && !elim
+                            ? `<button type="button" onclick="eliminateTournamentTeam('${team.id}','${s5Escape(team.name)}')" title="Eliminate from Season 5" class="custom-btn delete s5-elim !py-1 !px-2.5 text-xs"><i class="fas fa-user-slash"></i></button>`
+                            : ''}
+                        ${!team.disqualified && elim
+                            ? `<button type="button" onclick="restoreTournamentTeam('${team.id}','${s5Escape(team.name)}')" title="Restore to Season 5" class="custom-btn secondary !py-1 !px-2.5 text-xs"><i class="fas fa-rotate-left"></i></button>`
+                            : ''}
+                        <button type="button" onclick="confirmDeleteTeam('${team.id}', '${s5Escape(team.name)}')" title="Delete Team" class="custom-btn delete !py-1 !px-2.5 text-xs">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    };
+
+    // The new progression is manually controlled. Prevent legacy automatic
+    // generation from deciding the stage for the admin.
+    window.autoAdvanceTournament = function(){ return; };
+
+    // Public tournament UI refresh: hide legacy point tables and use the new
+    // progression terminology.
+    window.s5ApplyPublicTournamentChanges = function(){
+        const ids=['league-tbody-a','league-tbody-b'];
+        ids.forEach(id=>{
+            const el=document.getElementById(id);
+            const card=el?.closest('.custom-card');
+            if(card) card.remove();
+        });
+
+        const textMap=[
+            ['River Playoffs · 8 Teams','Ganga & Yamuna Playoffs · 8 Teams'],
+            ['River A · Rank 1–4','Group Ganga · Rank 1–4'],
+            ['River B · Rank 5–8','Group Yamuna · Rank 5–8']
+        ];
+        document.querySelectorAll('#view-tournament *').forEach(el=>{
+            if(el.children.length===0 && el.textContent){
+                let t=el.textContent;
+                textMap.forEach(([a,b])=>t=t.replaceAll(a,b));
+                if(t!==el.textContent) el.textContent=t;
+            }
+        });
+
+        if(typeof renderTournamentPage==='function') renderTournamentPage();
+    };
+
+    // Listen for team changes; top 16 and ocean editors should update immediately.
+    function s5AdminRefresh(){
+        if(currentUserRole==='admin'){
+            s5RenderAll();
+            s5ApplyPublicTournamentChanges();
+        }
+    }
+
+    // Start after the existing single-file app has finished defining all globals.
+    setTimeout(async()=>{
+        try{
+            s5ApplyPublicTournamentChanges();
+            await s5LoadProgression();
+            s5RenderOceanDrafts();
+            if(s5Progression.oceanMode==='auto') await s5AutoAssignOceanSlots(false);
+        }catch(e){ console.error('S5 progression init:',e); }
+    },1200);
+
+    // Expose useful functions for HTML buttons.
+    window.s5LoadOceanChartsFromFirebase=s5LoadOceanChartsFromFirebase;
+    window.s5SaveOceanCharts=s5SaveOceanCharts;
+    window.s5SelectTop16=s5SelectTop16;
+    window.s5DistributeTop16ToLake=s5DistributeTop16ToLake;
+    window.s5LoadLakeFromTop16=s5LoadLakeFromTop16;
+    window.s5SaveLakeKnockout=s5SaveLakeKnockout;
+    window.s5LoadLakeWinnersToGroups=s5LoadLakeWinnersToGroups;
+    window.s5DistributeWinnersToGroups=s5DistributeWinnersToGroups;
+    window.s5CreateGroupSemifinals=s5CreateGroupSemifinals;
+    window.s5CreateGroupFinals=s5CreateGroupFinals;
+    window.s5CreateWaterfallFinal=s5CreateWaterfallFinal;
+
+
+    if(typeof window.updateUI==='function' && !window.__S5_UPDATEUI_OCEAN_WRAPPED__){
+        const originalUpdateUI = window.updateUI;
+        window.updateUI = function(){
+            const result = originalUpdateUI.apply(this, arguments);
+            setTimeout(()=>s5OceanAutoRefreshOnTeams(), 120);
+            return result;
+        };
+        window.__S5_UPDATEUI_OCEAN_WRAPPED__ = true;
+    }
+
+    // Wrap switchTab so opening Tournament/Admin re-renders the new controls.
+    if(typeof window.switchTab==='function' && !window.__S5_SWITCH_WRAPPED__){
+        const originalSwitch=window.switchTab;
+        window.switchTab=function(tab){
+            originalSwitch(tab);
+            if(tab==='tournament' || tab==='admin'){
+                setTimeout(()=>{
+                    if(tab==='tournament') s5ApplyPublicTournamentChanges();
+                    if(tab==='admin') s5RenderAll();
+                },150);
+            }
+        };
+        window.__S5_SWITCH_WRAPPED__=true;
+    }
+
 })();
 </script>
 
