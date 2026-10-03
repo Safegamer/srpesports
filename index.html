@@ -8920,5 +8920,140 @@
 })();
 </script>
 
+
+<script>
+(function () {
+    'use strict';
+
+    // Keep inline HTML buttons reliable regardless of script scope/order.
+    const expose = (name) => {
+        if (typeof window[name] === 'function') return;
+        const fn = typeof globalThis[name] === 'function' ? globalThis[name] : null;
+        if (fn) window[name] = fn;
+    };
+
+    [
+        's5ScheduleGenerateBalancedDraft',
+        's5ScheduleLoadFromFirebase',
+        's5ScheduleSave',
+        's5ScheduleValidateOnly',
+        's5ScheduleQuickEdit',
+        's5ScheduleEdit',
+        's5ScheduleBuilderRefresh',
+        's5OpenSchedulePicker',
+        's5SchedulePick',
+        's5FilterSchedulePicker',
+        's5CloseSchedulePicker'
+    ].forEach(expose);
+
+    // Missing handler in the previous version.
+    if (typeof window.s5ScheduleValidateOnly !== 'function' &&
+        typeof s5ScheduleValidate === 'function') {
+        window.s5ScheduleValidateOnly = function () {
+            if (currentUserRole !== 'admin') {
+                showToast('Admin access required.', 'error');
+                return false;
+            }
+            const result = s5ScheduleValidate();
+            if (result.valid) {
+                showToast('✅ Ocean League schedule is valid.', 'success');
+                return true;
+            }
+            const shown = (result.errors || []).slice(0, 8).join(' ');
+            const more = result.totalErrors > 8 ? ` +${result.totalErrors - 8} more.` : '';
+            showToast('❌ ' + shown + more, 'error');
+            return false;
+        };
+    }
+
+    // Missing handler in the previous version.
+    if (typeof window.s5ScheduleQuickEdit !== 'function' &&
+        typeof s5ScheduleEdit === 'function') {
+        window.s5ScheduleQuickEdit = function (index) {
+            const row = Array.isArray(s5ScheduleDraft) ? s5ScheduleDraft[index] : null;
+            if (!row) return;
+
+            const currentA = row.slotA ? (getTournamentSlot(row.slotA)?.team?.name || 'OPEN SLOT') : 'OPEN SLOT';
+            const currentB = row.slotB ? (getTournamentSlot(row.slotB)?.team?.name || 'OPEN SLOT') : 'OPEN SLOT';
+
+            const result = prompt(
+                `Quick edit Match #${String(index + 1).padStart(2, '0')}\n\n` +
+                `${currentA} VS ${currentB}\n\n` +
+                `Enter Team A slot,Team B slot\nExample: 1,12`,
+                `${row.slotA || ''},${row.slotB || ''}`
+            );
+
+            if (result === null) return;
+
+            const parts = result.split(',').map(v => Number(v.trim()));
+            if (
+                parts.length !== 2 ||
+                !Number.isInteger(parts[0]) ||
+                !Number.isInteger(parts[1])
+            ) {
+                showToast('Use the format A-slot,B-slot, for example 1,12.', 'error');
+                return;
+            }
+
+            const group = row.group === 'B' ? 'B' : 'A';
+            const min = group === 'A' ? 1 : 13;
+            const max = group === 'A' ? 12 : 24;
+
+            if (parts[0] < min || parts[0] > max || parts[1] < min || parts[1] > max) {
+                showToast(`Both teams must be inside ${group === 'A' ? 'Pacific Ocean' : 'Indian Ocean'}.`, 'error');
+                return;
+            }
+            if (parts[0] === parts[1]) {
+                showToast('A team cannot play itself.', 'error');
+                return;
+            }
+
+            s5ScheduleEdit(index, 'slotA', String(parts[0]));
+            s5ScheduleEdit(index, 'slotB', String(parts[1]));
+        };
+    }
+
+    // Explicit exports for every inline button.
+    [
+        's5ScheduleGenerateBalancedDraft',
+        's5ScheduleLoadFromFirebase',
+        's5ScheduleSave',
+        's5ScheduleEdit',
+        's5ScheduleBuilderRefresh',
+        's5ScheduleValidateOnly',
+        's5ScheduleQuickEdit',
+        's5OpenSchedulePicker',
+        's5SchedulePick',
+        's5FilterSchedulePicker',
+        's5CloseSchedulePicker'
+    ].forEach(expose);
+
+    // Add a visible "working" state so an admin gets feedback from async buttons.
+    const wrapAsyncButton = (name) => {
+        const original = window[name];
+        if (typeof original !== 'function' || original.__s5Wrapped) return;
+        const wrapped = async function (...args) {
+            try {
+                return await original.apply(this, args);
+            } catch (error) {
+                console.error(`[S-5] ${name}:`, error);
+                if (typeof showToast === 'function') {
+                    showToast(`Could not complete ${name.replace(/^s5Schedule/, 'schedule ')}: ${error.message}`, 'error');
+                }
+                throw error;
+            }
+        };
+        wrapped.__s5Wrapped = true;
+        window[name] = wrapped;
+    };
+
+    [
+        's5ScheduleLoadFromFirebase',
+        's5ScheduleSave'
+    ].forEach(wrapAsyncButton);
+
+})();
+</script>
+
 </body>
 </html>
