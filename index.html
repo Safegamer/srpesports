@@ -1517,6 +1517,244 @@
         .ocean-tab-btn.pacific-active { color:#cffafe; }
         .ocean-tab-btn.indian-active { color:#e0f2fe; }
 
+
+        .s5-public-ocean-editor {
+            display:grid;
+            grid-template-columns:1fr;
+            gap:8px;
+        }
+        .s5-public-ocean-slot {
+            display:grid;
+            grid-template-columns:48px minmax(0,1fr);
+            gap:9px;
+            align-items:center;
+            padding:7px;
+            border:1px solid rgba(255,255,255,.06);
+            border-radius:12px;
+            background:rgba(2,6,23,.20);
+        }
+        .s5-public-ocean-slot-label {
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            min-height:38px;
+            border-radius:10px;
+            background:rgba(34,211,238,.055);
+            border:1px solid rgba(103,232,249,.14);
+            color:#67e8f9;
+            font-size:10px;
+            font-weight:900;
+        }
+        .s5-public-ocean-slot-preview {
+            margin-top:3px;
+            padding-left:2px;
+            color:#64748b;
+            font-size:9px;
+            overflow:hidden;
+            white-space:nowrap;
+            text-overflow:ellipsis;
+        }
+        .s5-public-edit-empty {
+            padding:16px;
+            border-radius:12px;
+            border:1px dashed rgba(255,255,255,.09);
+            color:#64748b;
+            text-align:center;
+            font-size:10px;
+        }
+        @media(max-width:700px){
+            .s5-public-ocean-slot { grid-template-columns:42px minmax(0,1fr); }
+        }
+
+
+        /* ============================================================
+           S-5 RELIABLE MOBILE PICKER
+           A single fixed modal is used for Ocean + Schedule controls.
+           It avoids native select menus and nested fixed popovers.
+           ============================================================ */
+        .s5-reliable-picker-overlay {
+            position:fixed;
+            inset:0;
+            z-index:2147483646;
+            display:none;
+            align-items:flex-end;
+            justify-content:center;
+            padding:12px;
+            background:rgba(0,0,0,.58);
+            backdrop-filter:blur(5px);
+            -webkit-backdrop-filter:blur(5px);
+        }
+        .s5-reliable-picker-overlay.open { display:flex; }
+        .s5-reliable-picker-sheet {
+            width:min(560px,100%);
+            max-height:min(82vh,720px);
+            overflow:hidden;
+            border-radius:18px 18px 14px 14px;
+            border:1px solid rgba(103,232,249,.22);
+            background:#020617;
+            box-shadow:0 -20px 70px rgba(0,0,0,.5);
+            display:flex;
+            flex-direction:column;
+        }
+        .s5-reliable-picker-head {
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            padding:13px 14px;
+            border-bottom:1px solid rgba(255,255,255,.07);
+            background:#071525;
+        }
+        .s5-reliable-picker-title {
+            min-width:0;
+            color:#f8fafc;
+            font-size:14px;
+            font-weight:900;
+        }
+        .s5-reliable-picker-subtitle {
+            margin-top:2px;
+            color:#64748b;
+            font-size:9px;
+        }
+        .s5-reliable-picker-close {
+            width:34px;
+            height:34px;
+            flex:0 0 34px;
+            border:0;
+            border-radius:10px;
+            color:#cbd5e1;
+            background:rgba(255,255,255,.06);
+            cursor:pointer;
+        }
+        .s5-reliable-picker-search-wrap {
+            padding:10px;
+            border-bottom:1px solid rgba(255,255,255,.06);
+            background:#040b18;
+        }
+        .s5-reliable-picker-search {
+            width:100%;
+            height:38px;
+            border-radius:10px;
+            border:1px solid rgba(255,255,255,.09);
+            background:#020617;
+            color:#f8fafc;
+            padding:0 11px;
+            outline:none;
+            font-size:12px;
+        }
+        .s5-reliable-picker-list {
+            overflow:auto;
+            -webkit-overflow-scrolling:touch;
+            padding:8px;
+        }
+        .s5-reliable-picker-option {
+            width:100%;
+            min-height:46px;
+            display:grid;
+            grid-template-columns:52px minmax(0,1fr) 22px;
+            align-items:center;
+            gap:8px;
+            border:0;
+            border-radius:10px;
+            background:transparent;
+            color:#cbd5e1;
+            padding:8px 10px;
+            text-align:left;
+            cursor:pointer;
+            touch-action:manipulation;
+        }
+        .s5-reliable-picker-option:hover,
+        .s5-reliable-picker-option:active {
+            background:rgba(34,211,238,.09);
+            color:#ecfeff;
+        }
+        .s5-reliable-picker-option.selected {
+            background:rgba(34,211,238,.12);
+            color:#fff;
+        }
+        .s5-reliable-picker-code {
+            color:#67e8f9;
+            font-size:9px;
+            font-weight:900;
+        }
+        .s5-reliable-picker-name {
+            min-width:0;
+            overflow:hidden;
+            white-space:nowrap;
+            text-overflow:ellipsis;
+            font-size:12px;
+            font-weight:750;
+        }
+        .s5-reliable-picker-check { color:#4ade80; font-size:11px; text-align:right; }
+        .s5-reliable-picker-disabled { opacity:.38; cursor:not-allowed; }
+        .s5-clear-ocean-btn {
+            color:#fca5a5 !important;
+            border-color:rgba(239,68,68,.18) !important;
+        }
+        @media(min-width:701px){
+            .s5-reliable-picker-overlay { align-items:center; }
+            .s5-reliable-picker-sheet { border-radius:18px; }
+        }
+
+
+.s5-reliable-picker-overlay{position:fixed;inset:0;z-index:2147483646;display:none;align-items:flex-end;justify-content:center;padding:12px;background:rgba(0,0,0,.58);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.s5-reliable-picker-overlay.open{display:flex}.s5-reliable-picker-sheet{width:min(560px,100%);max-height:min(82vh,720px);overflow:hidden;border-radius:18px 18px 14px 14px;border:1px solid rgba(103,232,249,.22);background:#020617;box-shadow:0 -20px 70px rgba(0,0,0,.5);display:flex;flex-direction:column}.s5-reliable-picker-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.07);background:#071525}.s5-reliable-picker-title{min-width:0;color:#f8fafc;font-size:14px;font-weight:900}.s5-reliable-picker-subtitle{margin-top:2px;color:#64748b;font-size:9px}.s5-reliable-picker-close{width:34px;height:34px;border:0;border-radius:10px;color:#cbd5e1;background:rgba(255,255,255,.06)}.s5-reliable-picker-search-wrap{padding:10px;border-bottom:1px solid rgba(255,255,255,.06);background:#040b18}.s5-reliable-picker-search{width:100%;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.09);background:#020617;color:#f8fafc;padding:0 11px;outline:none;font-size:12px}.s5-reliable-picker-list{overflow:auto;-webkit-overflow-scrolling:touch;padding:8px}.s5-reliable-picker-option{width:100%;min-height:46px;display:grid;grid-template-columns:52px minmax(0,1fr) 22px;align-items:center;gap:8px;border:0;border-radius:10px;background:transparent;color:#cbd5e1;padding:8px 10px;text-align:left;cursor:pointer;touch-action:manipulation}.s5-reliable-picker-option:hover,.s5-reliable-picker-option:active{background:rgba(34,211,238,.09);color:#ecfeff}.s5-reliable-picker-option.selected{background:rgba(34,211,238,.12);color:#fff}.s5-reliable-picker-code{color:#67e8f9;font-size:9px;font-weight:900}.s5-reliable-picker-name{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px;font-weight:750}.s5-reliable-picker-check{color:#4ade80;font-size:11px;text-align:right}.s5-reliable-picker-disabled{opacity:.38;cursor:not-allowed}.s5-clear-ocean-btn{color:#fca5a5!important;border-color:rgba(239,68,68,.18)!important}
+@media(min-width:701px){.s5-reliable-picker-overlay{align-items:center}.s5-reliable-picker-sheet{border-radius:18px}}
+
+</style>
+
+<style>
+/* ============================================================
+   S5 EMERGENCY STABLE CONTROLS
+   One event-driven interaction layer. No native select popups.
+   ============================================================ */
+.s5-final-hide { display:none !important; }
+.s5-final-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.s5-final-btn{appearance:none;border:1px solid rgba(103,232,249,.18);background:rgba(15,23,42,.72);color:#e2e8f0;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:900;cursor:pointer;transition:.18s ease;touch-action:manipulation}
+.s5-final-btn:hover,.s5-final-btn:focus{outline:none;border-color:rgba(103,232,249,.4);background:rgba(14,165,233,.10);transform:translateY(-1px)}
+.s5-final-btn.primary{background:linear-gradient(135deg,rgba(14,165,233,.82),rgba(59,130,246,.75));border-color:rgba(125,211,252,.34);color:#fff}
+.s5-final-btn.danger{border-color:rgba(248,113,113,.23);background:rgba(239,68,68,.07);color:#fecaca}
+.s5-final-btn.gold{border-color:rgba(250,204,21,.22);background:rgba(250,204,21,.07);color:#fde68a}
+.s5-final-slot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.s5-final-slot{display:grid;grid-template-columns:42px minmax(0,1fr);gap:8px;align-items:center;padding:9px;border:1px solid rgba(255,255,255,.07);border-radius:12px;background:rgba(2,6,23,.26)}
+.s5-final-slot-label{display:flex;align-items:center;justify-content:center;min-height:38px;border-radius:9px;background:rgba(34,211,238,.06);border:1px solid rgba(103,232,249,.15);color:#67e8f9;font-size:10px;font-weight:1000}
+.s5-final-slot-main{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.s5-final-slot-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:850;color:#f8fafc}
+.s5-final-slot-open{color:#64748b}
+.s5-final-slot-change{flex:0 0 auto}
+.s5-final-schedule-day{border:1px solid rgba(255,255,255,.07);border-radius:15px;overflow:hidden;background:rgba(2,6,23,.22)}
+.s5-final-schedule-day-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:rgba(255,255,255,.035);border-bottom:1px solid rgba(255,255,255,.06)}
+.s5-final-schedule-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:9px}
+.s5-final-match{border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:11px;background:rgba(0,0,0,.15);min-width:0}
+.s5-final-match-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}
+.s5-final-match-no{font-size:10px;font-weight:1000;color:#93c5fd}
+.s5-final-pill{font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;border-radius:999px;padding:5px 7px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.16);color:#fbbf24}
+.s5-final-pill.done{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.16);color:#86efac}
+.s5-final-match-meta{font-size:9px;color:#64748b;margin-bottom:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s5-final-matchup{display:grid;grid-template-columns:minmax(0,1fr) 35px minmax(0,1fr);gap:7px;align-items:center}
+.s5-final-team{min-width:0}
+.s5-final-team-name{font-size:10.5px;font-weight:850;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s5-final-team-slot{font-size:8px;color:#64748b;margin-top:2px}
+.s5-final-vs{text-align:center;font-weight:1000;color:#facc15;font-size:10px}
+.s5-final-match-actions{display:flex;justify-content:flex-end;margin-top:9px}
+.s5-final-scrim{position:fixed;inset:0;background:rgba(2,6,23,.72);backdrop-filter:blur(7px);z-index:2147482000;display:flex;align-items:flex-end;justify-content:center;padding:14px}
+.s5-final-sheet{width:min(620px,100%);max-height:min(88vh,760px);overflow:hidden;background:#06111f;border:1px solid rgba(103,232,249,.20);border-radius:18px;box-shadow:0 28px 90px rgba(0,0,0,.6)}
+.s5-final-sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 15px;border-bottom:1px solid rgba(255,255,255,.07)}
+.s5-final-sheet-body{padding:12px 14px;max-height:calc(88vh - 70px);overflow:auto}
+.s5-final-options{display:grid;grid-template-columns:1fr;gap:7px}
+.s5-final-option{width:100%;text-align:left;padding:10px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.025);color:#e2e8f0;font-size:11px;font-weight:750;cursor:pointer;touch-action:manipulation}
+.s5-final-option:hover,.s5-final-option:focus{outline:none;background:rgba(34,211,238,.08);border-color:rgba(103,232,249,.22)}
+.s5-final-option.selected{background:rgba(34,211,238,.10);border-color:rgba(103,232,249,.26)}
+.s5-final-search{width:100%;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:#020617;color:#fff;padding:0 11px;font-size:11px;outline:none;margin-bottom:9px}
+.s5-final-search:focus{border-color:rgba(34,211,238,.35)}
+.s5-final-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.s5-final-field-label{display:block;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;font-weight:900;margin:0 0 5px 2px}
+.s5-final-input{width:100%;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:#020617;color:#fff;padding:0 10px;font-size:11px;outline:none}
+.s5-final-input:focus{border-color:rgba(34,211,238,.35)}
+.s5-final-toggle{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.s5-final-toggle button.active{background:rgba(34,211,238,.10);border-color:rgba(103,232,249,.3);color:#ecfeff}
+.s5-final-status{margin:9px 0 0;padding:9px 11px;border-radius:10px;background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.12);color:#94a3b8;font-size:10px;line-height:1.45}
+@media(max-width:780px){.s5-final-schedule-grid,.s5-final-slot-grid{grid-template-columns:1fr}.s5-final-slot{grid-template-columns:40px minmax(0,1fr)}.s5-final-schedule-grid{padding:7px}.s5-final-btn{min-height:42px}.s5-final-scrim{padding:8px}.s5-final-sheet{border-radius:16px}.s5-final-sheet-body{max-height:82vh}}
 </style>
 </head>
 <body class="flex h-screen overflow-hidden text-slate-200" data-theme="midnight-blue">
@@ -1775,10 +2013,32 @@
             <div class="custom-card mb-8">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
                     <div>
-                        <h2 class="text-2xl font-bold text-white"><i class="fas fa-th-large text-cyan-400 mr-2"></i>Ocean Slot Chart</h2>
-                        <p class="text-xs text-slate-500 mt-1">Every planned slot exists from the start. Registered teams occupy the next available slot automatically.</p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h2 class="text-2xl font-bold text-white"><i class="fas fa-th-large text-cyan-400 mr-2"></i>Ocean Slot Chart</h2>
+                            <span id="tourney-ocean-edit-badge" class="hidden auto-badge"><i class="fas fa-pen"></i> Editing</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Admins can choose exactly which team occupies each Pacific Ocean / Indian Ocean slot.</p>
                     </div>
-                    <span id="tourney-slot-summary" class="text-xs font-bold text-slate-400"></span>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span id="tourney-slot-summary" class="text-xs font-bold text-slate-400"></span>
+                        <div id="tourney-ocean-admin-actions" class="hidden flex flex-wrap gap-2">
+                            <button type="button" id="tourney-ocean-edit-btn" class="custom-btn secondary !py-2 !px-3 text-xs">
+                                <i class="fas fa-pen"></i> Edit Slots
+                            </button>
+                            <button type="button" id="tourney-ocean-reload-btn" class="custom-btn secondary !py-2 !px-3 text-xs">
+                                <i class="fas fa-rotate"></i> Reload
+                            </button>
+                            <button type="button" id="tourney-ocean-clear-btn" class="custom-btn secondary !py-2 !px-3 text-xs s5-clear-ocean-btn">
+                                <i class="fas fa-eraser"></i> Clear All
+                            </button>
+                            <button type="button" id="tourney-ocean-save-btn" class="custom-btn !py-2 !px-3 text-xs hidden">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            <button type="button" id="tourney-ocean-cancel-btn" class="custom-btn secondary !py-2 !px-3 text-xs hidden">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     <div>
@@ -2569,6 +2829,9 @@
                             </div>
                             <button type="button" onclick="s5LoadOceanChartsFromFirebase()" class="custom-btn secondary !py-2 !px-3 text-xs">
                                 <i class="fas fa-rotate"></i> Reload
+                            </button>
+                            <button type="button" id="s5-ocean-clear-btn" class="custom-btn secondary !py-2 !px-3 text-xs s5-clear-ocean-btn">
+                                <i class="fas fa-eraser"></i> Clear All
                             </button>
                             <button type="button" onclick="s5SaveOceanCharts()" class="custom-btn !py-2 !px-3 text-xs">
                                 <i class="fas fa-save"></i> Save
@@ -5258,7 +5521,10 @@
                 const groupSlot = tournamentGroupSlotNumber(i, total);
                 const persisted = persistedBySlot[i] || {};
                 let team = persisted.teamId ? teams.find(t => t.id === persisted.teamId) : null;
-                if (!team && unassigned.length) team = unassigned.shift();
+                // In the final Season 5 manual slot mode, an explicitly empty
+                // persisted slot stays OPEN instead of being auto-filled.
+                const manualOceanMode = window.__S5_FINAL_MANUAL_OCEAN__ === true;
+                if (!team && unassigned.length && !manualOceanMode && !persisted.manualOpen) team = unassigned.shift();
                 result.push({
                     ...persisted,
                     slotNumber: i,
@@ -6739,6 +7005,46 @@
         setTimeout(s5ScheduleBuilderRefresh, 3500);
 
 
+        window.s5ScheduleGenerateBalancedDraft = s5ScheduleGenerateBalancedDraft;
+        window.s5ScheduleLoadFromFirebase = s5ScheduleLoadFromFirebase;
+        window.s5ScheduleSave = s5ScheduleSave;
+        window.s5ScheduleEdit = s5ScheduleEdit;
+        window.s5ScheduleBuilderRefresh = s5ScheduleBuilderRefresh;
+        window.s5ScheduleValidateOnly = function(){
+            if (currentUserRole !== 'admin') {
+                showToast('Admin access required.', 'error');
+                return false;
+            }
+            const result = s5ScheduleValidate();
+            s5ScheduleNotifyValidation(result);
+            return result.valid;
+        };
+        window.s5ScheduleQuickEdit = function(index){
+            const row = Array.isArray(s5ScheduleDraft) ? s5ScheduleDraft[index] : null;
+            if(!row) return;
+            const currentA = row.slotA ? (getTournamentSlot(row.slotA)?.team?.name || 'OPEN SLOT') : 'OPEN SLOT';
+            const currentB = row.slotB ? (getTournamentSlot(row.slotB)?.team?.name || 'OPEN SLOT') : 'OPEN SLOT';
+            const result = prompt(
+                `Quick edit Match #${String(index+1).padStart(2,'0')}\n\n${currentA} VS ${currentB}\n\nEnter Team A slot,Team B slot\nExample: 1,12`,
+                `${row.slotA || ''},${row.slotB || ''}`
+            );
+            if(result === null) return;
+            const parts = result.split(',').map(v=>Number(v.trim()));
+            if(parts.length!==2 || !Number.isInteger(parts[0]) || !Number.isInteger(parts[1])){
+                showToast('Use the format A-slot,B-slot, for example 1,12.','error');
+                return;
+            }
+            const group = row.group === 'B' ? 'B' : 'A';
+            const min = group === 'A' ? 1 : 13;
+            const max = group === 'A' ? 12 : 24;
+            if(parts[0]<min || parts[0]>max || parts[1]<min || parts[1]>max){
+                showToast(`Both teams must be inside ${group === 'A' ? 'Pacific Ocean' : 'Indian Ocean'}.`,'error');
+                return;
+            }
+            if(parts[0]===parts[1]){ showToast('A team cannot play itself.','error'); return; }
+            s5ScheduleEdit(index,'slotA',String(parts[0]));
+            s5ScheduleEdit(index,'slotB',String(parts[1]));
+        };
         window.s5OpenSchedulePicker = s5OpenSchedulePicker;
         window.s5SchedulePick = s5SchedulePick;
         window.s5FilterSchedulePicker = s5FilterSchedulePicker;
@@ -8156,6 +8462,9 @@
         }
 
         s5RenderOceanDrafts();
+        if (typeof window.__s5RefreshPublicOceanEditor === 'function') {
+            window.__s5RefreshPublicOceanEditor();
+        }
     }
 
     function s5RenderOceanDrafts(){
@@ -8226,6 +8535,66 @@
                 ? `<strong class="text-cyan-300">Manual mode:</strong> choose the exact team for A1–A12 and B1–B12. Save when finished.`
                 : `<strong class="text-green-300">Auto mode:</strong> new eligible teams fill the next empty slot automatically.`;
         }
+    }
+
+    // ------------------------------------------------------------
+    // Ocean assignment controls (explicitly defined/exported so the
+    // admin buttons work reliably from inline HTML handlers).
+    // ------------------------------------------------------------
+    function s5SetOceanMode(mode){
+        if(currentUserRole !== 'admin'){
+            showToast('Admin access required.','error');
+            return;
+        }
+
+        const next = mode === 'auto' ? 'auto' : 'manual';
+        s5Progression.oceanMode = next;
+        s5RenderOceanDrafts();
+
+        if(next === 'auto'){
+            s5AutoAssignOceanSlots(false)
+                .then(() => s5RenderOceanDrafts())
+                .catch(e => showToast('Could not auto-assign Ocean slots: '+e.message,'error'));
+        }else{
+            s5SaveProgression()
+                .then(() => showToast('✏️ Ocean assignment is now Manual.','success'))
+                .catch(e => showToast('Could not save Ocean mode: '+e.message,'error'));
+        }
+    }
+
+    async function s5AutoAssignOceanSlots(silent=false){
+        if(currentUserRole !== 'admin') return;
+
+        const all = s5AllSelectableTeams().slice(0,24);
+        const current = s5OceanDraft();
+        const a = [...(current.a || [])];
+        const b = [...(current.b || [])];
+        const used = new Set([...a,...b].filter(Boolean));
+
+        // Fill empty slots in order without moving an already assigned team.
+        const remaining = all.filter(t => !used.has(t.id));
+        let cursor = 0;
+        for(let i=0;i<12 && cursor<remaining.length;i++){
+            if(!a[i]){
+                a[i] = remaining[cursor++].id;
+                used.add(a[i]);
+            }
+        }
+        for(let i=0;i<12 && cursor<remaining.length;i++){
+            if(!b[i]){
+                b[i] = remaining[cursor++].id;
+                used.add(b[i]);
+            }
+        }
+
+        window.s5OceanDraftA = a;
+        window.s5OceanDraftB = b;
+        s5RenderOceanDrafts();
+
+        // Auto mode is intentionally persistent. Saving here also makes the
+        // public Ocean standings use the same slot assignments after refresh.
+        await s5SaveOceanCharts(true);
+        if(!silent) showToast('✅ Ocean slots auto-assigned.','success');
     }
 
     function s5OceanDraft(){
@@ -8879,6 +9248,13 @@
     },1200);
 
     // Expose useful functions for HTML buttons.
+    window.s5SetOceanMode=s5SetOceanMode;
+    window.s5AutoAssignOceanSlots=s5AutoAssignOceanSlots;
+    window.s5OpenOceanTeamPicker=s5OpenOceanTeamPicker;
+    window.s5FilterOceanTeamPicker=s5FilterOceanTeamPicker;
+    window.s5PickOceanTeam=s5PickOceanTeam;
+    window.s5ChangeOceanA=s5ChangeOceanA;
+    window.s5ChangeOceanB=s5ChangeOceanB;
     window.s5LoadOceanChartsFromFirebase=s5LoadOceanChartsFromFirebase;
     window.s5SaveOceanCharts=s5SaveOceanCharts;
     window.s5SelectTop16=s5SelectTop16;
@@ -9055,5 +9431,731 @@
 })();
 </script>
 
+<script>
+(function(){
+    'use strict';
+
+    let publicOceanEdit = false;
+
+    function poEscape(v){
+        return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    }
+
+    function poEnsureDraft(){
+        if(!Array.isArray(window.s5OceanDraftA) || window.s5OceanDraftA.length!==12){
+            window.s5OceanDraftA = deriveTournamentSlots().filter(s=>s.group==='A').map(s=>s.teamId||null);
+        }
+        if(!Array.isArray(window.s5OceanDraftB) || window.s5OceanDraftB.length!==12){
+            window.s5OceanDraftB = deriveTournamentSlots().filter(s=>s.group==='B').map(s=>s.teamId||null);
+        }
+    }
+
+    function poTeamOptions(side,index,selected){
+        poEnsureDraft();
+        const a=window.s5OceanDraftA,b=window.s5OceanDraftB;
+        const current=side==='A'?a:b;
+        const other=side==='A'?b:a;
+        const used=new Set([...other,...current.filter((id,i)=>i!==index && id)].filter(Boolean));
+        const teamsList=s5AllSelectableTeams();
+        let out=`<option value="">OPEN SLOT</option>`;
+        for(const t of teamsList){
+            if(used.has(t.id) && t.id!==selected) continue;
+            const rank=getSortedTeams().findIndex(x=>x.id===t.id)+1;
+            out+=`<option value="${poEscape(t.id)}" ${t.id===selected?'selected':''}>${rank>0?`#${rank} · `:''}${poEscape(t.name)}</option>`;
+        }
+        return out;
+    }
+
+    function poRenderSlot(side,index){
+        poEnsureDraft();
+        const values=side==='A'?window.s5OceanDraftA:window.s5OceanDraftB;
+        const id=values[index]||'';
+        const team=s5TeamById(id);
+        const name=team?.name||'OPEN SLOT';
+        const rank=team ? getSortedTeams().findIndex(t=>t.id===team.id)+1 : null;
+        return `
+            <div class="s5-public-ocean-slot">
+                <span class="s5-public-ocean-slot-label">${side}${index+1}</span>
+                <div class="min-w-0">
+                    <button type="button" class="s5-ocean-team-trigger" aria-haspopup="listbox" aria-expanded="false"
+                        onclick="s5OpenOceanTeamPicker('${side}',${index},this)">
+                        <span class="s5-ocean-team-trigger-left">
+                            <span class="s5-ocean-team-trigger-name" title="${poEscape(name)}">${poEscape(name)}</span>
+                            ${rank ? `<span class="s5-ocean-team-trigger-rank">#${rank}</span>` : ''}
+                        </span>
+                        <i class="fas fa-chevron-down s5-ocean-team-trigger-icon"></i>
+                    </button>
+                    <div class="s5-public-ocean-slot-preview" title="${poEscape(name)}">${poEscape(name)}</div>
+                </div>
+            </div>`;
+    }
+
+    function poRenderChart(){
+        window.__s5RefreshPublicOceanEditor = poRenderChart;
+        const aWrap=document.getElementById('tourney-slots-a');
+        const bWrap=document.getElementById('tourney-slots-b');
+        if(!aWrap || !bWrap) return;
+
+        if(!publicOceanEdit){
+            // Normal public rendering is handled by the original app.
+            return;
+        }
+
+        poEnsureDraft();
+        aWrap.innerHTML='<div class="s5-public-ocean-editor">'+Array.from({length:12},(_,i)=>poRenderSlot('A',i)).join('')+'</div>';
+        bWrap.innerHTML='<div class="s5-public-ocean-editor">'+Array.from({length:12},(_,i)=>poRenderSlot('B',i)).join('')+'</div>';
+    }
+
+    function poSetEditMode(enabled){
+        if(currentUserRole!=='admin'){
+            if(typeof showToast==='function') showToast('Admin access required.','error');
+            return;
+        }
+        publicOceanEdit=!!enabled;
+        const actions=document.getElementById('tourney-ocean-admin-actions');
+        const editBtn=document.getElementById('tourney-ocean-edit-btn');
+        const saveBtn=document.getElementById('tourney-ocean-save-btn');
+        const cancelBtn=document.getElementById('tourney-ocean-cancel-btn');
+        const badge=document.getElementById('tourney-ocean-edit-badge');
+        if(actions) actions.classList.remove('hidden');
+        if(saveBtn) saveBtn.classList.toggle('hidden',!publicOceanEdit);
+        if(cancelBtn) cancelBtn.classList.toggle('hidden',!publicOceanEdit);
+        if(editBtn) editBtn.classList.toggle('hidden',publicOceanEdit);
+        if(badge) badge.classList.toggle('hidden',!publicOceanEdit);
+        if(publicOceanEdit) poEnsureDraft();
+        if(publicOceanEdit) poRenderChart();
+        else {
+            window.__s5RefreshPublicOceanEditor = null;
+            if(typeof window.renderTournamentPage==='function') window.renderTournamentPage();
+        }
+    }
+
+    async function poSave(){
+        if(currentUserRole!=='admin') return;
+        if(!publicOceanEdit) return;
+        try{
+            await s5SaveOceanCharts();
+            publicOceanEdit=false;
+            poSetEditMode(false);
+            if(typeof showToast==='function') showToast('✅ Ocean slot chart saved.','success');
+        }catch(e){
+            console.error('Public Ocean save:',e);
+            if(typeof showToast==='function') showToast('Could not save Ocean slot chart: '+e.message,'error');
+        }
+    }
+
+    function poCancel(){
+        publicOceanEdit=false;
+        if(typeof window.s5LoadOceanChartsFromFirebase==='function'){
+            window.s5LoadOceanChartsFromFirebase().then(()=>poSetEditMode(false));
+        }else{
+            poSetEditMode(false);
+        }
+    }
+
+    function poInit(){
+        const actions=document.getElementById('tourney-ocean-admin-actions');
+        if(!actions) return;
+        if(currentUserRole==='admin') actions.classList.remove('hidden');
+
+        document.getElementById('tourney-ocean-edit-btn')?.addEventListener('click',()=>poSetEditMode(true));
+        document.getElementById('tourney-ocean-save-btn')?.addEventListener('click',poSave);
+        document.getElementById('tourney-ocean-cancel-btn')?.addEventListener('click',poCancel);
+        document.getElementById('tourney-ocean-reload-btn')?.addEventListener('click',async()=>{
+            if(typeof window.s5LoadOceanChartsFromFirebase==='function') await window.s5LoadOceanChartsFromFirebase();
+            publicOceanEdit=false;
+            poSetEditMode(false);
+        });
+    }
+
+
+
+
+
+    document.addEventListener('click', function(e){
+        const target = e.target.closest?.('#tourney-ocean-edit-btn, #tourney-ocean-save-btn, #tourney-ocean-cancel-btn, #tourney-ocean-reload-btn');
+        if (!target) return;
+        if (target.id === 'tourney-ocean-edit-btn') poSetEditMode(true);
+        if (target.id === 'tourney-ocean-save-btn') poSave();
+        if (target.id === 'tourney-ocean-cancel-btn') poCancel();
+        if (target.id === 'tourney-ocean-reload-btn') (async()=>{
+            if(typeof window.s5LoadOceanChartsFromFirebase==='function') await window.s5LoadOceanChartsFromFirebase();
+            publicOceanEdit=false;
+            poSetEditMode(false);
+        })();
+    }, true);
+
+    // Make existing S-5 admin handlers available to touch/inline HTML reliably.
+    const names=['s5SetOceanMode','s5SaveOceanCharts','s5LoadOceanChartsFromFirebase','s5OpenOceanTeamPicker','s5PickOceanTeam',
+                 's5ScheduleGenerateBalancedDraft','s5ScheduleLoadFromFirebase','s5ScheduleSave','s5ScheduleValidateOnly','s5ScheduleQuickEdit',
+                 's5OpenSchedulePicker','s5SchedulePick','s5FilterSchedulePicker'];
+    const expose=()=>{
+        names.forEach(n=>{
+            try{
+                if(typeof window[n]!=='function' && typeof globalThis[n]==='function') window[n]=globalThis[n];
+            }catch(_){ }
+        });
+    };
+
+    window.s5PublicOceanEdit = ()=>poSetEditMode(true);
+    window.s5PublicOceanSave = poSave;
+    window.s5PublicOceanCancel = poCancel;
+    window.s5PublicOceanReload = poCancel;
+
+    // Re-run after the app is rendered because Tournament/Admin sections are dynamic.
+    const boot=()=>{ expose(); poInit(); };
+    setTimeout(boot,600);
+    setTimeout(boot,1500);
+    setTimeout(boot,3000);
+
+    // When switching to Tournament, restore the edit controls after rerender.
+    if(typeof window.switchTab==='function' && !window.__S5_PUBLIC_OCEAN_SWITCH__){
+        const oldSwitch=window.switchTab;
+        window.switchTab=function(tab){
+            oldSwitch.apply(this,arguments);
+            if(tab==='tournament') setTimeout(()=>{poInit();if(publicOceanEdit) poRenderChart();},120);
+        };
+        window.__S5_PUBLIC_OCEAN_SWITCH__=true;
+    }
+
+    if (!window.__S5_PUBLIC_OCEAN_OBSERVER__) {
+        window.__S5_PUBLIC_OCEAN_OBSERVER__ = true;
+        const view = document.getElementById('view-tournament');
+        if (view && window.MutationObserver) {
+            const observer = new MutationObserver(()=>setTimeout(poInit,0));
+            observer.observe(view,{childList:true,subtree:true});
+        }
+    }
+
+})();
+</script>
+
+
+<div id="s5-reliable-picker-overlay" class="s5-reliable-picker-overlay" aria-hidden="true">
+  <div id="s5-reliable-picker-sheet" class="s5-reliable-picker-sheet" role="dialog" aria-modal="true">
+    <div class="s5-reliable-picker-head">
+      <div class="min-w-0">
+        <div id="s5-reliable-picker-title" class="s5-reliable-picker-title">Select</div>
+        <div id="s5-reliable-picker-subtitle" class="s5-reliable-picker-subtitle">Tap an option</div>
+      </div>
+      <button type="button" id="s5-reliable-picker-close" class="s5-reliable-picker-close" aria-label="Close"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div id="s5-reliable-picker-search-wrap" class="s5-reliable-picker-search-wrap hidden">
+      <input id="s5-reliable-picker-search" class="s5-reliable-picker-search" type="search" placeholder="Search team..." autocomplete="off">
+    </div>
+    <div id="s5-reliable-picker-list" class="s5-reliable-picker-list"></div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  let ctx = null;
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+
+  function closePicker(){
+    const o=$('s5-reliable-picker-overlay');
+    if(o){o.classList.remove('open');o.setAttribute('aria-hidden','true');}
+    ctx=null;
+  }
+
+  function openPicker(c){
+    const o=$('s5-reliable-picker-overlay'), t=$('s5-reliable-picker-title'), s=$('s5-reliable-picker-subtitle'), l=$('s5-reliable-picker-list'), sw=$('s5-reliable-picker-search-wrap'), q=$('s5-reliable-picker-search');
+    if(!o||!t||!s||!l) return;
+    ctx=c;
+    t.textContent=c.title||'Select';
+    s.textContent=c.subtitle||'Tap an option';
+    l.innerHTML=c.render();
+    sw.classList.toggle('hidden',!c.search);
+    if(q){q.value='';q.oninput=()=>c.filter&&c.filter(q.value);}
+    o.classList.add('open'); o.setAttribute('aria-hidden','false');
+    if(c.search) setTimeout(()=>q&&q.focus(),80);
+  }
+
+  function oceanDraft(){
+    const a=window.s5OceanDraftA || deriveTournamentSlots().filter(s=>s.group==='A').map(s=>s.teamId||null);
+    const b=window.s5OceanDraftB || deriveTournamentSlots().filter(s=>s.group==='B').map(s=>s.teamId||null);
+    window.s5OceanDraftA=[...a]; window.s5OceanDraftB=[...b];
+    return {a:window.s5OceanDraftA,b:window.s5OceanDraftB};
+  }
+
+  function openOcean(side,index){
+    if(typeof currentUserRole!=='undefined' && currentUserRole!=='admin'){showToast('Admin access required.','error');return;}
+    const d=oceanDraft(), selected=(side==='A'?d.a:d.b)[index]||'';
+    const other=side==='A'?d.b:d.a, same=side==='A'?d.a:d.b;
+    const used=new Set([...other,...same.filter((v,i)=>i!==index&&v)].filter(Boolean));
+    openPicker({
+      title:`${side}${index+1} · ${side==='A'?'Pacific Ocean':'Indian Ocean'}`,
+      subtitle:'Choose the team for this slot', search:true,
+      render:()=>{
+        let out=`<button type="button" class="s5-reliable-picker-option ${!selected?'selected':''}" data-kind="ocean" data-side="${side}" data-index="${index}" data-value=""><span class="s5-reliable-picker-code">OPEN</span><span class="s5-reliable-picker-name">Open Slot</span><span class="s5-reliable-picker-check">${!selected?'✓':''}</span></button>`;
+        s5AllSelectableTeams().forEach(team=>{
+          const disabled=used.has(team.id)&&team.id!==selected, rank=getSortedTeams().findIndex(t=>t.id===team.id)+1;
+          out+=`<button type="button" class="s5-reliable-picker-option ${team.id===selected?'selected':''} ${disabled?'s5-reliable-picker-disabled':''}" ${disabled?'disabled':''} data-kind="ocean" data-side="${side}" data-index="${index}" data-value="${esc(team.id)}"><span class="s5-reliable-picker-code">${rank>0?'#'+rank:''}</span><span class="s5-reliable-picker-name">${esc(team.name)}</span><span class="s5-reliable-picker-check">${team.id===selected?'✓':''}</span></button>`;
+        });
+        return out;
+      },
+      filter:(query)=>filterPicker(query)
+    });
+  }
+
+  function filterPicker(query){
+    const q=String(query||'').toLowerCase();
+    $('s5-reliable-picker-list')?.querySelectorAll('.s5-reliable-picker-option').forEach(btn=>{
+      const name=btn.querySelector('.s5-reliable-picker-name')?.textContent?.toLowerCase()||'';
+      const code=btn.querySelector('.s5-reliable-picker-code')?.textContent?.toLowerCase()||'';
+      btn.style.display=(!q||name.includes(q)||code.includes(q))?'grid':'none';
+    });
+  }
+
+  function openSchedule(index,field){
+    if(typeof currentUserRole!=='undefined' && currentUserRole!=='admin'){showToast('Admin access required.','error');return;}
+    const btn=document.getElementById(`s5-schedule-trigger-${field==='slotA'?'team-a':field==='slotB'?'team-b':field}-${index}`);
+    if(typeof window.s5OpenSchedulePicker==='function' && btn){
+      // The old picker is now only a compatibility fallback. The reliable picker
+      // below is preferred if the schedule draft can be read through the exported helper.
+      if(typeof window.s5ScheduleGetRow==='function'){
+        const row=window.s5ScheduleGetRow(index); if(row) return openScheduleFromRow(index,field,row);
+      }
+    }
+    // Use the currently exported draft array bridge if available.
+    if(window.__s5ScheduleRows && window.__s5ScheduleRows[index]) return openScheduleFromRow(index,field,window.__s5ScheduleRows[index]);
+    // Final fallback: invoke the stable picker; its buttons remain functional.
+    if(typeof window.s5OpenSchedulePicker==='function' && btn){ window.s5OpenSchedulePicker(index,field,btn); return; }
+    showToast('Schedule editor is still loading. Try again in a moment.','error');
+  }
+
+  function openScheduleFromRow(index,field,row){
+    let options=[],selected=null,search=false,title='Select', subtitle='Choose one option';
+    if(field==='day'){selected=Number(row.day);title='Match Day';options=Array.from({length:15},(_,i)=>({value:i+1,code:String(i+1).padStart(2,'0'),label:`Day ${i+1}`}));}
+    else if(field==='round'){selected=Number(row.round);title='Round';options=Array.from({length:5},(_,i)=>({value:i+1,code:`R${i+1}`,label:`Round ${i+1}`}));}
+    else if(field==='group'){selected=row.group;title='Ocean';options=[{value:'A',code:'PAC',label:'Pacific Ocean'},{value:'B',code:'IND',label:'Indian Ocean'}];}
+    else{
+      search=true; selected=Number(field==='slotA'?row.slotA:row.slotB); title=field==='slotA'?'Team A':'Team B';
+      const group=row.group==='B'?'B':'A', start=group==='A'?1:13, end=group==='A'?12:24, other=Number(field==='slotA'?row.slotB:row.slotA);
+      options.push({value:'',code:'OPEN',label:'Open Slot'});
+      for(let sn=start;sn<=end;sn++){const sl=getTournamentSlot(sn), tm=sl?.team; options.push({value:sn,code:`${group}${sl?.groupSlot||sn}`,label:tm?.name||'OPEN SLOT',disabled:sn===other});}
+    }
+    openPicker({title,subtitle,search,render:()=>options.map(o=>`<button type="button" class="s5-reliable-picker-option ${String(o.value)===String(selected)?'selected':''} ${o.disabled?'s5-reliable-picker-disabled':''}" ${o.disabled?'disabled':''} data-kind="schedule" data-index="${index}" data-field="${field}" data-value="${esc(o.value)}"><span class="s5-reliable-picker-code">${esc(o.code)}</span><span class="s5-reliable-picker-name">${esc(o.label)}</span><span class="s5-reliable-picker-check">${String(o.value)===String(selected)?'✓':''}</span></button>`).join(''),filter:(q)=>filterPicker(q)});
+  }
+
+  function chooseOcean(side,index,value){
+    const d=oceanDraft();
+    if(side==='A'){d.a[index]=value||null;if(value)d.b=d.b.map(v=>v===value?null:v);}else{d.b[index]=value||null;if(value)d.a=d.a.map(v=>v===value?null:v);}
+    window.s5OceanDraftA=[...d.a]; window.s5OceanDraftB=[...d.b]; closePicker();
+    if(typeof window.__s5RefreshPublicOceanEditor==='function') window.__s5RefreshPublicOceanEditor();
+    if(typeof window.s5RenderOceanDrafts==='function') window.s5RenderOceanDrafts();
+  }
+
+  function clearAllOcean(){
+    if(typeof currentUserRole!=='undefined' && currentUserRole!=='admin') return showToast('Admin access required.','error');
+    if(!confirm('Clear all 24 Pacific Ocean / Indian Ocean slots? They will become Open Slot. Click Save to publish.')) return;
+    window.s5OceanDraftA=Array(12).fill(null); window.s5OceanDraftB=Array(12).fill(null);
+    if(typeof window.__s5RefreshPublicOceanEditor==='function') window.__s5RefreshPublicOceanEditor();
+    if(typeof window.s5RenderOceanDrafts==='function') window.s5RenderOceanDrafts();
+    showToast('All Ocean slots are Open Slot locally. Click Save to publish.','success');
+  }
+
+  document.addEventListener('pointerup',function(e){
+    const target=e.target.closest?.('#tourney-ocean-clear-btn,#s5-ocean-clear-btn,.s5-ocean-team-trigger,.s5-custom-picker-trigger,.schedule-toolbar button');
+    if(!target)return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if(target.id==='tourney-ocean-clear-btn'||target.id==='s5-ocean-clear-btn') return clearAllOcean();
+    if(target.classList.contains('s5-ocean-team-trigger')){
+      const m=(target.getAttribute('onclick')||'').match(/s5OpenOceanTeamPicker\([\'\"]([AB])[\'\"],\s*(\d+)/); if(m)return openOcean(m[1],Number(m[2]));
+    }
+    if(target.classList.contains('s5-custom-picker-trigger')){
+      const id=target.id||'',m=id.match(/^s5-schedule-trigger-(day|round|group|team-a|team-b)-(\d+)$/); if(m)return openSchedule(Number(m[2]),m[1]==='team-a'?'slotA':m[1]==='team-b'?'slotB':m[1]);
+    }
+    if(target.closest('.schedule-toolbar')){
+      const txt=(target.textContent||'').trim().toLowerCase();
+      if(txt.includes('balanced')) return window.s5ScheduleGenerateBalancedDraft?.(true);
+      if(txt.includes('reload')) return window.s5ScheduleLoadFromFirebase?.();
+      if(txt.includes('validate')) return window.s5ScheduleValidateOnly?.();
+      if(txt.includes('save')) return window.s5ScheduleSave?.();
+    }
+  },true);
+
+  document.addEventListener('pointerup',function(e){
+    const opt=e.target.closest?.('.s5-reliable-picker-option'); if(!opt) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if(opt.dataset.kind==='ocean') return chooseOcean(opt.dataset.side,Number(opt.dataset.index),opt.dataset.value||'');
+    if(opt.dataset.kind==='schedule'){
+      const raw=opt.dataset.value||null; closePicker();
+      if(typeof window.s5SchedulePick==='function') window.s5SchedulePick(Number(opt.dataset.index),opt.dataset.field,raw);
+    }
+  },true);
+
+  $('s5-reliable-picker-close')?.addEventListener('pointerup',function(e){e.preventDefault();closePicker();},true);
+  $('s5-reliable-picker-overlay')?.addEventListener('pointerup',function(e){if(e.target===this)closePicker();},true);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closePicker();});
+  window.addEventListener('resize',closePicker);
+
+  // Bridge for the schedule draft so the reliable mobile picker doesn't need
+  // access to a private IIFE variable.
+  if(typeof window.s5ScheduleGetRow!=='function') window.s5ScheduleGetRow=function(index){
+    return Array.isArray(window.__s5ScheduleRows)?window.__s5ScheduleRows[index]||null:null;
+  };
+
+  // Patch the existing schedule renderer's output after each refresh by reading
+  // the rendered card controls. This creates the lightweight public row bridge.
+  function rebuildScheduleRowBridge(){
+    const triggers=document.querySelectorAll('.s5-custom-picker-trigger');
+    if(!triggers.length) return;
+    const rows=[];
+    triggers.forEach(btn=>{
+      const m=(btn.id||'').match(/^s5-schedule-trigger-(day|round|group|team-a|team-b)-(\d+)$/);
+      if(!m)return;
+      const i=Number(m[2]); rows[i]=rows[i]||{};
+      const val=btn.querySelector('.s5-custom-picker-value')?.textContent?.trim()||'';
+      if(m[1]==='day')rows[i].day=Number((val.match(/\d+/)||['1'])[0]);
+      if(m[1]==='round')rows[i].round=Number((val.match(/\d+/)||['1'])[0]);
+      if(m[1]==='group')rows[i].group=val.includes('Indian')?'B':'A';
+      if(m[1]==='team-a'){const s=getTournamentSlotByDisplay(val);rows[i].slotA=s;}
+      if(m[1]==='team-b'){const s=getTournamentSlotByDisplay(val);rows[i].slotB=s;}
+    });
+    window.__s5ScheduleRows=rows;
+  }
+  function getTournamentSlotByDisplay(val){
+    const m=String(val).match(/([AB])(\d+)/); if(!m)return null; const n=(m[1]==='A'?0:12)+Number(m[2]); return n;
+  }
+  const obs=new MutationObserver(rebuildScheduleRowBridge);
+  const sb=$('schedule-builder-container'); if(sb)obs.observe(sb,{childList:true,subtree:true});
+  setTimeout(rebuildScheduleRowBridge,800); setTimeout(rebuildScheduleRowBridge,1800); setTimeout(rebuildScheduleRowBridge,3200);
+
+  window.s5ReliableClearAllOcean=clearAllOcean;
+})();
+</script>
+
+
+<script>
+(function(){
+  'use strict';
+  window.__S5_FINAL_MANUAL_OCEAN__ = true;
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const esc = v => String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+
+  const state = {
+    oceanA: null,
+    oceanB: null,
+    oceanEditing: false,
+    oceanSnapshotA: null,
+    oceanSnapshotB: null,
+    schedule: [],
+    scheduleReady: false,
+    scheduleLoaded: false,
+    modal: null
+  };
+
+  function toast(msg,type='success'){ try{ if(typeof showToast==='function') showToast(msg,type); }catch(e){ alert(msg); } }
+  function activeAdmin(){ return typeof currentUserRole==='undefined' || currentUserRole==='admin'; }
+
+  function slotTeam(id){ return id ? (teams||[]).find(t=>t.id===id)||null : null; }
+  function slotId(n){ return `slot_${String(n).padStart(3,'0')}`; }
+  function deriveCurrentOcean(){
+    const slots = typeof deriveTournamentSlots==='function' ? deriveTournamentSlots() : [];
+    return {
+      a: Array.from({length:12},(_,i)=>slots.find(s=>Number(s.slotNumber)===i+1)?.teamId||null),
+      b: Array.from({length:12},(_,i)=>slots.find(s=>Number(s.slotNumber)===i+13)?.teamId||null)
+    };
+  }
+  function initOceanDraft(){
+    const cur=deriveCurrentOcean();
+    if(!Array.isArray(state.oceanA)) state.oceanA=[...cur.a];
+    if(!Array.isArray(state.oceanB)) state.oceanB=[...cur.b];
+  }
+  function allEligibleTeams(){
+    if(typeof getSortedTeams==='function') return getSortedTeams().filter(t=>!t.disqualified);
+    return (teams||[]).filter(t=>!t.disqualified);
+  }
+
+  function hideDuplicateOceanEditor(){
+    const old=$('#s5-ocean-a-editor');
+    if(old){
+      const stage=old.closest('.s5-progress-stage');
+      if(stage) stage.classList.add('s5-final-hide');
+    }
+  }
+
+  function ensureOceanPublicActions(){
+    const a=$('#tourney-slots-a'), b=$('#tourney-slots-b');
+    if(!a||!b) return null;
+    const card=a.closest('.custom-card');
+    if(!card) return null;
+
+    let bar=card.querySelector('#s5-final-ocean-actions');
+    if(!bar){
+      bar=document.createElement('div');
+      bar.id='s5-final-ocean-actions';
+      bar.className='s5-final-toolbar mb-4';
+      bar.innerHTML=`
+        <button type="button" data-s5-action="ocean-edit" class="s5-final-btn"><i class="fas fa-pen mr-1"></i> Edit Slots</button>
+        <button type="button" data-s5-action="ocean-clear" class="s5-final-btn danger"><i class="fas fa-eraser mr-1"></i> Clear All</button>
+        <button type="button" data-s5-action="ocean-reload" class="s5-final-btn"><i class="fas fa-rotate mr-1"></i> Reload</button>
+        <button type="button" data-s5-action="ocean-save" class="s5-final-btn primary"><i class="fas fa-save mr-1"></i> Save Changes</button>
+        <button type="button" data-s5-action="ocean-cancel" class="s5-final-btn">Cancel</button>`;
+      const head=card.querySelector('.flex.flex-col.md\\:flex-row.md\\:items-center');
+      if(head) head.insertAdjacentElement('afterend',bar); else card.insertBefore(bar,card.firstChild);
+    }
+    return {a,b,bar};
+  }
+
+  function renderOceanPublic(){
+    if(!activeAdmin()) return;
+    const refs=ensureOceanPublicActions(); if(!refs) return;
+    hideDuplicateOceanEditor();
+    initOceanDraft();
+    const edit=state.oceanEditing;
+    refs.bar.querySelectorAll('[data-s5-action="ocean-save"],[data-s5-action="ocean-cancel"]').forEach(x=>x.style.display=edit?'inline-flex':'none');
+    refs.bar.querySelector('[data-s5-action="ocean-edit"]').style.display=edit?'none':'inline-flex';
+    refs.bar.querySelector('[data-s5-action="ocean-clear"]').style.display=edit?'inline-flex':'none';
+
+    const renderSide=(wrap, vals, side)=>{
+      wrap.innerHTML=`<div class="s5-final-slot-grid">${vals.map((id,i)=>{
+        const t=slotTeam(id); const name=t?.name||'OPEN SLOT';
+        return `<div class="s5-final-slot">
+          <span class="s5-final-slot-label">${side}${i+1}</span>
+          <div class="s5-final-slot-main">
+            <span class="s5-final-slot-name ${t?'':'s5-final-slot-open'}" title="${esc(name)}">${esc(name)}</span>
+            ${edit?`<button type="button" class="s5-final-btn s5-final-slot-change" data-s5-action="ocean-pick" data-side="${side}" data-index="${i}"><i class="fas fa-pen"></i></button>`:''}
+          </div>
+        </div>`;
+      }).join('')}</div>`;
+    };
+    renderSide(refs.a,state.oceanA,'A');
+    renderSide(refs.b,state.oceanB,'B');
+  }
+
+  function openOceanPicker(side,index){
+    initOceanDraft();
+    const current=side==='A'?state.oceanA[index]:state.oceanB[index];
+    const other=side==='A'?state.oceanB:state.oceanA;
+    const same=side==='A'?state.oceanA:state.oceanB;
+    const used=new Set([...other,...same.filter((x,i)=>i!==index&&x)].filter(Boolean));
+    openSheet(`${side}${index+1} · ${side==='A'?'Pacific Ocean':'Indian Ocean'}`,'Choose a team for this slot',true,(query)=>{
+      let html=`<div class="s5-final-options">`;
+      html+=`<button type="button" class="s5-final-option ${!current?'selected':''}" data-s5-modal-action="ocean-pick" data-side="${side}" data-index="${index}" data-value=""><b>OPEN SLOT</b><span class="float-right">${!current?'✓':''}</span></button>`;
+      const q=String(query||'').toLowerCase();
+      allEligibleTeams().forEach(t=>{
+        if(used.has(t.id)&&t.id!==current) return;
+        const rank=(typeof getSortedTeams==='function'?getSortedTeams().findIndex(x=>x.id===t.id)+1:0);
+        if(q && !String(t.name||'').toLowerCase().includes(q) && !String(rank).includes(q)) return;
+        html+=`<button type="button" class="s5-final-option ${t.id===current?'selected':''}" data-s5-modal-action="ocean-pick" data-side="${side}" data-index="${index}" data-value="${esc(t.id)}"><span><b>${rank>0?'#'+rank+' · ':''}${esc(t.name)}</b></span><span class="float-right">${t.id===current?'✓':''}</span></button>`;
+      });
+      html+=`</div>`; return html;
+    });
+  }
+
+  async function saveOcean(){
+    if(!activeAdmin()||!db) return;
+    initOceanDraft();
+    const ids=[...state.oceanA,...state.oceanB].filter(Boolean);
+    if(new Set(ids).size!==ids.length){toast('A team cannot occupy two Ocean slots.','error');return;}
+    try{
+      const batch=db.batch();
+      for(let i=0;i<12;i++){
+        const ref=db.collection('tournament_slots').doc(slotId(i+1));
+        const t=slotTeam(state.oceanA[i]);
+        batch.set(ref,{slotNumber:i+1,group:'A',groupSlot:i+1,teamId:t?.id||null,teamName:t?.name||null,manualOpen:!t,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      }
+      for(let i=0;i<12;i++){
+        const n=i+13, ref=db.collection('tournament_slots').doc(slotId(n));
+        const t=slotTeam(state.oceanB[i]);
+        batch.set(ref,{slotNumber:n,group:'B',groupSlot:i+1,teamId:t?.id||null,teamName:t?.name||null,manualOpen:!t,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      }
+      await batch.commit();
+      state.oceanSnapshotA=[...state.oceanA]; state.oceanSnapshotB=[...state.oceanB]; state.oceanEditing=false;
+      toast('✅ Pacific Ocean and Indian Ocean slots saved.','success');
+      renderOceanPublic();
+      if(typeof renderTournamentPage==='function') renderTournamentPage();
+      setTimeout(renderOceanPublic,50);
+    }catch(e){toast('Could not save Ocean slots: '+e.message,'error');}
+  }
+
+  async function clearOcean(){
+    if(!activeAdmin()) return;
+    if(!state.oceanEditing) state.oceanEditing=true;
+    if(!confirm('Clear all 24 Ocean slots? All will become OPEN SLOT. Click Save Changes to publish.')) return;
+    state.oceanA=Array(12).fill(null); state.oceanB=Array(12).fill(null); renderOceanPublic();
+    toast('All Ocean slots are now OPEN SLOT locally. Click Save Changes to publish.','success');
+  }
+
+  function cancelOcean(){
+    if(Array.isArray(state.oceanSnapshotA)) state.oceanA=[...state.oceanSnapshotA];
+    if(Array.isArray(state.oceanSnapshotB)) state.oceanB=[...state.oceanSnapshotB];
+    state.oceanEditing=false; renderOceanPublic();
+  }
+
+  async function reloadOcean(){
+    try{
+      const snap=await db.collection('tournament_slots').get(); const map={}; snap.forEach(d=>map[Number(d.data().slotNumber)]=d.data());
+      state.oceanA=Array.from({length:12},(_,i)=>map[i+1]?.teamId||null);
+      state.oceanB=Array.from({length:12},(_,i)=>map[i+13]?.teamId||null);
+      state.oceanSnapshotA=[...state.oceanA]; state.oceanSnapshotB=[...state.oceanB]; state.oceanEditing=false;
+      renderOceanPublic(); toast('Ocean slots reloaded from Firebase.','success');
+    }catch(e){toast('Could not reload Ocean slots: '+e.message,'error');}
+  }
+
+  // -------------------- schedule --------------------
+  function normalizeSchedule(rows){
+    const sorted=(rows||[]).filter(m=>m.stage==='league').sort((a,b)=>(Number(a.day)||99)-(Number(b.day)||99)||(Number(a.round)||99)-(Number(b.round)||99)||String(a.id).localeCompare(String(b.id)));
+    return Array.from({length:60},(_,i)=>{
+      const m=sorted[i];
+      return {id:m?.id||`L-${String(i+1).padStart(3,'0')}`,day:Number(m?.day)||Math.floor(i/4)+1,round:Number(m?.round)||Math.floor(i/12)+1,group:m?.group==='B'?'B':'A',slotA:Number(m?.slotA)||null,slotB:Number(m?.slotB)||null,resultStatus:m?.resultStatus||'pending',teamAScore:m?.teamAScore??null,teamBScore:m?.teamBScore??null,winnerTeamId:m?.winnerTeamId||null};
+    });
+  }
+  function makeBalanced(){
+    function group(group,start){
+      const ids=Array.from({length:12},(_,i)=>start+i); const out=[];
+      // circle schedule: 11 rounds, select first 5, giving 60 total pairings.
+      let arr=[...ids];
+      for(let r=1;r<=5;r++){
+        for(let i=0;i<6;i++){
+          const a=arr[i],b=arr[arr.length-1-i]; out.push({group,round:r,slotA:a,slotB:b});
+        }
+        arr=[arr[0],arr[arr.length-1],...arr.slice(1,-1)];
+      }
+      return out;
+    }
+    const a=group('A',1),b=group('B',13), rows=[]; let day=1;
+    for(let i=0;i<30;i+=2){ rows.push({...a[i],day},{...a[i+1],day},{...b[i],day},{...b[i+1],day}); day++; }
+    return rows.map((m,i)=>({...m,id:`L-${String(i+1).padStart(3,'0')}`,resultStatus:'pending',teamAScore:null,teamBScore:null,winnerTeamId:null}));
+  }
+  async function loadSchedule(){
+    try{
+      const snap=await db.collection('tournament_matches').where('stage','==','league').get(); const rows=[]; snap.forEach(d=>rows.push({id:d.id,...d.data()}));
+      state.schedule=rows.length?normalizeSchedule(rows):makeBalanced(); state.scheduleReady=true; state.scheduleLoaded=true; renderSchedule(); toast(`Loaded ${rows.length||60} league matches.`,'success');
+    }catch(e){toast('Could not load schedule: '+e.message,'error');}
+  }
+  function scheduleTeamName(n){const s=getTournamentSlot(n),t=s?.team;return t?.name||'OPEN SLOT';}
+  function validateSchedule(){
+    const e=[],days={},groups={A:0,B:0},appear={};
+    state.schedule.forEach((m,i)=>{const d=Number(m.day),g=m.group==='B'?'B':'A',a=Number(m.slotA),b=Number(m.slotB);days[d]=(days[d]||0)+1;groups[g]++;appear[a]=(appear[a]||0)+1;appear[b]=(appear[b]||0)+1;if(a===b)e.push(`Match ${i+1}: same team selected.`);if(!(a>0&&a<=(g==='A'?12:24)&&b>0&&b<=(g==='A'?12:24)))e.push(`Match ${i+1}: wrong Ocean slots.`);});
+    for(let d=1;d<=15;d++)if((days[d]||0)!==4)e.push(`Day ${d}: needs exactly 4 matches.`);
+    if(groups.A!==30)e.push('Pacific Ocean needs 30 matches.'); if(groups.B!==30)e.push('Indian Ocean needs 30 matches.');
+    for(let n=1;n<=24;n++)if((appear[n]||0)!==5)e.push(`Slot ${n}: needs 5 matches, has ${appear[n]||0}.`);
+    return {valid:e.length===0,errors:e};
+  }
+  function renderSchedule(){
+    const wrap=$('#schedule-builder-container'); if(!wrap||!activeAdmin()) return;
+    if(!Array.isArray(state.schedule)||state.schedule.length!==60) state.schedule=makeBalanced();
+    const days=[];
+    for(let d=1;d<=15;d++){
+      const rows=state.schedule.map((m,i)=>({m,i})).filter(x=>Number(x.m.day)===d);
+      days.push(`<div class="s5-final-schedule-day"><div class="s5-final-schedule-day-head"><div><div class="font-black text-white">Day ${d}</div><div class="text-[10px] text-slate-500">${rows.length}/4 matches</div></div><span class="s5-final-pill ${rows.length===4?'done':''}">${rows.length===4?'READY':'EDIT'}</span></div><div class="s5-final-schedule-grid">${rows.map(({m,i})=>{const done=m.resultStatus==='completed';return `<div class="s5-final-match"><div class="s5-final-match-head"><span class="s5-final-match-no">#${String(i+1).padStart(2,'0')}</span><span class="s5-final-pill ${done?'done':''}">${done?'Locked':'Pending'}</span></div><div class="s5-final-match-meta">${m.group==='B'?'Indian Ocean':'Pacific Ocean'} · Day ${m.day} · Round ${m.round}</div><div class="s5-final-matchup"><div class="s5-final-team"><div class="s5-final-team-name">${esc(scheduleTeamName(m.slotA))}</div><div class="s5-final-team-slot">${m.slotA?'Slot '+m.slotA:'Open'}</div></div><div class="s5-final-vs">VS</div><div class="s5-final-team"><div class="s5-final-team-name">${esc(scheduleTeamName(m.slotB))}</div><div class="s5-final-team-slot">${m.slotB?'Slot '+m.slotB:'Open'}</div></div></div><div class="s5-final-match-actions">${done?'':'<button type="button" data-s5-action="schedule-edit" data-index="'+i+'" class="s5-final-btn"><i class="fas fa-pen mr-1"></i>Edit Match</button>'}</div></div>`}).join('')}</div></div>`);
+    }
+    wrap.innerHTML=days.join('');
+  }
+  function saveSchedule(){
+    const v=validateSchedule(); if(!v.valid){toast('❌ '+v.errors.slice(0,6).join(' '),'error');return;}
+    const existing=new Map((tournamentMatches||[]).filter(m=>m.stage==='league').map(m=>[m.id,m]));
+    for(const m of state.schedule){const old=existing.get(m.id); if(old?.resultStatus==='completed' && (Number(old.day)!==Number(m.day)||Number(old.round)!==Number(m.round)||old.group!==m.group||Number(old.slotA)!==Number(m.slotA)||Number(old.slotB)!==Number(m.slotB))){toast(`Completed match ${m.id} is locked.`,'error');return;}}
+    const batch=db.batch();
+    state.schedule.forEach((m,i)=>{const id=existing.has(m.id)?m.id:`L-${String(i+1).padStart(3,'0')}`,ref=db.collection('tournament_matches').doc(id),old=existing.get(m.id);batch.set(ref,{stage:'league',format:'league',day:Number(m.day),round:Number(m.round),group:m.group,slotA:Number(m.slotA),slotB:Number(m.slotB),resultStatus:old?.resultStatus||'pending',teamAId:old?.teamAId||null,teamBId:old?.teamBId||null,teamAName:old?.teamAName||null,teamBName:old?.teamBName||null,teamAScore:old?.teamAScore??null,teamBScore:old?.teamBScore??null,winnerTeamId:old?.winnerTeamId||null,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});});
+    batch.set(db.collection('settings').doc('tournament_format'),{leagueScheduleMode:'manual',leagueScheduleVersion:Date.now(),leagueScheduleUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    return batch.commit().then(()=>{window.__SRP_S5_MANUAL_SCHEDULE__=true;toast('✅ 60-match schedule saved.','success');loadSchedule();});
+  }
+  function editSchedule(index){
+    const row=state.schedule[index]; if(!row||row.resultStatus==='completed')return;
+    let draft={...row};
+    function teamList(field){
+      const group=draft.group==='B'?'B':'A',min=group==='A'?1:13,max=group==='A'?12:24,other=Number(field==='slotA'?draft.slotB:draft.slotA);let h='<div class="s5-final-options">';
+      for(let n=min;n<=max;n++){const s=getTournamentSlot(n),name=s?.team?.name||'OPEN SLOT';const sel=Number(field==='slotA'?draft.slotA:draft.slotB)===n;h+=`<button type="button" class="s5-final-option ${sel?'selected':''}" data-s5-modal-action="schedule-team" data-index="${index}" data-field="${field}" data-value="${n}" ${n===other?'disabled':''}>${esc(group)}${s?.groupSlot||'?'} · ${esc(name)} ${sel?'✓':''}</button>`;}return h+'</div>';
+    }
+    openFormSheet(`Edit Match #${String(index+1).padStart(2,'0')}`,()=>{
+      return `<div class="s5-final-form-grid"><div><label class="s5-final-field-label">Day</label><input id="s5-final-day" class="s5-final-input" type="number" min="1" max="15" value="${Number(draft.day)||1}"></div><div><label class="s5-final-field-label">Round</label><input id="s5-final-round" class="s5-final-input" type="number" min="1" max="5" value="${Number(draft.round)||1}"></div></div><div class="s5-final-field-label">Ocean</div><div class="s5-final-toggle"><button type="button" class="s5-final-btn ${draft.group==='A'?'active':''}" data-s5-modal-action="schedule-group" data-value="A">Pacific Ocean</button><button type="button" class="s5-final-btn ${draft.group==='B'?'active':''}" data-s5-modal-action="schedule-group" data-value="B">Indian Ocean</button></div><div class="s5-final-status"><b>Team A:</b> ${esc(scheduleTeamName(draft.slotA))}<br><b>Team B:</b> ${esc(scheduleTeamName(draft.slotB))}</div><div class="s5-final-toolbar mt-3"><button type="button" class="s5-final-btn" data-s5-modal-action="schedule-team-open" data-field="slotA">Choose Team A</button><button type="button" class="s5-final-btn" data-s5-modal-action="schedule-team-open" data-field="slotB">Choose Team B</button></div><div class="s5-final-toolbar mt-3"><button type="button" class="s5-final-btn primary" data-s5-modal-action="schedule-save-edit">Save Match</button><button type="button" class="s5-final-btn" data-s5-modal-action="close">Cancel</button></div>`;
+    },()=>{ draft.day=Number($('#s5-final-day')?.value)||1; draft.round=Number($('#s5-final-round')?.value)||1; state.schedule[index]=draft; closeSheet(); renderSchedule(); });
+    state.modalDraft=draft;
+    state.modalScheduleIndex=index;
+    state.modalScheduleTeamList=teamList;
+  }
+
+  // Generic bottom sheet. All choices use buttons, not <select>.
+  function openSheet(title,subtitle,search,renderer){
+    closeSheet(); const scrim=document.createElement('div');scrim.id='s5-final-modal';scrim.className='s5-final-scrim';scrim.innerHTML=`<div class="s5-final-sheet" role="dialog" aria-modal="true"><div class="s5-final-sheet-head"><div class="min-w-0"><div class="font-black text-white">${esc(title)}</div><div class="text-[10px] text-slate-500">${esc(subtitle)}</div></div><button type="button" class="s5-final-btn" data-s5-modal-action="close"><i class="fas fa-xmark"></i></button></div><div class="s5-final-sheet-body">${search?'<input id="s5-final-search" class="s5-final-search" placeholder="Search team..." autocomplete="off">':''}<div id="s5-final-sheet-content"></div></div></div>`;document.body.appendChild(scrim);state.modal={renderer,search,title};
+    const render=()=>{const c=$('#s5-final-sheet-content');if(c)c.innerHTML=renderer(search?$('#s5-final-search')?.value:'');};render();
+    $('#s5-final-search')?.addEventListener('input',render); setTimeout(()=>$('#s5-final-search')?.focus(),20);
+  }
+  function openFormSheet(title,render,onSave){
+    openSheet(title,'Edit values and save',false,()=>render()); state.formOnSave=onSave;
+  }
+  function closeSheet(){const x=$('#s5-final-modal');if(x)x.remove();state.modal=null;state.formOnSave=null;}
+
+  document.addEventListener('pointerup',async e=>{
+    const target=e.target.closest?.('[data-s5-action]'); if(target){
+      const action=target.dataset.s5Action;
+      if(['ocean-edit','ocean-clear','ocean-reload','ocean-save','ocean-cancel','ocean-pick','schedule-edit','schedule-generate','schedule-reload','schedule-validate','schedule-save'].includes(action)) {e.preventDefault();e.stopPropagation();}
+      if(action==='ocean-edit'){initOceanDraft();state.oceanSnapshotA=[...state.oceanA];state.oceanSnapshotB=[...state.oceanB];state.oceanEditing=true;renderOceanPublic();return;}
+      if(action==='ocean-clear'){clearOcean();return;}
+      if(action==='ocean-reload'){reloadOcean();return;}
+      if(action==='ocean-save'){saveOcean();return;}
+      if(action==='ocean-cancel'){cancelOcean();return;}
+      if(action==='ocean-pick'){openOceanPicker(target.dataset.side,Number(target.dataset.index));return;}
+      if(action==='schedule-edit'){editSchedule(Number(target.dataset.index));return;}
+      if(action==='schedule-generate'){state.schedule=makeBalanced();state.scheduleReady=true;renderSchedule();toast('Balanced 60-match draft prepared locally.','success');return;}
+      if(action==='schedule-reload'){loadSchedule();return;}
+      if(action==='schedule-validate'){const v=validateSchedule();toast(v.valid?'✅ Schedule is valid.':'❌ '+v.errors.slice(0,6).join(' '),v.valid?'success':'error');return;}
+      if(action==='schedule-save'){saveSchedule();return;}
+    }
+
+    const opt=e.target.closest?.('[data-s5-modal-action]'); if(opt){
+      e.preventDefault();e.stopPropagation();const a=opt.dataset.s5ModalAction;
+      if(a==='close'){closeSheet();return;}
+      if(a==='ocean-pick'){const side=opt.dataset.side,index=Number(opt.dataset.index),id=opt.dataset.value||null;if(side==='A'){state.oceanA[index]=id;if(id)state.oceanB=state.oceanB.map(v=>v===id?null:v);}else{state.oceanB[index]=id;if(id)state.oceanA=state.oceanA.map(v=>v===id?null:v);}closeSheet();renderOceanPublic();return;}
+      if(a==='schedule-team-open'){const field=opt.dataset.field;closeSheet();const idx=state.modalScheduleIndex;const draft=state.modalDraft;const group=draft.group==='B'?'B':'A';const current=Number(field==='slotA'?draft.slotA:draft.slotB);const other=Number(field==='slotA'?draft.slotB:draft.slotA);const min=group==='A'?1:13,max=group==='A'?12:24;openSheet(field==='slotA'?'Choose Team A':'Choose Team B','Select a slot',true,(q)=>{q=(q||'').toLowerCase();let h='<div class="s5-final-options">';for(let n=min;n<=max;n++){if(n===other)continue;const s=getTournamentSlot(n),name=s?.team?.name||'OPEN SLOT';if(q&&!name.toLowerCase().includes(q)&&!String(n).includes(q))continue;h+=`<button type="button" class="s5-final-option ${current===n?'selected':''}" data-s5-modal-action="schedule-team" data-index="${idx}" data-field="${field}" data-value="${n}">${group}${s?.groupSlot||'?'} · ${esc(name)} ${current===n?'✓':''}</button>`;}return h+'</div>';});state.scheduleTeamReturn={idx,field};return;}
+      if(a==='schedule-team'){const idx=Number(opt.dataset.index),field=opt.dataset.field,val=Number(opt.dataset.value);if(state.scheduleTeamReturn){state.modalDraft=state.modalDraft||{...state.schedule[idx]};state.modalDraft[field]=val;const d=state.modalDraft;closeSheet();editSchedule(idx);state.modalDraft=d;return;}state.schedule[idx][field]=val;closeSheet();renderSchedule();return;}
+      if(a==='schedule-group'){const idx=state.modalScheduleIndex;if(idx!=null){state.modalDraft=state.modalDraft||{...state.schedule[idx]};state.modalDraft.group=opt.dataset.value==='B'?'B':'A';const start=state.modalDraft.group==='A'?1:13;if(!(Number(state.modalDraft.slotA)>=start&&Number(state.modalDraft.slotA)<start+12))state.modalDraft.slotA=start;if(!(Number(state.modalDraft.slotB)>=start&&Number(state.modalDraft.slotB)<start+12))state.modalDraft.slotB=start+1;closeSheet();editSchedule(idx);}return;}
+      if(a==='schedule-save-edit'){const idx=state.modalScheduleIndex;if(idx!=null&&state.formOnSave)state.formOnSave();return;}
+    }
+  },true);
+
+  // Dedicated schedule toolbar generated here; never depends on old button classes.
+  function ensureScheduleToolbar(){
+    const wrap=$('#schedule-builder-container'); if(!wrap||!activeAdmin())return;
+    const parent=wrap.parentElement; if(!parent)return;
+    let bar=parent.querySelector('#s5-final-schedule-actions');
+    if(!bar){bar=document.createElement('div');bar.id='s5-final-schedule-actions';bar.className='s5-final-toolbar mb-4';bar.innerHTML=`<button type="button" data-s5-action="schedule-generate" class="s5-final-btn"><i class="fas fa-wand-magic-sparkles mr-1"></i> Balanced Draft</button><button type="button" data-s5-action="schedule-reload" class="s5-final-btn"><i class="fas fa-rotate mr-1"></i> Reload</button><button type="button" data-s5-action="schedule-validate" class="s5-final-btn"><i class="fas fa-check-double mr-1"></i> Validate</button><button type="button" data-s5-action="schedule-save" class="s5-final-btn primary"><i class="fas fa-save mr-1"></i> Save Schedule</button>`;wrap.insertAdjacentElement('beforebegin',bar);}
+    if(!state.scheduleReady){state.schedule=makeBalanced();state.scheduleReady=true;}
+  }
+
+  function hideOldScheduleToolbar(){
+    const wrap=$('#schedule-builder-container'); if(!wrap)return;
+    const card=wrap.closest('.custom-card');
+    if(!card)return;
+    card.querySelectorAll('.schedule-toolbar').forEach(x=>{if(x.id!=='s5-final-schedule-actions')x.classList.add('s5-final-hide');});
+  }
+
+  function refresh(){
+    if(typeof currentUserRole!=='undefined'&&currentUserRole!=='admin')return;
+    hideDuplicateOceanEditor();
+    renderOceanPublic();
+    ensureScheduleToolbar(); hideOldScheduleToolbar(); renderSchedule();
+  }
+
+  // Prevent the legacy tournament renderer from immediately replacing the stable UI.
+  if(typeof window.renderTournamentPage==='function'&&!window.__S5_FINAL_RENDER_WRAP__){
+    const orig=window.renderTournamentPage;
+    window.renderTournamentPage=function(){const r=orig.apply(this,arguments);setTimeout(refresh,0);return r;};
+    window.__S5_FINAL_RENDER_WRAP__=true;
+  }
+
+  // Observe dynamic tab content. The observer only asks for a stable repaint;
+  // our own rendered nodes carry unique classes and won't recurse indefinitely.
+  if(window.MutationObserver&&!window.__S5_FINAL_OBSERVER__){
+    window.__S5_FINAL_OBSERVER__=true;
+    const obs=new MutationObserver(()=>{if(!$('#s5-final-ocean-actions')||!$('.s5-final-schedule-day'))setTimeout(refresh,0);});
+    obs.observe(document.body,{childList:true,subtree:true});
+  }
+
+  // Patch switchTab with explicit refresh after navigation.
+  if(typeof window.switchTab==='function'&&!window.__S5_FINAL_SWITCH_WRAP__){
+    const old=window.switchTab; window.switchTab=function(tab){const r=old.apply(this,arguments);if(tab==='tournament'||tab==='admin')setTimeout(refresh,80);return r;}; window.__S5_FINAL_SWITCH_WRAP__=true;
+  }
+
+  setTimeout(refresh,300);setTimeout(refresh,900);setTimeout(refresh,1800);
+})();
+</script>
 </body>
 </html>
