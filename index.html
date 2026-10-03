@@ -2069,7 +2069,6 @@
                     </div>
                 </div>
             </div>
->
 
             <div class="custom-card mb-8">
                 <div class="p-5 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -2873,6 +2872,9 @@
                         <div class="s5-control-actions">
                             <button type="button" onclick="s5SelectTop16()" class="custom-btn secondary !py-2 !px-3 text-xs">
                                 <i class="fas fa-list-ol"></i> Select Top 16
+                            </button>
+                            <button type="button" id="s5-reset-top16-btn" class="custom-btn secondary !py-2 !px-3 text-xs" data-s5-action="reset-top16">
+                                <i class="fas fa-rotate-left"></i> Reset Top 16
                             </button>
                             <button type="button" onclick="s5DistributeTop16ToLake()" class="custom-btn gold-btn !py-2 !px-3 text-xs">
                                 <i class="fas fa-water"></i> Distribute 8 + 8
@@ -9258,6 +9260,7 @@
     window.s5LoadOceanChartsFromFirebase=s5LoadOceanChartsFromFirebase;
     window.s5SaveOceanCharts=s5SaveOceanCharts;
     window.s5SelectTop16=s5SelectTop16;
+    window.resetTop16=resetTop16;
     window.s5DistributeTop16ToLake=s5DistributeTop16ToLake;
     window.s5LoadLakeFromTop16=s5LoadLakeFromTop16;
     window.s5SaveLakeKnockout=s5SaveLakeKnockout;
@@ -9998,6 +10001,33 @@
     }catch(e){toast('Could not reload Ocean slots: '+e.message,'error');}
   }
 
+
+  async function resetTop16(){
+    if(!activeAdmin()) return;
+    let selected=[];
+    try{
+      const snap=await db.collection('settings').doc('tournament_progression').get();
+      selected=Array.isArray(snap.data()?.selectedTop16)?snap.data().selectedTop16:[];
+    }catch(e){ console.warn('Top16 reset read failed:',e); }
+    if(!selected.length){
+      toast('Top 16 is already empty.','success');
+      return;
+    }
+    if(!confirm('Reset the selected Top 16? This will not delete teams, leaderboard results, or Ocean slots.')) return;
+    try{
+      await db.collection('settings').doc('tournament_progression').set({
+        selectedTop16:[],
+        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+      },{merge:true});
+      const list=document.getElementById('s5-top16-list');
+      if(list) list.innerHTML='<div class="text-xs text-slate-500">No Top 16 selection is currently saved.</div>';
+      toast('✅ Top 16 reset.','success');
+    }catch(e){
+      console.error('Top16 reset:',e);
+      toast('Could not reset Top 16: '+e.message,'error');
+    }
+  }
+
   // -------------------- schedule --------------------
   function normalizeSchedule(rows){
     const sorted=(rows||[]).filter(m=>m.stage==='league').sort((a,b)=>(Number(a.day)||99)-(Number(b.day)||99)||(Number(a.round)||99)-(Number(b.round)||99)||String(a.id).localeCompare(String(b.id)));
@@ -10084,6 +10114,8 @@
   function closeSheet(){const x=$('#s5-final-modal');if(x)x.remove();state.modal=null;state.formOnSave=null;}
 
   document.addEventListener('pointerup',async e=>{
+    const reset=e.target.closest?.('#s5-reset-top16-btn,[data-s5-action="reset-top16"]');
+    if(reset){ e.preventDefault(); e.stopImmediatePropagation(); return window.resetTop16?.(); }
     const target=e.target.closest?.('[data-s5-action]'); if(target){
       const action=target.dataset.s5Action;
       if(['ocean-edit','ocean-clear','ocean-reload','ocean-save','ocean-cancel','ocean-pick','schedule-edit','schedule-generate','schedule-reload','schedule-validate','schedule-save'].includes(action)) {e.preventDefault();e.stopPropagation();}
@@ -10129,8 +10161,17 @@
 
   function refresh(){
     if(typeof currentUserRole!=='undefined'&&currentUserRole!=='admin')return;
+
+    const publicA=document.getElementById('tourney-slots-a');
+    const publicB=document.getElementById('tourney-slots-b');
+    if(publicA&&publicB){
+      const publicCard=publicA.closest('.custom-card');
+      if(publicCard) publicCard.classList.remove('hidden','s5-final-hide');
+    }
+
     hideDuplicateOceanEditor();
     renderOceanPublic();
+    ensureOceanPublicActions();
     ensureScheduleToolbar(); hideOldScheduleToolbar(); renderSchedule();
   }
 
