@@ -2735,61 +2735,6 @@
 
 
             <!-- ============================== -->
-            <!-- ADMIN LEAGUE SCHEDULE BUILDER   -->
-            <!-- ============================== -->
-            <div class="custom-card schedule-builder-card mb-10" style="animation-delay:.092s;">
-                <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4 mb-5">
-                    <div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <h2 class="text-2xl font-black text-cyan-300 flex items-center gap-2">
-                                <i class="fas fa-calendar-days"></i> Ocean League Schedule Builder
-                            </h2>
-                            <span id="schedule-builder-mode" class="schedule-save-status auto">
-                                <i class="fas fa-magic"></i> Automatic
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-1 max-w-3xl">
-                            Admin-only editor for the 60 league matches. The tournament stays 24 teams,
-                            12 in Pacific Ocean and 12 in Indian Ocean, but you control the exact match day, round and opponents.
-                        </p>
-                    </div>
-
-                    <div class="schedule-toolbar">
-                        <button type="button" onclick="s5ScheduleGenerateBalancedDraft(true)" class="custom-btn secondary !py-2 !px-3 text-xs">
-                            <i class="fas fa-wand-magic-sparkles mr-1"></i> Generate Balanced Draft
-                        </button>
-                        <button type="button" onclick="s5ScheduleLoadFromFirebase()" class="custom-btn secondary !py-2 !px-3 text-xs">
-                            <i class="fas fa-rotate mr-1"></i> Reload
-                        </button>
-                        <button type="button" onclick="s5ScheduleValidateOnly()" class="custom-btn secondary !py-2 !px-3 text-xs">
-                            <i class="fas fa-check-double mr-1"></i> Validate
-                        </button>
-                        <button type="button" onclick="s5ScheduleSave()" class="custom-btn !py-2 !px-3 text-xs">
-                            <i class="fas fa-save mr-1"></i> Save Schedule
-                        </button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
-                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Matches</div><div id="schedule-stat-matches" class="text-xl font-black text-white mt-1">60</div></div>
-                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Per Day</div><div id="schedule-stat-per-day" class="text-xl font-black text-cyan-300 mt-1">4</div></div>
-                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Pacific Ocean</div><div id="schedule-stat-a" class="text-xl font-black text-cyan-300 mt-1">30</div></div>
-                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Indian Ocean</div><div id="schedule-stat-b" class="text-xl font-black text-purple-300 mt-1">30</div></div>
-                    <div class="backup-frozen"><div class="text-[10px] uppercase tracking-widest text-slate-500">Mode</div><div id="schedule-stat-mode" class="text-sm font-black text-green-300 mt-2">AUTOMATIC</div></div>
-                </div>
-
-                <div class="p-3 rounded-xl bg-blue-500/5 border border-blue-500/15 text-[11px] text-slate-400 leading-relaxed mb-5">
-                    <strong class="text-cyan-300">What you can edit:</strong>
-                    day 1–15, round 1–5, Pacific Ocean/B and the two opponents. You can prepare the complete schedule
-                    before all 24 teams register because the editor uses the locked slot numbers.
-                    <strong class="text-yellow-300">Completed matches are locked and cannot be moved after a result is entered.</strong>
-                </div>
-
-                <div id="schedule-builder-container" class="space-y-4">
-                    <div class="p-8 text-center text-slate-500">Loading schedule editor…</div>
-                </div>
-            </div>
-
 
             <!-- ============================== -->
             <!-- S5 TOURNAMENT PROGRESSION       -->
@@ -10198,5 +10143,424 @@
   setTimeout(refresh,300);setTimeout(refresh,900);setTimeout(refresh,1800);
 })();
 </script>
+
+<style id="s5-controls-only-css">
+/* ============================================================
+   S-5 CONTROLS-ONLY LAYOUT
+   Public Tournament tab is hidden. Admin operations live here.
+   ============================================================ */
+#nav-tournament { display:none !important; }
+#view-tournament { display:none !important; }
+#view-controls { max-width:1200px; margin:0 auto; padding-bottom:80px; }
+#view-controls .custom-card { opacity:1 !important; transform:none !important; }
+.s5-controls-hero{background:linear-gradient(135deg,rgba(8,145,178,.12),rgba(59,130,246,.045));border:1px solid rgba(103,232,249,.19)}
+.s5-controls-section{border:1px solid rgba(255,255,255,.07);background:rgba(2,6,23,.22);border-radius:16px;padding:15px}
+.s5-controls-section-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.s5-controls-title{font-size:18px;font-weight:1000;color:#fff;display:flex;align-items:center;gap:8px}
+.s5-controls-sub{font-size:11px;line-height:1.5;color:#64748b;margin-top:4px;max-width:800px}
+.s5-stage-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.s5-stage-btn{appearance:none;border:1px solid rgba(103,232,249,.18);background:rgba(15,23,42,.74);color:#e2e8f0;border-radius:10px;padding:9px 12px;font-size:10px;font-weight:900;cursor:pointer;touch-action:manipulation}
+.s5-stage-btn:hover,.s5-stage-btn:focus{outline:none;border-color:rgba(103,232,249,.42);background:rgba(14,165,233,.1)}
+.s5-stage-btn.primary{background:linear-gradient(135deg,rgba(14,165,233,.85),rgba(59,130,246,.8));color:white}
+.s5-stage-btn.gold{background:linear-gradient(135deg,#f59e0b,#d97706);color:#020617;border-color:rgba(250,204,21,.25)}
+.s5-stage-btn.danger{background:rgba(239,68,68,.07);color:#fecaca;border-color:rgba(248,113,113,.23)}
+.s5-stage-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.s5-stage-match{border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(0,0,0,.16);padding:12px;min-width:0}
+.s5-stage-match.locked{border-color:rgba(34,197,94,.20);background:rgba(34,197,94,.025)}
+.s5-stage-match-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.s5-stage-match-id{display:flex;align-items:center;gap:7px;min-width:0}
+.s5-stage-match-badge{min-width:36px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(14,165,233,.08);border:1px solid rgba(103,232,249,.15);color:#67e8f9;font-size:9px;font-weight:1000}
+.s5-stage-status{font-size:8px;font-weight:1000;letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:999px;border:1px solid rgba(245,158,11,.18);color:#fbbf24;background:rgba(251,191,36,.05)}
+.s5-stage-status.done{color:#86efac;border-color:rgba(34,197,94,.20);background:rgba(34,197,94,.05)}
+.s5-stage-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.s5-stage-field label{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;font-weight:900;margin:0 0 4px 2px}
+.s5-stage-number{width:100%;height:36px;border-radius:9px;border:1px solid rgba(255,255,255,.08);background:#020617;color:#f8fafc;padding:0 9px;font-size:11px;font-weight:800;outline:none}
+.s5-stage-number:focus{border-color:rgba(34,211,238,.38);box-shadow:0 0 0 3px rgba(34,211,238,.06)}
+.s5-stage-pair{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);align-items:center;gap:7px}
+.s5-stage-pick{width:100%;min-height:45px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:#020617;color:#e2e8f0;padding:7px 9px;text-align:left;cursor:pointer;touch-action:manipulation}
+.s5-stage-pick:hover,.s5-stage-pick:focus{outline:none;border-color:rgba(34,211,238,.4);background:#071525}
+.s5-stage-pick-label{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;font-weight:900}
+.s5-stage-pick-value{font-size:11px;font-weight:900;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.s5-stage-vs{text-align:center;color:#facc15;font-weight:1000;font-size:11px}
+.s5-stage-note{margin-top:10px;padding:9px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);color:#64748b;font-size:9px;line-height:1.45}
+.s5-stage-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.s5-stage-stat{border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);border-radius:10px;padding:8px 9px}
+.s5-stage-stat-k{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;font-weight:900}
+.s5-stage-stat-v{font-size:16px;font-weight:1000;color:#f8fafc;margin-top:3px}
+.s5-controls-spacer{height:8px}
+.s5-stage-modal{position:fixed;inset:0;z-index:2147483200;background:rgba(2,6,23,.76);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:flex-end;justify-content:center;padding:12px}
+.s5-stage-modal.open{display:flex}
+.s5-stage-sheet{width:min(560px,100%);max-height:min(82vh,720px);overflow:hidden;border:1px solid rgba(103,232,249,.20);border-radius:18px;background:#020617;box-shadow:0 24px 80px rgba(0,0,0,.55);display:flex;flex-direction:column}
+.s5-stage-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.07);background:#071525}
+.s5-stage-sheet-title{font-size:14px;font-weight:1000;color:white}.s5-stage-sheet-sub{font-size:9px;color:#64748b;margin-top:2px}
+.s5-stage-sheet-body{overflow:auto;-webkit-overflow-scrolling:touch;padding:8px}
+.s5-stage-option{width:100%;min-height:46px;display:flex;align-items:center;gap:9px;border:0;border-radius:10px;background:transparent;color:#cbd5e1;padding:8px 10px;text-align:left;cursor:pointer;touch-action:manipulation}
+.s5-stage-option:hover,.s5-stage-option:active{background:rgba(34,211,238,.08);color:#ecfeff}
+.s5-stage-option.selected{background:rgba(34,211,238,.11);color:#fff}
+.s5-stage-option.used{opacity:.35;cursor:not-allowed}
+.s5-stage-option-seed{min-width:42px;color:#67e8f9;font-size:9px;font-weight:1000}.s5-stage-option-name{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;font-weight:800}.s5-stage-option-check{color:#4ade80;font-size:10px}
+@media(max-width:800px){.s5-stage-grid{grid-template-columns:1fr}.s5-stage-summary{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){#view-controls{padding-left:10px;padding-right:10px}.s5-controls-section{padding:12px}.s5-stage-toolbar{display:grid;grid-template-columns:1fr 1fr}.s5-stage-toolbar .s5-stage-btn{width:100%}.s5-stage-meta{grid-template-columns:1fr 1fr}.s5-stage-pair{grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:5px}.s5-stage-pick{min-height:42px;padding:6px 7px}.s5-stage-pick-value{font-size:10px}}
+
+/* S5 v6: schedules are intentionally removed from the admin UI. */
+.schedule-builder-card, #schedule-builder-container, #s5-lake-schedule, #s5-playoff-schedule, #s5-final-schedule-actions, .s5-final-schedule-day, .s5-reliable-schedule-card { display:none !important; }
+
+.s5-team-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+@media(max-width:700px){.s5-team-grid{grid-template-columns:1fr;} .s5-stage-toolbar{grid-template-columns:1fr 1fr;} .s5-stage-toolbar .s5-stage-btn{width:100%;}}
+</style>
+
+
+<script id="s5-controls-only-js">
+(function(){
+  'use strict';
+  const qs=s=>document.querySelector(s), qsa=s=>Array.from(document.querySelectorAll(s));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const role=()=>{try{return typeof currentUserRole!=='undefined'?currentUserRole:null}catch(_){return null}};
+  const isAdmin=()=>role()==='admin';
+  const toast=(m,t)=>{try{showToast(m,t)}catch(_){alert(m)}};
+  const teamName=id=>{
+    try{
+      if(!id) return 'OPEN SLOT';
+      if(typeof s5TeamById==='function') return s5TeamById(id)?.name||'OPEN SLOT';
+      return (typeof teams!=='undefined'?(teams||[]).find(t=>t.id===id)?.name:null)||'OPEN SLOT';
+    }catch(_){return 'OPEN SLOT'}
+  };
+  const activeTeams=()=>{
+    try{return getSortedTeams().filter(t=>!t.disqualified&&!t.tournamentEliminated).slice(0,24)}catch(_){return (typeof teams!=='undefined'?(teams||[]):[]).filter(t=>!t.disqualified&&!t.tournamentEliminated).slice(0,24)}
+  };
+
+  const state={
+    lakeA:Array(8).fill(null), lakeB:Array(8).fill(null),
+    ko:Array.from({length:8},(_,i)=>({id:`K-${String(i+1).padStart(2,'0')}`,a:null,b:null,done:false,raw:null})),
+    modal:null, ready:false
+  };
+
+  function ensureControlsNav(){
+    const nav=document.querySelector('nav');
+    if(!nav||document.getElementById('nav-controls')) return;
+    const a=document.createElement('a');
+    a.id='nav-controls'; a.className='nav-link'; a.style.display='none';
+    a.innerHTML='<i class="fas fa-sliders-h w-8 text-center text-xl text-cyan-300"></i><span class="font-semibold text-lg">Controls</span>';
+    a.addEventListener('click',()=>window.switchTab?.('controls'));
+    const admin=document.getElementById('nav-admin');
+    if(admin&&admin.parentNode) admin.parentNode.insertBefore(a,admin.nextSibling); else nav.appendChild(a);
+  }
+
+  function ensureControlsView(){
+    let v=document.getElementById('view-controls');
+    if(v) return v;
+    const admin=document.getElementById('view-admin');
+    if(!admin||!admin.parentNode) return null;
+    v=document.createElement('div'); v.id='view-controls'; v.className='hidden';
+    v.innerHTML=`
+      <div class="custom-card s5-controls-hero mb-5">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <div class="auto-badge inline-flex"><i class="fas fa-sliders-h"></i> Admin Controls</div>
+            <h1 class="text-3xl sm:text-4xl font-black glow-title text-white mt-2">Season 5 Controls</h1>
+            <p class="text-sm text-slate-400 mt-2">Manage Ocean placement, Top 16, manual Lake team placement, manual Lake Knockout matchups, Ganga/Yamuna progression and tournament conclusion.</p>
+          </div>
+          <div class="cs-pill">ADMIN ONLY</div>
+        </div>
+      </div>
+      <div id="s5-controls-host"></div>
+      <div id="s5-manual-stage-host"></div>
+    `;
+    admin.parentNode.insertBefore(v,admin.nextSibling);
+    return v;
+  }
+
+  function removeScheduleUI(){
+    const ids=['schedule-builder-container','s5-lake-schedule','s5-playoff-schedule','s5-final-schedule-actions'];
+    ids.forEach(id=>{const el=document.getElementById(id);if(el){const card=el.closest('.custom-card')||el;card.remove();}});
+    qsa('.schedule-builder-card,.s5-final-schedule-day,.s5-reliable-schedule-card').forEach(el=>el.remove());
+    // Disable legacy schedule refreshers so an old observer cannot recreate the editor.
+    ['s5ScheduleBuilderRefresh','s5ScheduleGenerateBalancedDraft','s5ScheduleLoadFromFirebase','s5ScheduleSave','s5ScheduleValidateOnly','s5ScheduleQuickEdit','s5ScheduleEdit'].forEach(name=>{
+      if(typeof window[name]==='function' && !window[name].__S5_DISABLED_V6){
+        const noop=function(){toast('The Season 5 schedule editor has been removed. Use manual stage controls.','error')};
+        noop.__S5_DISABLED_V6=true; window[name]=noop;
+      }
+    });
+  }
+
+  function moveAdminCards(){
+    const host=qs('#s5-controls-host'), admin=qs('#view-admin'); if(!host||!admin)return;
+    removeScheduleUI();
+    const ids=['tournament-config-form'];
+    ids.forEach(id=>{const el=document.getElementById(id);if(!el)return;const card=el.closest('.custom-card');if(card&&card.parentNode!==host)host.appendChild(card)});
+    const prog=qs('#view-admin .s5-progression-card');
+    if(prog&&prog.parentNode!==host)host.appendChild(prog);
+
+    // Replace the old native Lake selector block with our reliable manual picker UI.
+    const oldLake=qs('#s5-lake-a-editor')?.closest('.s5-progress-stage');
+    if(oldLake) oldLake.style.display='none';
+
+    // The old Ocean schedule card is never moved to Controls.
+    const sched=qs('#view-admin .schedule-builder-card'); if(sched)sched.remove();
+  }
+
+  async function loadLake(){
+    try{
+      if(typeof db==='undefined') return;
+      const snap=await db.collection('settings').doc('tournament_progression').get();
+      const d=snap.exists?snap.data()||{}:{};
+      state.lakeA=Array.isArray(d.lakeA)?d.lakeA.slice(0,8):Array(8).fill(null);
+      state.lakeB=Array.isArray(d.lakeB)?d.lakeB.slice(0,8):Array(8).fill(null);
+      while(state.lakeA.length<8)state.lakeA.push(null); while(state.lakeB.length<8)state.lakeB.push(null);
+    }catch(e){toast('Could not load Lake placement: '+e.message,'error')}
+  }
+
+  async function saveLake(){
+    if(!isAdmin())return toast('Admin access required.','error');
+    const all=[...state.lakeA,...state.lakeB].filter(Boolean);
+    if(new Set(all).size!==all.length)return toast('A team cannot be assigned to Lake more than once.','error');
+    try{
+      await db.collection('settings').doc('tournament_progression').set({lakeA:[...state.lakeA],lakeB:[...state.lakeB],updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      // Keep the existing progression engine in sync in memory as well.
+      for(let i=0;i<8;i++){try{window.s5ChangeLakeA?.(i,state.lakeA[i]||'')}catch(_){} try{window.s5ChangeLakeB?.(i,state.lakeB[i]||'')}catch(_){}
+      }
+      renderLake();
+      toast(`✅ Lake placement saved (${all.length}/16).`,'success');
+    }catch(e){toast('Could not save Lake placement: '+e.message,'error')}
+  }
+
+  function lakePool(){
+    const ids=[...state.lakeA,...state.lakeB].filter(Boolean);
+    const selected=activeTeams().filter(t=>ids.includes(t.id));
+    return selected.length?selected:activeTeams();
+  }
+
+  function openTeamPicker(kind,index,side){
+    closeModal();
+    const modal=document.createElement('div'); modal.id='s5-manual-team-modal'; modal.className='s5-stage-modal open';
+    const title=kind==='lake' ? `Choose ${side==='A'?'Lake A':'Lake B'} Team` : `Choose Knockout Team ${side}`;
+    const subtitle=kind==='lake' ? `Select any active team for ${side}${index+1}` : `Select a Lake team for KO-${String(index+1).padStart(2,'0')}`;
+    modal.innerHTML=`<div class="s5-stage-sheet"><div class="s5-stage-sheet-head"><div><div class="s5-stage-sheet-title">${esc(title)}</div><div class="s5-stage-sheet-sub">${esc(subtitle)}</div></div><button type="button" class="s5-stage-btn" data-manual-modal="close">Close</button></div><div class="s5-stage-sheet-body"><input id="s5-manual-team-search" class="custom-input" style="margin-bottom:8px;font-size:11px" placeholder="Search team..." autocomplete="off"><div id="s5-manual-team-list"></div></div></div>`;
+    document.body.appendChild(modal);
+    state.modal={kind,index,side,modal};
+    const render=()=>{
+      const q=(qs('#s5-manual-team-search')?.value||'').trim().toLowerCase();
+      const pool=kind==='lake'?activeTeams():lakePool();
+      const used=kind==='lake'
+        ? [...state.lakeA,...state.lakeB]
+        : state.ko.flatMap((m,i)=>i===index?[]:[m.a,m.b]);
+      const current=kind==='lake'?(side==='A'?state.lakeA[index]:state.lakeB[index]):state.ko[index][side==='A'?'a':'b'];
+      const list=qs('#s5-manual-team-list'); if(!list)return;
+      const filtered=pool.filter(t=>!q||t.name.toLowerCase().includes(q));
+      list.innerHTML=filtered.map(t=>{
+        const disabled=used.includes(t.id)&&t.id!==current;
+        return `<button type="button" class="s5-stage-option ${t.id===current?'selected':''} ${disabled?'used':''}" ${disabled?'disabled':''} data-manual-team="${esc(t.id)}"><span class="s5-stage-option-seed">${esc(t.id.slice(0,6))}</span><span class="s5-stage-option-name">${esc(t.name)}</span><span class="s5-stage-option-check">${t.id===current?'✓':''}</span></button>`;
+      }).join('') || '<div class="s5-stage-note">No matching active teams found.</div>';
+    };
+    qs('#s5-manual-team-search')?.addEventListener('input',render);
+    render();
+    setTimeout(()=>qs('#s5-manual-team-search')?.focus(),20);
+  }
+
+  function closeModal(){const m=qs('#s5-manual-team-modal');if(m)m.remove();state.modal=null;}
+
+  function renderLake(){
+    const host=qs('#s5-manual-lake-list'); if(!host)return;
+    const slot=(side,i)=>{
+      const id=side==='A'?state.lakeA[i]:state.lakeB[i];
+      return `<button type="button" class="s5-stage-pick" data-manual-pick="lake" data-index="${i}" data-side="${side}"><div class="s5-stage-pick-label">${side}${i+1}</div><div class="s5-stage-pick-value">${esc(teamName(id))}</div></button>`;
+    };
+    qs('#s5-lake-manual-count').textContent=`${[...state.lakeA,...state.lakeB].filter(Boolean).length}/16`;
+    qs('#s5-lake-manual-a').innerHTML=Array.from({length:8},(_,i)=>`<div class="s5-team-row"><span class="s5-slot-label">A${i+1}</span><div>${slot('A',i)}</div></div>`).join('');
+    qs('#s5-lake-manual-b').innerHTML=Array.from({length:8},(_,i)=>`<div class="s5-team-row"><span class="s5-slot-label">B${i+1}</span><div>${slot('B',i)}</div></div>`).join('');
+  }
+
+  function seedLakeFromTop16(){
+    try{
+      const top=(window.__S5_MANUAL_TOP16__||[]).filter(Boolean);
+      if(top.length===16){state.lakeA=top.slice(0,8);state.lakeB=top.slice(8,16);renderLake();toast('✅ Top 16 loaded into Lake A/B.','success');return;}
+      const ts=activeTeams().slice(0,16); state.lakeA=ts.slice(0,8).map(t=>t.id); state.lakeB=ts.slice(8,16).map(t=>t.id);renderLake();toast('✅ First 16 active teams loaded into Lake A/B.','success');
+    }catch(e){toast('Could not load Top 16: '+e.message,'error')}
+  }
+
+  function clearLake(){state.lakeA=Array(8).fill(null);state.lakeB=Array(8).fill(null);renderLake();toast('Lake slots cleared locally. Click Save Lake to persist.','success')}
+
+  async function loadKnockout(){
+    try{
+      let ex=[];
+      if(typeof db!=='undefined'){
+        const snap=await db.collection('tournament_matches').where('stage','==','knockout').get();
+        snap.forEach(doc=>ex.push({id:doc.id,...doc.data()}));
+      }
+      const byId=new Map(ex.map(m=>[m.id,m]));
+      state.ko=Array.from({length:8},(_,i)=>{
+        const id=`K-${String(i+1).padStart(2,'0')}`,m=byId.get(id);
+        const defA=state.lakeA[i]||null, defB=state.lakeB[7-i]||null;
+        return {id,a:m?.teamAId||m?.sourceA?.teamId||defA,b:m?.teamBId||m?.sourceB?.teamId||defB,done:m?.resultStatus==='completed',raw:m||null};
+      });
+      renderKnockout();
+    }catch(e){toast('Could not load Knockout matches: '+e.message,'error')}
+  }
+
+  function renderKnockout(){
+    const host=qs('#s5-manual-ko-list');if(!host)return;
+    const filled=state.ko.filter(m=>m.a||m.b).length, done=state.ko.filter(m=>m.done).length;
+    qs('#s5-ko-count').textContent=`${filled}/8`; qs('#s5-ko-locked').textContent=String(done);
+    host.innerHTML=state.ko.map((m,i)=>{
+      const na=teamName(m.a),nb=teamName(m.b);
+      return `<div class="s5-stage-match ${m.done?'locked':''}">
+        <div class="s5-stage-match-head"><div class="s5-stage-match-id"><span class="s5-stage-match-badge">K-${String(i+1).padStart(2,'0')}</span><span class="text-[10px] text-slate-500 font-bold">Lake BO3 ${i+1}</span></div><span class="s5-stage-status ${m.done?'done':''}">${m.done?'Completed · Locked':'Manual'}</span></div>
+        <div class="s5-stage-pair">
+          <button type="button" class="s5-stage-pick" ${m.done?'disabled':''} data-manual-pick="ko" data-index="${i}" data-side="A"><div class="s5-stage-pick-label">Team A</div><div class="s5-stage-pick-value">${esc(na)}</div></button>
+          <div class="s5-stage-vs">VS</div>
+          <button type="button" class="s5-stage-pick" ${m.done?'disabled':''} data-manual-pick="ko" data-index="${i}" data-side="B"><div class="s5-stage-pick-label">Team B</div><div class="s5-stage-pick-value">${esc(nb)}</div></button>
+        </div>
+        <div class="s5-stage-note">Teams are selected manually from the current Lake pool. Completed results cannot be changed.</div>
+      </div>`;
+    }).join('');
+  }
+
+  function seedKnockout(){
+    state.ko=state.ko.map((m,i)=>m.done?m:{...m,a:state.lakeA[i]||null,b:state.lakeB[7-i]||null});
+    renderKnockout();toast('✅ Lake-seeded knockout pairings loaded. You can now change either side manually.','success');
+  }
+  function clearKnockout(){state.ko=state.ko.map(m=>m.done?m:{...m,a:null,b:null});renderKnockout();toast('Knockout slots cleared locally. Click Save Knockout to persist.','success')}
+
+  async function saveKnockout(){
+    if(!isAdmin())return toast('Admin access required.','error');
+    try{
+      const duplicate=[];
+      const seen=new Set();
+      state.ko.forEach(m=>{[m.a,m.b].filter(Boolean).forEach(id=>{if(seen.has(id))duplicate.push(id);seen.add(id)})});
+      if(duplicate.length)return toast('A team cannot appear in more than one knockout match.','error');
+      const batch=db.batch();
+      state.ko.forEach((m,i)=>{
+        const ref=db.collection('tournament_matches').doc(m.id), old=m.raw||{};
+        const data={stage:'knockout',format:'BO3',matchNumber:i+1,label:`Lake BO3 ${i+1}`,sourceA:{teamId:m.a||null,seed:i+1,group:'A'},sourceB:{teamId:m.b||null,seed:8-i,group:'B'},teamAId:m.a||null,teamBId:m.b||null,teamAName:m.a?teamName(m.a):null,teamBName:m.b?teamName(m.b):null,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+        if(m.done){data.resultStatus='completed';data.teamAId=old.teamAId||m.a||null;data.teamBId=old.teamBId||m.b||null;data.teamAName=old.teamAName||teamName(m.a);data.teamBName=old.teamBName||teamName(m.b);data.teamAScore=old.teamAScore??null;data.teamBScore=old.teamBScore??null;data.winnerTeamId=old.winnerTeamId||null;}
+        else {data.resultStatus='pending';data.teamAScore=null;data.teamBScore=null;data.winnerTeamId=null;data.createdAt=old.createdAt||firebase.firestore.FieldValue.serverTimestamp();}
+        batch.set(ref,data,{merge:true});
+      });
+      await batch.commit();
+      toast('✅ Manual Lake Knockout matchups saved.','success');
+      await loadKnockout();
+    }catch(e){toast('Could not save Knockout matches: '+e.message,'error')}
+  }
+
+  function renderManualStageUI(){
+    const host=qs('#s5-manual-stage-host');if(!host)return;
+    host.innerHTML=`
+      <div class="custom-card mb-5" id="s5-manual-lake-card">
+        <div class="s5-controls-section-head">
+          <div><div class="s5-controls-title"><i class="fas fa-water text-blue-300"></i> Manual Lake Team Placement</div><div class="s5-controls-sub">Put any active team into Lake A1–A8 or Lake B1–B8 manually. No schedule builder and no automatic reshuffling.</div></div>
+          <div class="cs-pill" id="s5-lake-manual-count">0/16</div>
+        </div>
+        <div class="s5-stage-toolbar mb-3">
+          <button type="button" class="s5-stage-btn secondary" data-manual-action="lake-load">Load Top 16</button>
+          <button type="button" class="s5-stage-btn danger" data-manual-action="lake-clear">Clear Lake</button>
+          <button type="button" class="s5-stage-btn primary" data-manual-action="lake-save">Save Lake</button>
+        </div>
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+          <div><div class="flex items-center justify-between mb-2"><h4 class="font-black text-blue-300">Lake A · 8 Teams</h4></div><div id="s5-lake-manual-a" class="s5-team-grid"></div></div>
+          <div><div class="flex items-center justify-between mb-2"><h4 class="font-black text-blue-300">Lake B · 8 Teams</h4></div><div id="s5-lake-manual-b" class="s5-team-grid"></div></div>
+        </div>
+        <div class="s5-stage-note mt-4">Click any slot to choose a team. The picker works on desktop and mobile and prevents duplicate team assignments.</div>
+      </div>
+
+      <div class="custom-card mb-5" id="s5-manual-ko-card">
+        <div class="s5-controls-section-head">
+          <div><div class="s5-controls-title"><i class="fas fa-swords text-cyan-300"></i> Manual Lake Knockout</div><div class="s5-controls-sub">Assign the two teams in each of the 8 BO3 knockout matches manually. Completed matches are locked.</div></div>
+          <div class="flex items-center gap-2"><span class="cs-pill" id="s5-ko-count">0/8</span><span class="cs-pill" id="s5-ko-locked">0 locked</span></div>
+        </div>
+        <div class="s5-stage-toolbar mb-3">
+          <button type="button" class="s5-stage-btn secondary" data-manual-action="ko-seed">Seed From Lake</button>
+          <button type="button" class="s5-stage-btn danger" data-manual-action="ko-clear">Clear Knockout</button>
+          <button type="button" class="s5-stage-btn secondary" data-manual-action="ko-reload">Reload</button>
+          <button type="button" class="s5-stage-btn primary" data-manual-action="ko-save">Save Knockout</button>
+        </div>
+        <div id="s5-manual-ko-list" class="s5-stage-grid"></div>
+        <div class="s5-stage-note mt-4">Default seeding is A1 vs B8, A2 vs B7 … A8 vs B1. Use the Team A/Team B buttons to override any matchup manually.</div>
+      </div>`;
+    renderLake();renderKnockout();
+  }
+
+  function hideLegacyLakeBlock(){
+    const old=qs('#s5-lake-a-editor')?.closest('.s5-progress-stage');if(old)old.style.display='none';
+  }
+
+  async function openControls(){
+    ensureControlsNav(); const v=ensureControlsView(); if(!v)return;
+    moveAdminCards(); removeScheduleUI(); hideLegacyLakeBlock(); renderManualStageUI();
+    await loadLake(); await loadKnockout(); renderLake(); renderKnockout();
+    // The old progression card still provides Ocean, Top 16, Ganga/Yamuna and conclusion controls.
+    try{window.s5RenderAll?.()}catch(_){}
+    hideLegacyLakeBlock();
+    // Preserve current Top 16 for the manual Load Top 16 convenience button.
+    try{window.__S5_MANUAL_TOP16__=[...(window.__S5_MANUAL_TOP16__||[])];}catch(_){}
+  }
+
+  document.addEventListener('click',function(e){
+    const b=e.target.closest?.('[data-manual-action]');
+    if(b){
+      const a=b.dataset.manualAction;
+      if(a==='lake-load'){seedLakeFromTop16();return}
+      if(a==='lake-clear'){clearLake();return}
+      if(a==='lake-save'){saveLake();return}
+      if(a==='ko-seed'){seedKnockout();return}
+      if(a==='ko-clear'){clearKnockout();return}
+      if(a==='ko-reload'){loadKnockout();return}
+      if(a==='ko-save'){saveKnockout();return}
+    }
+    const pick=e.target.closest?.('[data-manual-pick]');
+    if(pick&&!pick.disabled){openTeamPicker(pick.dataset.manualPick==='lake'?'lake':'ko',Number(pick.dataset.index),pick.dataset.side);return}
+    const close=e.target.closest?.('[data-manual-modal="close"]');
+    if(close){closeModal();return}
+    const team=e.target.closest?.('[data-manual-team]');
+    if(team&&state.modal){
+      const id=team.dataset.manualTeam, {kind,index,side}=state.modal;
+      if(kind==='lake'){
+        const arr=side==='A'?state.lakeA:state.lakeB;
+        state.lakeA=state.lakeA.map((v,i)=>i===index&&side==='A'?id:v===id?null:v);
+        state.lakeB=state.lakeB.map((v,i)=>i===index&&side==='B'?id:v===id?null:v);
+        arr[index]=id;
+        closeModal();renderLake();
+      }else{
+        const key=side==='A'?'a':'b';
+        state.ko=state.ko.map((m,i)=>i===index?{...m,[key]:id}:({...m,a:m.a===id?null:m.a,b:m.b===id?null:m.b}));
+        closeModal();renderKnockout();
+      }
+    }
+  },false);
+
+  function installSwitchWrapper(){
+    if(typeof window.switchTab!=='function'||window.__S5_CONTROLS_V6_SWITCH__)return;
+    const old=window.switchTab;
+    window.switchTab=function(tab){
+      if(tab==='tournament')tab='ocean-standings';
+      if(tab==='controls'&&!isAdmin()) return old('login');
+      const r=old(tab);
+      qsa('#nav-controls').forEach(x=>x.classList.toggle('active',tab==='controls'));
+      if(tab!=='controls')qs('#view-controls')?.classList.add('hidden');
+      if(tab==='controls'){const v=ensureControlsView();if(v)v.classList.remove('hidden');setTimeout(()=>openControls(),60)}
+      return r;
+    };
+    window.__S5_CONTROLS_V6_SWITCH__=true;
+  }
+
+  function accessUI(){
+    ensureControlsNav();
+    const n=qs('#nav-controls');if(n)n.style.display=isAdmin()?'flex':'none';
+    if(!isAdmin())qs('#view-controls')?.classList.add('hidden');
+  }
+
+  function stripTournament(){
+    const tn=qs('#nav-tournament');if(tn)tn.remove();
+    const tv=qs('#view-tournament');if(tv)tv.style.display='none';
+  }
+
+  function boot(){
+    ensureControlsNav();ensureControlsView();installSwitchWrapper();accessUI();stripTournament();removeScheduleUI();
+    if(isAdmin())setTimeout(()=>openControls(),100);
+  }
+  document.addEventListener('DOMContentLoaded',()=>{setTimeout(boot,0);setTimeout(boot,500);setTimeout(boot,1500)});
+  setTimeout(boot,300);setTimeout(boot,1000);setTimeout(boot,2500);
+})();
+</script>
+
 </body>
 </html>
