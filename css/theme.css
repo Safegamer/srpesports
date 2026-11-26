@@ -482,3 +482,5 @@ body {
 .photo-help{color:#84a18e;font-size:10px;line-height:1.5;overflow-wrap:anywhere}
 @keyframes srpMaintenanceIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.srp-maintenance-screen{animation:none}}
+.registration-message { margin: 12px 0; padding: 12px 14px; border: 1px solid rgba(52,211,153,.25); border-radius: 14px; color: #a7f3d0; background: rgba(16,185,129,.08); font-size: .85rem; line-height: 1.5; }
+.registration-message.error { border-color: rgba(248,113,113,.32); color: #fecaca; background: rgba(127,29,29,.18); }
