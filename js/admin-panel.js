@@ -282,6 +282,7 @@
     $('setting-matches-per-team').value = t.matchesPerTeam ?? 5;
     $('setting-max-subs').value = t.maxSubs ?? 2;
     $('setting-prize').value = t.prizePool ?? t.prize_pool ?? t.prize ?? '';
+    $('setting-registration-open').checked = t.registrationOpen === true || t.registration?.open === true;
     $('setting-maintenance-note').value = t.maintenanceNotice || '';
     $('setting-maintenance').checked = !!t.maintenanceMode;
     $('rules-json').value = JSON.stringify(state.settings.rules || {}, null, 2);
@@ -289,7 +290,7 @@
     $('setting-season').disabled = !master; $('setting-theme').disabled = !master;
     $('setting-team-limit').disabled = !master; $('setting-matches-per-team').disabled = !master;
     $('setting-max-subs').disabled = !master; $('setting-maintenance-note').disabled = !master;
-    $('setting-maintenance').disabled = !master;
+    $('setting-registration-open').disabled = !master; $('setting-maintenance').disabled = !master;
     $('setting-prize').disabled = !can('prize_edit');
     $('save-settings').disabled = !canAny(['prize_edit']) && !master;
     $('announcement-text').disabled = !can('announcement_edit'); $('announcement-active').disabled = !can('announcement_edit'); $('save-announcement').disabled = !can('announcement_edit');
@@ -465,6 +466,7 @@
   }
 
   function openRawEditor(collection, id = null) {
+    if (collection === 'tournament_slots' && !id) return openSlotEditor();
     const permission = collection === 'tournament_slots' ? 'tourney_slots' : 'tourney_scores';
     requirePermission(permission);
     const list = collection === 'tournament_slots' ? state.slots : state.tournamentMatches;
@@ -484,6 +486,40 @@
         if (docId) await collectionRef.doc(docId).set(data,{merge:true}); else await collectionRef.add(data);
         showToast('Tournament document saved.'); closeModal();
       } catch (error) { showToast(error.message || 'Could not save document.','error'); }
+    });
+  }
+
+  function openSlotEditor() {
+    requirePermission('tourney_slots');
+    const groupKey = (slot) => String(slot.group || slot.groupName || '').toUpperCase().replace(/^GROUP\s*/, '');
+    const nextGroupSlot = (group) => Math.max(0, ...state.slots.filter(slot => groupKey(slot) === group).map(slot => Number(slot.groupSlot) || 0)) + 1;
+    const nextSlotNumber = Math.max(0, ...state.slots.map(slot => Number(slot.slotNumber) || 0)) + 1;
+    const defaultGroup = nextGroupSlot('A') <= 12 ? 'A' : 'B';
+    const teams = [{value:'',label:'Leave unassigned'}, ...state.teams.map(team => ({value:team.id,label:team.name || team.id}))];
+    openModal('Add tournament slot', `
+      <div class="form-grid">
+        ${makeInput('Slot number','slot-number',nextSlotNumber,'number','min="1" step="1" required')}
+        ${makeSelect('Group','slot-group',defaultGroup,[{value:'A',label:'Group A · Amazon Grove'},{value:'B',label:'Group B · Sundar Grove'}])}
+        ${makeInput('Position in group','slot-group-position',nextGroupSlot(defaultGroup),'number','min="1" step="1" required')}
+        ${makeSelect('Team (optional)','slot-team','',teams)}
+      </div>
+      <label class="check-row setting-toggle" style="margin-top:14px"><input type="checkbox" id="slot-locked"><span><strong>Lock this slot</strong><small>Use this after the assignment is final.</small></span></label>
+      <p class="form-hint">You can leave the team empty and assign it later.</p>
+    `, `<button class="quiet-action" data-modal-close>Cancel</button><button class="primary-action" id="save-slot"><i class="fa-solid fa-floppy-disk"></i> Add slot</button>`);
+    $('slot-group').addEventListener('change', () => { $('slot-group-position').value = nextGroupSlot($('slot-group').value); });
+    $('save-slot').addEventListener('click', async () => {
+      try {
+        requirePermission('tourney_slots');
+        const slotNumber = Number($('slot-number').value);
+        const groupSlot = Number($('slot-group-position').value);
+        const group = $('slot-group').value;
+        if (!Number.isInteger(slotNumber) || slotNumber < 1 || !Number.isInteger(groupSlot) || groupSlot < 1) throw new Error('Enter valid positive slot and group numbers.');
+        const team = getTeamRecord($('slot-team').value);
+        const data = {slotNumber,group,groupSlot,teamId:team?.id || null,teamName:team?.name || null,locked:$('slot-locked').checked};
+        const ref = await db.collection('tournament_slots').add(data);
+        showToast(`Slot ${slotNumber} added (${ref.id}).`);
+        closeModal();
+      } catch (error) { showToast(error.message || 'Could not add slot.','error'); }
     });
   }
 
@@ -539,6 +575,7 @@
       patch.totalTeams = Number($('setting-team-limit').value || 24);
       patch.matchesPerTeam = Number($('setting-matches-per-team').value || 5);
       patch.maxSubs = Number($('setting-max-subs').value || 2);
+      patch.registrationOpen = $('setting-registration-open').checked;
       patch.maintenanceMode = $('setting-maintenance').checked;
       patch.maintenanceNotice = $('setting-maintenance-note').value.trim();
     }
