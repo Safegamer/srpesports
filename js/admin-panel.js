@@ -183,19 +183,40 @@
     subscribeDocument('past_season', 'past_season');
     if (can('token_view') || isMaster()) subscribeCollection('tokens', 'tokens');
     if (isMaster()) subscribeCollection('sub_admins', 'subAdmins');
-    if (isMaster()) loadApplications();
+    if (isMaster()) {
+      loadApplications();
+      initializeRegistrationCounter().catch(error => { console.error('Registration capacity setup failed:', error); });
+    }
   }
 
   async function loadApplications() {
-    if (!isMaster() || !functions) return;
+    if (!isMaster()) return;
     try {
-      const result = await functions.httpsCallable('listTeamRegistrations')();
-      state.applications = result.data?.applications || [];
+      const snapshot = await db.collection('registration_applications').orderBy('createdAt', 'desc').limit(100).get();
+      state.applications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderActivePage();
     } catch (error) {
       console.error('Applications could not be loaded:', error);
-      if (state.activePage === 'applications') showToast(error.message || 'Could not load applications. Deploy the registration functions first.', 'error');
+      if (state.activePage === 'applications') showToast(error.message || 'Could not load applications.', 'error');
     }
+  }
+
+  async function initializeRegistrationCounter() {
+    if (!isMaster()) return;
+    const settingsRef = db.collection('settings').doc('tournament');
+    const [teams, applications] = await Promise.all([
+      db.collection('teams').get(),
+      db.collection('registration_applications').where('status', '==', 'pending').get()
+    ]);
+    await db.runTransaction(async transaction => {
+      const settingsSnap = await transaction.get(settingsRef);
+      const settings = settingsSnap.exists ? settingsSnap.data() : {};
+      if (Number.isInteger(Number(settings.registrationReservedCount))) return;
+      transaction.set(settingsRef, {
+        registrationReservedCount: teams.size + applications.size,
+        lastRegistrationId: null
+      }, { merge: true });
+    });
   }
 
   function renderApplications() {
@@ -211,8 +232,9 @@
 
   async function viewApplication(id) {
     requireMaster();
-    const result = await functions.httpsCallable('getTeamRegistration')({ applicationId: id });
-    const app = result.data;
+    const snapshot = await db.collection('registration_applications').doc(id).get();
+    if (!snapshot.exists) throw new Error('Application not found.');
+    const app = { id: snapshot.id, ...snapshot.data() };
     const players = (app.players || []).map((p, index) => `<div class="info-tile" style="margin-top:10px"><strong>${p.isSub ? 'Substitute' : 'Player'} ${index + 1} · ${esc(p.ign || '')}</strong><div class="table-secondary">UID: ${esc(p.uid || '')} · Device: ${esc(p.device || '')}</div>${p.photo ? `<img src="${esc(p.photo)}" alt="${esc(p.ign)} player photo" style="display:block;max-width:150px;max-height:150px;object-fit:cover;border-radius:12px;margin-top:8px">` : ''}</div>`).join('');
     const body = `<div class="info-tile"><strong>${esc(app.teamName)}</strong><div class="table-secondary">Captain: ${esc(app.captainName)} · ${esc(app.email)}${app.discord ? ` · Discord: ${esc(app.discord)}` : ''}</div><div class="table-secondary">Status: ${esc(app.status || 'pending')}</div></div>${players}`;
     const actions = app.status === 'pending' ? `<button class="quiet-action" data-modal-close>Close</button><button class="quiet-action" data-review-application="reject|${esc(id)}">Reject</button><button class="primary-action" data-review-application="approve|${esc(id)}">Approve and add team</button>` : '<button class="quiet-action" data-modal-close>Close</button>';
@@ -223,7 +245,52 @@
     requireMaster();
     const label = decision === 'approve' ? 'approve this application and create its team and players' : 'reject this application and return its token';
     if (!window.confirm(`Are you sure you want to ${label}?`)) return;
-    await functions.httpsCallable('reviewTeamRegistration')({ applicationId: id, decision });
+    const appRef = db.collection('registration_applications').doc(id);
+    const settingsRef = db.collection('settings').doc('tournament');
+    const teamRef = db.collection('teams').doc();
+    const playerRefs = Array.from({ length: 6 }, () => db.collection('players').doc());
+    await db.runTransaction(async transaction => {
+      const appSnap = await transaction.get(appRef);
+      const settingsSnap = await transaction.get(settingsRef);
+      if (!appSnap.exists) throw new Error('Application not found.');
+      const app = appSnap.data();
+      if (app.status !== 'pending') throw new Error('This application has already been reviewed.');
+      const settings = settingsSnap.exists ? settingsSnap.data() : {};
+      if (decision === 'reject') {
+        const tokenRef = app.tokenDocumentId ? db.collection('tokens').doc(app.tokenDocumentId) : null;
+        const tokenSnap = tokenRef ? await transaction.get(tokenRef) : null;
+        transaction.update(appRef, { status: 'rejected', reviewedAt: firebase.firestore.FieldValue.serverTimestamp(), reviewedBy: auth.currentUser.uid });
+        if (tokenSnap?.exists) transaction.update(tokenRef, {
+          used: false, usedBy: null,
+          registrationApplicationId: firebase.firestore.FieldValue.delete(),
+          redeemedAt: firebase.firestore.FieldValue.delete()
+        });
+        transaction.update(settingsRef, {
+          registrationReservedCount: Math.max(0, Number(settings.registrationReservedCount) - 1)
+        });
+        return;
+      }
+      if (decision !== 'approve') throw new Error('Choose approve or reject.');
+      const capacity = Math.max(1, Math.min(128, Number(settings.totalTeams) || 24));
+      if (state.teams.length >= capacity) throw new Error('The season is full. Free a team place before approving.');
+      const group = String.fromCharCode(65 + Math.min(3, Math.floor(state.teams.length / Math.max(1, Math.ceil(capacity / 4)))));
+      transaction.set(teamRef, {
+        name: app.teamName, group, disqualified: false, rosterLocked: false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        registrationApplicationId: id
+      });
+      (app.players || []).forEach((player, index) => transaction.set(playerRefs[index], {
+        teamId: teamRef.id, ign: player.ign, uid: player.uid, device: player.device,
+        role: player.isSub ? 'Sub' : (index === 0 ? 'Captain' : 'Starter'),
+        isSub: !!player.isSub, slotOrder: index,
+        photoUrl: player.photo || '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }));
+      transaction.update(appRef, {
+        status: 'approved', teamId: teamRef.id,
+        reviewedAt: firebase.firestore.FieldValue.serverTimestamp(), reviewedBy: auth.currentUser.uid
+      });
+    });
     closeModal();
     showToast(decision === 'approve' ? 'Application approved; team and players added.' : 'Application rejected; token returned.');
     await loadApplications();
@@ -298,7 +365,7 @@
   }
 
   function renderTokens() {
-    const items = filtered(state.tokens, $('token-search').value, ['token','season','usedBy']);
+    const items = filtered(state.tokens.filter(token => !token.migratedTo), $('token-search').value, ['token','season','usedBy']);
     $('tokens-body').innerHTML = items.length ? items.map(t => `
       <tr><td><code style="color:#fde68a;font-weight:900;letter-spacing:.08em">${esc(t.token || t.id)}</code></td><td>${esc(t.season || '—')}</td><td>${t.used ? '<span class="status-pill warning">Redeemed</span>' : '<span class="status-pill">Unused</span>'}</td><td>${esc(t.usedBy || '—')}</td>
       <td><div class="table-actions">${can('token_view') ? `<button class="mini-action" data-copy-token="${esc(t.token || t.id)}"><i class="fa-solid fa-copy"></i> Copy</button>` : ''}${!t.used && can('token_delete') ? `<button class="mini-action delete" data-delete-token="${esc(t.id)}"><i class="fa-solid fa-ban"></i> Revoke</button>` : ''}</div></td></tr>`).join('') : '<tr><td colspan="5"><div class="empty-state"><i class="fa-solid fa-ticket"></i>No tokens found.</div></td></tr>';
@@ -587,12 +654,40 @@
     crypto.getRandomValues(values);
     return Array.from(values, value => chars[value % chars.length]).join('');
   }
+  async function hashToken(token) {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(token).trim().toUpperCase()));
+    return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+  }
   async function generateToken() {
     requirePermission('token_create');
     const token = randomToken(16);
+    const tokenHash = await hashToken(token);
     const season = state.settings.tournament.season || 'Season 6';
-    await db.collection('tokens').add({ token, season, used:false, usedBy:null, createdAt:firebase.firestore.FieldValue.serverTimestamp() });
+    await db.collection('tokens').doc(tokenHash).set({
+      token, tokenHash, season, used:false, usedBy:null,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
     await copyText(token, 'New season token created and copied.');
+  }
+  async function migrateLegacyTokens() {
+    requireMaster();
+    const legacy = state.tokens.filter(token => token.token && !token.tokenHash && !token.migratedTo);
+    if (!legacy.length) { showToast('All existing tokens are ready for registration.'); return; }
+    let batch = db.batch();
+    let writes = 0;
+    for (const token of legacy) {
+      const tokenHash = await hashToken(token.token);
+      const migratedRef = db.collection('tokens').doc(tokenHash);
+      batch.set(migratedRef, {
+        ...Object.fromEntries(Object.entries(token).filter(([key]) => key !== 'id' && key !== 'migratedTo')),
+        tokenHash, legacyDocumentId: token.id
+      }, { merge: true });
+      batch.update(db.collection('tokens').doc(token.id), { migratedTo: tokenHash });
+      writes += 2;
+      if (writes >= 400) { await batch.commit(); batch = db.batch(); writes = 0; }
+    }
+    if (writes) await batch.commit();
+    showToast(`Prepared ${legacy.length} existing token(s) for registration.`);
   }
   async function copyText(value, message = 'Copied to clipboard.') {
     try { await navigator.clipboard.writeText(String(value)); showToast(message); }
@@ -831,6 +926,7 @@
   $('add-slot-button').addEventListener('click', () => { try { openRawEditor('tournament_slots'); } catch(e) { showToast(e.message,'error'); } });
   $('add-tmatch-button').addEventListener('click', () => { try { openRawEditor('tournament_matches'); } catch(e) { showToast(e.message,'error'); } });
   $('generate-token').addEventListener('click', async () => { try { await generateToken(); } catch(e) { showToast(e.message || 'Token generation failed.','error'); } });
+  $('migrate-tokens')?.addEventListener('click', async () => { try { await migrateLegacyTokens(); } catch(e) { console.error(e); showToast(e.message || 'Existing tokens could not be prepared.','error'); } });
   $('save-announcement').addEventListener('click', async () => { try { await saveAnnouncement(); } catch(e) { showToast(e.message,'error'); } });
   $('save-livestream').addEventListener('click', async () => { try { await saveLivestream(); } catch(e) { showToast(e.message,'error'); } });
   $('save-settings').addEventListener('click', async () => { try { await saveGeneralSettings(); } catch(e) { showToast(e.message,'error'); } });
