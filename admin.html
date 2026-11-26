@@ -23,10 +23,12 @@
     }
 
     .header {
-      padding: 18px 6%;
+      padding: 16px 5%;
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
       background: var(--theme-surface);
       border-bottom: 1px solid var(--theme-card-border);
     }
@@ -38,14 +40,14 @@
     }
 
     .logo {
-      width: 44px;
-      height: 44px;
+      width: 43px;
+      height: 43px;
       display: grid;
       place-items: center;
       border-radius: 12px;
       background: var(--theme-btn-gradient);
-      font-weight: 900;
       color: white;
+      font-weight: 900;
     }
 
     .brand small {
@@ -56,17 +58,38 @@
       letter-spacing: 2px;
     }
 
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 11px 15px;
+      border: 1px solid var(--theme-card-border);
+      border-radius: 11px;
+      color: var(--theme-accent-text);
+      background: var(--theme-card-bg);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 800;
+      transition: .2s ease;
+    }
+
+    .back-link:hover {
+      border-color: var(--theme-accent);
+      background: var(--theme-nav-active);
+      transform: translateY(-2px);
+    }
+
     main {
       flex: 1;
       display: grid;
       place-items: center;
-      padding: 24px;
+      padding: 30px 18px;
     }
 
     .login-card {
       width: 100%;
       max-width: 430px;
-      padding: 35px;
+      padding: 34px;
       border: 1px solid var(--theme-card-border);
       border-radius: 20px;
       background: var(--theme-surface);
@@ -74,7 +97,7 @@
     }
 
     .login-card h1 {
-      margin: 15px 0 10px;
+      margin: 14px 0 10px;
       font-size: 29px;
       font-weight: 900;
     }
@@ -88,8 +111,8 @@
     label {
       display: block;
       margin: 20px 0 8px;
-      font-size: 11px;
       color: #cbd5e1;
+      font-size: 11px;
       font-weight: 800;
       text-transform: uppercase;
     }
@@ -109,7 +132,7 @@
       box-shadow: 0 0 14px var(--theme-accent-glow);
     }
 
-    button {
+    .login-button {
       width: 100%;
       padding: 15px;
       margin-top: 24px;
@@ -117,12 +140,13 @@
       border-radius: 11px;
       background: var(--theme-btn-gradient);
       color: white;
+      font-size: 12px;
       font-weight: 900;
       letter-spacing: 1px;
       cursor: pointer;
     }
 
-    button:disabled {
+    .login-button:disabled {
       opacity: .6;
       cursor: wait;
     }
@@ -148,11 +172,29 @@
       to { transform: rotate(360deg); }
     }
 
+    .bottom-link {
+      display: inline-block;
+      margin-top: 22px;
+      color: var(--theme-accent-text);
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .bottom-link:hover {
+      text-decoration: underline;
+    }
+
     footer {
       padding: 18px;
-      text-align: center;
       color: #64748b;
       font-size: 10px;
+      text-align: center;
+    }
+
+    @media(max-width:480px) {
+      .login-card { padding: 25px 21px; }
+      .header { padding: 14px 17px; }
     }
   </style>
 </head>
@@ -160,6 +202,7 @@
 <body data-theme="save-trees">
 
   <header class="header">
+
     <div class="brand">
       <div class="logo">SRP</div>
       <div>
@@ -167,7 +210,13 @@
         <small>MASTER ADMINISTRATION</small>
       </div>
     </div>
-    <span class="cs-pill">SECURE ACCESS</span>
+
+    <!-- ALWAYS AVAILABLE: RETURN TO PUBLIC WEBSITE -->
+    <a href="index.html" class="back-link">
+      <span>←</span>
+      Return to Website
+    </a>
+
   </header>
 
   <main>
@@ -176,7 +225,7 @@
       <div class="loader"></div>
       <h2 style="text-align:center">Verifying Access</h2>
       <p class="muted" style="text-align:center">
-        Checking your master administrator credentials...
+        Checking administrator credentials...
       </p>
     </section>
 
@@ -187,7 +236,7 @@
       <h1 class="brand-text">Administrator Login</h1>
 
       <p class="muted">
-        Sign in with your authorized master administrator account.
+        Sign in using your authorized master administrator account.
       </p>
 
       <form id="loginForm">
@@ -210,7 +259,7 @@
           required
         >
 
-        <button id="loginButton" type="submit">
+        <button class="login-button" id="loginButton" type="submit">
           SIGN IN TO ADMIN
         </button>
 
@@ -218,7 +267,13 @@
 
       </form>
 
-      <p class="muted" style="margin-top:18px;text-align:center;font-size:10px">
+      <div style="text-align:center">
+        <a href="index.html" class="bottom-link">
+          ← Cancel and return to the homepage
+        </a>
+      </div>
+
+      <p class="muted" style="margin-top:20px;text-align:center;font-size:10px">
         Protected by Firebase Authentication and master-role verification.
       </p>
 
@@ -226,7 +281,9 @@
 
   </main>
 
-  <footer>SRP ESPORTS © 2026 · SEASON 06</footer>
+  <footer>
+    SRP ESPORTS © 2026 · SEASON 06
+  </footer>
 
   <script>
     const loginView = document.getElementById("login");
@@ -234,18 +291,24 @@
     const message = document.getElementById("message");
     const loginButton = document.getElementById("loginButton");
 
-    let checkingUser = false;
+    let authCheckRunning = false;
 
-    async function checkExistingSession(user) {
-      if (checkingUser) return;
+    function showLogin() {
+      checkingView.hidden = true;
+      loginView.hidden = false;
+    }
+
+    auth.onAuthStateChanged(async (user) => {
 
       if (!user) {
-        loginView.hidden = false;
-        checkingView.hidden = true;
+        authCheckRunning = false;
+        showLogin();
         return;
       }
 
-      checkingUser = true;
+      if (authCheckRunning) return;
+
+      authCheckRunning = true;
       loginView.hidden = true;
       checkingView.hidden = false;
 
@@ -258,20 +321,22 @@
         }
 
         await auth.signOut();
-        message.textContent = "This account is not authorized as master.";
+
+        message.textContent =
+          "This account does not have master administrator access.";
+
       } catch (error) {
         console.error(error);
-        message.textContent = "Unable to verify your administrator session.";
+        message.textContent =
+          "Unable to verify your administrator session.";
       }
 
-      checkingUser = false;
-      checkingView.hidden = true;
-      loginView.hidden = false;
-    }
-
-    auth.onAuthStateChanged(checkExistingSession);
+      authCheckRunning = false;
+      showLogin();
+    });
 
     document.getElementById("loginForm").addEventListener("submit", async (event) => {
+
       event.preventDefault();
 
       message.textContent = "";
@@ -292,6 +357,7 @@
         loginButton.disabled = false;
         loginButton.textContent = "SIGN IN TO ADMIN";
       }
+
     });
   </script>
 
