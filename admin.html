@@ -1,1 +1,129 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#052e1e"><title>SRP-ESPORTS | Admin setup pending</title><link rel="stylesheet" href="./css/theme.css"><script src="https://cdn.tailwindcss.com"></script></head><body data-theme="save-trees" class="min-h-screen flex items-center justify-center p-5"><main class="custom-card w-full max-w-xl !p-7 text-center"><i class="fas fa-shield-halved text-4xl text-emerald-300"></i><div class="section-kicker mt-4">Administrator access</div><h1 class="brand-text mt-2 text-3xl font-black">SECURE ADMIN SETUP PENDING</h1><p class="mt-4 text-sm leading-6 text-slate-300">The admin console is not enabled yet. We are replacing the temporary browser-only login flow with Firebase Authentication and server-enforced permissions. Do not enter passwords on this placeholder page.</p><a href="index.html" class="custom-btn mt-6">Return to website</a></main></body></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRP Esports | Master Admin</title>
+
+  <link rel="stylesheet" href="css/theme.css">
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="js/admin-auth.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: #080b12;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+    .panel {
+      width: 100%;
+      max-width: 420px;
+      padding: 32px;
+      border: 1px solid #273044;
+      border-radius: 16px;
+      background: #111827;
+    }
+    h1 { margin-top: 0; }
+    p { color: #9ca3af; line-height: 1.5; }
+    input, button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 14px;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    input {
+      border: 1px solid #374151;
+      background: #080b12;
+      color: white;
+    }
+    button {
+      border: 0;
+      background: #e63946;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .6; cursor: wait; }
+    #message { color: #f87171; }
+    #dashboard { display: none; }
+    a { color: #fb7185; }
+  </style>
+</head>
+
+<body>
+  <main class="panel">
+    <section id="login">
+      <h1>SRP Master Admin</h1>
+      <p>Sign in using your authorized master administrator account.</p>
+
+      <form id="loginForm">
+        <input id="email" type="email" placeholder="Admin email" required>
+        <input id="password" type="password" placeholder="Password" required>
+        <button id="loginButton" type="submit">Secure Login</button>
+      </form>
+
+      <p id="message" role="alert"></p>
+    </section>
+
+    <section id="dashboard">
+      <h1>Master Access Verified</h1>
+      <p>You are authenticated as the master administrator.</p>
+      <p><a href="vault.html">Open Admin Vault →</a></p>
+      <button id="logoutButton" type="button">Logout</button>
+    </section>
+  </main>
+
+  <script>
+    const loginSection = document.getElementById("login");
+    const dashboard = document.getElementById("dashboard");
+    const message = document.getElementById("message");
+    const loginButton = document.getElementById("loginButton");
+
+    async function refreshPage() {
+      try {
+        const valid = await verifyMaster();
+        loginSection.style.display = valid ? "none" : "block";
+        dashboard.style.display = valid ? "block" : "none";
+      } catch {
+        loginSection.style.display = "block";
+        dashboard.style.display = "none";
+      }
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      message.textContent = "";
+      loginButton.disabled = true;
+      loginButton.textContent = "Verifying...";
+
+      try {
+        await masterLogin(
+          document.getElementById("email").value.trim(),
+          document.getElementById("password").value
+        );
+        await refreshPage();
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = "Secure Login";
+      }
+    });
+
+    document.getElementById("logoutButton").addEventListener("click", masterLogout);
+
+    auth.onAuthStateChanged(() => refreshPage());
+    refreshPage();
+  </script>
+</body>
+</html>
