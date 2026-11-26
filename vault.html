@@ -1,1 +1,447 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#052e1e"><title>SRP-ESPORTS | Vault setup pending</title><link rel="stylesheet" href="./css/theme.css"><script src="https://cdn.tailwindcss.com"></script></head><body data-theme="save-trees" class="min-h-screen flex items-center justify-center p-5"><main class="custom-card w-full max-w-xl !p-7 text-center"><i class="fas fa-shield-halved text-4xl text-emerald-300"></i><div class="section-kicker mt-4">Administrator access</div><h1 class="brand-text mt-2 text-3xl font-black">SECURE SYSTEM VAULT SETUP PENDING</h1><p class="mt-4 text-sm leading-6 text-slate-300">The system vault is not enabled yet. We are replacing the temporary browser-only login flow with Firebase Authentication and server-enforced permissions. Do not enter passwords on this placeholder page.</p><a href="index.html" class="custom-btn mt-6">Return to website</a></main></body></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#03170f">
+
+  <title>SRP Esports | Admin Vault</title>
+
+  <link rel="stylesheet" href="css/theme.css">
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="js/admin-auth.js"></script>
+
+  <style>
+    [hidden] { display: none !important; }
+
+    body {
+      min-height: 100vh;
+    }
+
+    .vault-header {
+      height: 75px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5%;
+      background: var(--theme-surface);
+      border-bottom: 1px solid var(--theme-card-border);
+      backdrop-filter: blur(14px);
+    }
+
+    .vault-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .vault-logo {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--theme-btn-gradient);
+      color: white;
+      font-weight: 900;
+    }
+
+    .vault-brand strong {
+      font-size: 15px;
+      letter-spacing: 1px;
+    }
+
+    .vault-brand small {
+      display: block;
+      margin-top: 4px;
+      color: #94a3b8;
+      font-size: 9px;
+      letter-spacing: 2px;
+    }
+
+    .vault-main {
+      max-width: 1150px;
+      margin: auto;
+      padding: 45px 22px 70px;
+    }
+
+    .vault-title {
+      margin-bottom: 10px;
+      font-size: clamp(27px, 5vw, 38px);
+      font-weight: 900;
+    }
+
+    .vault-description {
+      color: #94a3b8;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      padding: 8px 12px;
+      border-radius: 30px;
+      border: 1px solid var(--theme-badge-border);
+      background: var(--theme-badge-bg);
+      color: var(--theme-accent-text);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .green-dot {
+      height: 8px;
+      width: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 10px #4ade80;
+    }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 17px;
+      margin-top: 30px;
+    }
+
+    .module-card {
+      min-height: 150px;
+      padding: 21px;
+      border-radius: 17px;
+      border: 1px solid var(--theme-card-border);
+      background: var(--theme-card-bg);
+    }
+
+    .module-icon {
+      font-size: 25px;
+      margin-bottom: 17px;
+    }
+
+    .module-card h3 {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .module-card p {
+      margin-top: 8px;
+      color: #94a3b8;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .module-status {
+      display: inline-block;
+      margin-top: 13px;
+      color: var(--theme-accent-text);
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .vault-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 15px;
+      border-radius: 10px;
+      border: 1px solid var(--theme-card-border);
+      background: var(--theme-card-bg);
+      color: white;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .toolbar-link:hover {
+      border-color: var(--theme-accent);
+    }
+
+    .logout-button {
+      padding: 11px 15px;
+      color: white;
+      border: 0;
+      border-radius: 10px;
+      background: linear-gradient(135deg,#dc2626,#991b1b);
+      font-weight: 800;
+      font-size: 11px;
+    }
+
+    .notice {
+      margin-top: 25px;
+      padding: 18px;
+      border: 1px solid var(--theme-card-border);
+      border-radius: 13px;
+      background: var(--theme-card-bg);
+      color: #cbd5e1;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    .center-screen {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .center-card {
+      width: 100%;
+      max-width: 450px;
+      padding: 32px;
+      text-align: center;
+    }
+
+    .loader {
+      width: 36px;
+      height: 36px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,.12);
+      border-top-color: var(--theme-accent);
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media(max-width: 750px) {
+      .module-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+      }
+    }
+
+    @media(max-width: 480px) {
+      .module-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .vault-header {
+        padding: 0 17px;
+      }
+
+      .vault-brand strong {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body data-theme="save-trees">
+
+  <section class="center-screen" id="checkingView">
+    <div class="custom-card center-card">
+      <div class="loader"></div>
+      <h2>Checking Master Access</h2>
+      <p class="vault-description">
+        Verifying your Firebase administrator credentials...
+      </p>
+    </div>
+  </section>
+
+  <section class="center-screen" id="deniedView" hidden>
+    <div class="custom-card center-card">
+      <div style="font-size:42px;margin-bottom:17px">🔒</div>
+      <div class="section-kicker">RESTRICTED AREA</div>
+      <h1 class="brand-text" style="margin:14px 0">
+        Access Required
+      </h1>
+      <p class="vault-description">
+        You need a valid master administrator session to open this vault.
+      </p>
+      <a href="admin.html" class="custom-btn" style="margin-top:22px">
+        RETURN TO MASTER LOGIN
+      </a>
+    </div>
+  </section>
+
+  <section id="vaultView" hidden>
+
+    <header class="vault-header">
+      <div class="vault-brand">
+        <div class="vault-logo">SRP</div>
+        <div>
+          <strong>SRP ESPORTS</strong>
+          <small>MASTER ADMIN VAULT</small>
+        </div>
+      </div>
+
+      <button class="logout-button" id="logoutButton">
+        SIGN OUT
+      </button>
+    </header>
+
+    <main class="vault-main">
+
+      <div class="vault-toolbar">
+        <div>
+          <div class="section-kicker">SEASON 06 / CONTROL SYSTEM</div>
+          <h1 class="vault-title brand-text">Admin Vault.</h1>
+          <p class="vault-description">
+            Master administration workspace for SRP Esports.
+          </p>
+        </div>
+
+        <div class="toolbar-actions">
+          <a href="admin.html" class="toolbar-link">← Admin Home</a>
+          <a href="index.html" class="toolbar-link">Website ↗</a>
+        </div>
+      </div>
+
+      <div class="verified">
+        <span class="green-dot"></span>
+        MASTER IDENTITY VERIFIED
+      </div>
+
+      <section class="custom-card">
+        <div class="section-kicker">SYSTEM OVERVIEW</div>
+        <h2 style="margin:12px 0;font-size:22px">
+          Welcome to the Master Vault
+        </h2>
+        <p class="vault-description">
+          Your Firebase master authentication is active.
+          This workspace is the secure entry point for tournament
+          management and administrative operations.
+        </p>
+      </section>
+
+      <div class="section-kicker" style="margin-top:35px">
+        ADMINISTRATION MODULES
+      </div>
+
+      <div class="module-grid">
+
+        <article class="module-card">
+          <div class="module-icon">👥</div>
+          <h3>Team Management</h3>
+          <p>Manage registered teams and team information.</p>
+          <span class="module-status">MODULE TO BE CONNECTED</span>
+        </article>
+
+        <article class="module-card">
+          <div class="module-icon">🎮</div>
+          <h3>Player Management</h3>
+          <p>Review player records and roster information.</p>
+          <span class="module-status">MODULE TO BE CONNECTED</span>
+        </article>
+
+        <article class="module-card">
+          <div class="module-icon">🏆</div>
+          <h3>Match Management</h3>
+          <p>Manage tournament matches and results.</p>
+          <span class="module-status">MODULE TO BE CONNECTED</span>
+        </article>
+
+        <article class="module-card">
+          <div class="module-icon">📊</div>
+          <h3>Tournament Slots</h3>
+          <p>Manage tournament positions and match slots.</p>
+          <span class="module-status">MODULE TO BE CONNECTED</span>
+        </article>
+
+        <article class="module-card">
+          <div class="module-icon">🛡️</div>
+          <h3>Sub-admins</h3>
+          <p>Manage administrator accounts and permissions.</p>
+          <span class="module-status">MODULE TO BE CONNECTED</span>
+        </article>
+
+        <article class="module-card">
+          <div class="module-icon">⚙️</div>
+          <h3>System Settings</h3>
+          <p>Manage tournament settings and public website data.</p>
+          <span class="module-status">MODULE TO BE CONNECTED</span>
+        </article>
+
+      </div>
+
+      <div class="notice">
+        <strong style="color:var(--theme-accent-text)">
+          Security status:
+        </strong>
+        The vault verifies the Firebase master custom claim before
+        displaying this workspace. The management modules above are
+        currently a visual framework; database operations still need
+        to be implemented and tested individually.
+      </div>
+
+    </main>
+  </section>
+
+  <script>
+    const checkingView = document.getElementById("checkingView");
+    const deniedView = document.getElementById("deniedView");
+    const vaultView = document.getElementById("vaultView");
+
+    function showVaultView(view) {
+      checkingView.hidden = view !== "checking";
+      deniedView.hidden = view !== "denied";
+      vaultView.hidden = view !== "vault";
+    }
+
+    let verificationRun = 0;
+
+    async function verifyVaultAccess(user) {
+      const run = ++verificationRun;
+
+      if (!user) {
+        showVaultView("denied");
+        return;
+      }
+
+      showVaultView("checking");
+
+      try {
+        const valid = await verifyMaster();
+
+        if (run !== verificationRun) return;
+
+        if (valid) {
+          showVaultView("vault");
+        } else {
+          await auth.signOut();
+
+          if (run === verificationRun) {
+            showVaultView("denied");
+          }
+        }
+      } catch (error) {
+        console.error("Vault verification failed:", error);
+
+        if (run === verificationRun) {
+          showVaultView("denied");
+        }
+      }
+    }
+
+    auth.onAuthStateChanged(verifyVaultAccess);
+
+    document.getElementById("logoutButton").addEventListener("click", async () => {
+      await masterLogout();
+    });
+  </script>
+
+</body>
+</html>
