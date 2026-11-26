@@ -211,7 +211,7 @@
     await db.runTransaction(async transaction => {
       const settingsSnap = await transaction.get(settingsRef);
       const settings = settingsSnap.exists ? settingsSnap.data() : {};
-      if (Number.isInteger(Number(settings.registrationReservedCount))) return;
+      if (typeof settings.registrationReservedCount === 'number' && Number.isInteger(settings.registrationReservedCount)) return;
       transaction.set(settingsRef, {
         registrationReservedCount: teams.size + applications.size,
         lastRegistrationId: null
@@ -370,6 +370,7 @@
       <tr><td><code style="color:#fde68a;font-weight:900;letter-spacing:.08em">${esc(t.token || t.id)}</code></td><td>${esc(t.season || '—')}</td><td>${t.used ? '<span class="status-pill warning">Redeemed</span>' : '<span class="status-pill">Unused</span>'}</td><td>${esc(t.usedBy || '—')}</td>
       <td><div class="table-actions">${can('token_view') ? `<button class="mini-action" data-copy-token="${esc(t.token || t.id)}"><i class="fa-solid fa-copy"></i> Copy</button>` : ''}${!t.used && can('token_delete') ? `<button class="mini-action delete" data-delete-token="${esc(t.id)}"><i class="fa-solid fa-ban"></i> Revoke</button>` : ''}</div></td></tr>`).join('') : '<tr><td colspan="5"><div class="empty-state"><i class="fa-solid fa-ticket"></i>No tokens found.</div></td></tr>';
     $('generate-token').hidden = !can('token_create');
+    if ($('migrate-tokens')) $('migrate-tokens').hidden = !isMaster();
   }
 
   function renderSubAdmins() {
