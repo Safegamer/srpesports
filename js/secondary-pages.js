@@ -93,6 +93,21 @@
     if (state.page === 'save-trees') renderSaveTrees();
   }
   function wire() {
+    const registrationForm = $('team-registration-form');
+    registrationForm?.querySelectorAll('.player-photo-input').forEach((input) => {
+      input.addEventListener('change', () => {
+        const help = input.closest('.player-photo-field')?.querySelector('.photo-help');
+        const file = input.files?.[0];
+        if (!file) { if (help) help.textContent = 'Choose an image from gallery or files · max 5 MB'; return; }
+        const validType = file.type.startsWith('image/');
+        if (!validType || file.size > 5 * 1024 * 1024) {
+          input.value = '';
+          if (help) help.textContent = !validType ? 'Choose an image file.' : 'Image must be 5 MB or smaller.';
+          return;
+        }
+        if (help) help.textContent = `${file.name} · ${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+      });
+    });
     $('theme-select')?.addEventListener('change', function () {
       const value = $('theme-select').value;
       if (value && THEMES.includes(value)) localStorage.setItem('srp_s6_theme_override', value);

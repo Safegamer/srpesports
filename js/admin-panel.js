@@ -567,7 +567,6 @@
     showToast('Livestream settings saved.');
   }
   async function saveGeneralSettings() {
-    const current = state.settings.tournament || {};
     const patch = {};
     if (isMaster()) {
       patch.season = $('setting-season').value.trim() || 'Season 6';
