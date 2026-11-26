@@ -1,9 +1,10 @@
-const CACHE_NAME = 'srp-esports-s6-v2';
+const CACHE_NAME = 'srp-esports-s6-admin-v3';
 const APP_SHELL = [
   './', './index.html', './tournament.html', './players.html',
   './rules.html', './save-trees.html', './register.html', './register-success.html',
   './hall-of-fame.html', './admin.html', './vault.html',
-  './css/theme.css', './js/firebase.js', './js/tournament.js', './js/secondary-pages.js',
+  './css/theme.css', './css/admin.css', './js/firebase.js', './js/tournament.js',
+  './js/secondary-pages.js', './js/admin-auth.js', './js/admin-panel.js',
   './app.webmanifest', './icons/icon-192.png', './icons/icon-512.png'
 ];
 

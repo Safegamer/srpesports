@@ -1,0 +1,159 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isMaster() {
+      return signedIn() && request.auth.token.role == 'master';
+    }
+
+    function activeSubAdmin() {
+      return signedIn()
+        && request.auth.token.role == 'sub'
+        && exists(/databases/$(database)/documents/sub_admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/sub_admins/$(request.auth.uid)).data.active == true;
+    }
+
+    function hasPerm(permission) {
+      return activeSubAdmin()
+        && get(/databases/$(database)/documents/sub_admins/$(request.auth.uid)).data.permissions[permission] == true;
+    }
+
+    function changedOnly(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
+    function teamUpdateAllowed() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return changed.hasOnly(['name', 'logoUrl', 'group', 'rosterLocked', 'disqualified', 'dqReason'])
+        && (!changed.hasAny(['name', 'logoUrl', 'group']) || hasPerm('team_edit_info'))
+        && (!changed.hasAny(['rosterLocked']) || hasPerm('team_lock_roster'))
+        && (!changed.hasAny(['disqualified', 'dqReason']) || hasPerm('team_dq'));
+    }
+
+    function playerUpdateAllowed() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return changed.hasOnly(['ign', 'uid', 'device', 'role', 'photoUrl', 'isSub', 'slotOrder', 'teamId'])
+        && (!changed.hasAny(['ign', 'uid', 'device']) || hasPerm('player_edit_details'))
+        && (!changed.hasAny(['photoUrl']) || hasPerm('player_edit_photo'))
+        && (!changed.hasAny(['isSub', 'slotOrder', 'teamId']) || hasPerm('player_manage_subs'))
+        && (!changed.hasAny(['role']) || hasPerm('player_edit_details') || hasPerm('player_manage_subs'));
+    }
+
+    function matchUpdateAllowed() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return changed.hasOnly([
+          'teamAId', 'teamAName', 'teamAScore', 'teamBId', 'teamBName', 'teamBScore',
+          'map', 'roundName', 'round', 'date', 'status', 'timestamp', 'title',
+          'stats', 'vodUrl', 'proofUrl', 'matchProofUrl', 'youtubeUrl'
+        ])
+        && (!changed.hasAny([
+          'teamAId', 'teamAName', 'teamAScore', 'teamBId', 'teamBName',
+          'teamBScore', 'map', 'roundName', 'round', 'date', 'status', 'timestamp', 'title'
+        ]) || hasPerm('match_edit_score'))
+        && (!changed.hasAny(['stats']) || hasPerm('match_edit_stats'))
+        && (!changed.hasAny(['vodUrl', 'proofUrl', 'matchProofUrl', 'youtubeUrl']) || hasPerm('match_edit_vod'));
+    }
+
+    function teamCreateAllowed() {
+      let keys = request.resource.data.keys();
+      return hasPerm('team_add')
+        && keys.hasOnly(['name', 'logoUrl', 'group', 'disqualified', 'rosterLocked', 'createdAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 48;
+    }
+
+    function playerCreateAllowed() {
+      let keys = request.resource.data.keys();
+      return keys.hasOnly(['teamId', 'ign', 'uid', 'device', 'role', 'photoUrl', 'isSub', 'slotOrder', 'createdAt'])
+        && (!keys.hasAny(['ign', 'uid', 'device']) || hasPerm('player_edit_details'))
+        && (!keys.hasAny(['photoUrl']) || hasPerm('player_edit_photo'))
+        && (!keys.hasAny(['teamId', 'isSub', 'slotOrder'])
+          || hasPerm('player_manage_subs')
+          || (hasPerm('player_edit_details') && request.resource.data.isSub == false))
+        && (!keys.hasAny(['role']) || hasPerm('player_edit_details') || hasPerm('player_manage_subs'))
+        && request.resource.data.ign is string
+        && request.resource.data.ign.size() > 0;
+    }
+
+    // Public tournament data remains readable. Writes are role- and action-scoped.
+    match /teams/{teamId} {
+      allow read: if true;
+      allow create: if isMaster() || teamCreateAllowed();
+      allow update: if isMaster() || teamUpdateAllowed();
+      allow delete: if isMaster() || hasPerm('team_delete');
+    }
+
+    match /players/{playerId} {
+      allow read: if true;
+      allow create: if isMaster() || playerCreateAllowed();
+      allow update: if isMaster() || playerUpdateAllowed();
+      allow delete: if isMaster() || hasPerm('player_manage_subs');
+    }
+
+    match /matches/{matchId} {
+      allow read: if true;
+      allow create: if isMaster() || hasPerm('match_create');
+      allow update: if isMaster() || matchUpdateAllowed();
+      allow delete: if isMaster() || hasPerm('match_delete');
+    }
+
+    match /tournament_slots/{slotId} {
+      allow read: if true;
+      allow write: if isMaster() || hasPerm('tourney_slots');
+    }
+
+    match /tournament_matches/{matchId} {
+      allow read: if true;
+      allow write: if isMaster() || hasPerm('tourney_scores');
+    }
+
+    match /settings/{documentId} {
+      // Only the three documents consumed by the public Season 6 pages are public.
+      // Other settings documents are private to master administrators.
+      allow read: if isMaster() || documentId in ['tournament', 'rules', 'past_season'];
+      allow create: if isMaster();
+      allow update: if isMaster()
+        || (documentId == 'tournament'
+          && hasPerm('announcement_edit')
+          && changedOnly(['announcement']))
+        || (documentId == 'tournament'
+          && hasPerm('livestream_edit')
+          && changedOnly(['liveStream']))
+        || (documentId == 'tournament'
+          && hasPerm('prize_edit')
+          && changedOnly(['prizePool', 'prize_pool', 'prize', 'updatedAt']))
+        || (documentId == 'rules' && hasPerm('rules_edit'));
+      allow delete: if isMaster();
+    }
+
+    match /tokens/{tokenId} {
+      allow read: if isMaster() || hasPerm('token_view');
+      allow create: if isMaster() || hasPerm('token_create');
+      allow update: if isMaster() || hasPerm('token_create');
+      allow delete: if isMaster() || hasPerm('token_delete');
+    }
+
+    // Sub-admin account records are written only by trusted Cloud Functions
+    // using the Firebase Admin SDK. Browser clients may only read them as master.
+    match /sub_admins/{uid} {
+      allow read: if isMaster();
+      allow write: if false;
+    }
+
+    // Keep application review data private to master administrators.
+    match /registration_applications/{applicationId} {
+      allow read, write: if isMaster();
+    }
+
+    // Explicit deny for any collection not listed above.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

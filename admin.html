@@ -1,388 +1,195 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#03170f">
-  <title>SRP Esports | Admin Login</title>
-
-  <link rel="stylesheet" href="css/theme.css">
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#052e1e">
+  <meta name="color-scheme" content="dark">
+  <title>SRP-ESPORTS | Admin Control</title>
+  <link rel="manifest" href="./app.webmanifest">
+  <link rel="stylesheet" href="./css/theme.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="js/admin-auth.js"></script>
-
-  <style>
-    [hidden] { display: none !important; }
-
-    body {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .header {
-      padding: 16px 5%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 14px;
-      background: var(--theme-surface);
-      border-bottom: 1px solid var(--theme-card-border);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo {
-      width: 43px;
-      height: 43px;
-      display: grid;
-      place-items: center;
-      border-radius: 12px;
-      background: var(--theme-btn-gradient);
-      color: white;
-      font-weight: 900;
-    }
-
-    .brand small {
-      display: block;
-      margin-top: 4px;
-      color: #94a3b8;
-      font-size: 9px;
-      letter-spacing: 2px;
-    }
-
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding: 11px 15px;
-      border: 1px solid var(--theme-card-border);
-      border-radius: 11px;
-      color: var(--theme-accent-text);
-      background: var(--theme-card-bg);
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 800;
-      transition: .2s ease;
-    }
-
-    .back-link:hover {
-      border-color: var(--theme-accent);
-      background: var(--theme-nav-active);
-      transform: translateY(-2px);
-    }
-
-    main {
-      flex: 1;
-      display: grid;
-      place-items: center;
-      padding: 30px 18px;
-    }
-
-    .login-card {
-      width: 100%;
-      max-width: 430px;
-      padding: 34px;
-      border: 1px solid var(--theme-card-border);
-      border-radius: 20px;
-      background: var(--theme-surface);
-      box-shadow: 0 20px 65px rgba(0,0,0,.35);
-    }
-
-    .login-card h1 {
-      margin: 14px 0 10px;
-      font-size: 29px;
-      font-weight: 900;
-    }
-
-    .muted {
-      color: #94a3b8;
-      font-size: 13px;
-      line-height: 1.8;
-    }
-
-    label {
-      display: block;
-      margin: 20px 0 8px;
-      color: #cbd5e1;
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    input {
-      width: 100%;
-      padding: 14px;
-      color: white;
-      background: rgba(2,12,8,.8);
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 11px;
-      outline: none;
-    }
-
-    input:focus {
-      border-color: var(--theme-accent);
-      box-shadow: 0 0 14px var(--theme-accent-glow);
-    }
-
-    .login-button {
-      width: 100%;
-      padding: 15px;
-      margin-top: 24px;
-      border: none;
-      border-radius: 11px;
-      background: var(--theme-btn-gradient);
-      color: white;
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: 1px;
-      cursor: pointer;
-      transition: .2s ease;
-    }
-
-    .login-button:hover:not(:disabled) {
-      transform: translateY(-2px);
-      filter: brightness(1.1);
-    }
-
-    .login-button:disabled {
-      opacity: .6;
-      cursor: wait;
-    }
-
-    .cancel-button {
-      display: flex;
-      width: 100%;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 12px;
-      padding: 13px 15px;
-      border: 1px solid var(--theme-card-border);
-      border-radius: 11px;
-      color: #cbd5e1;
-      background: rgba(255,255,255,.035);
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 700;
-      transition: .2s ease;
-    }
-
-    .cancel-button:hover {
-      color: white;
-      border-color: var(--theme-accent);
-      background: var(--theme-nav-active);
-      transform: translateY(-1px);
-    }
-
-    .cancel-button svg {
-      width: 16px;
-      height: 16px;
-      transition: transform .2s ease;
-    }
-
-    .cancel-button:hover svg {
-      transform: translateX(-3px);
-    }
-
-    #message {
-      min-height: 22px;
-      margin-top: 12px;
-      color: #fb7185;
-      font-size: 12px;
-    }
-
-    .loader {
-      width: 34px;
-      height: 34px;
-      margin: 0 auto 20px;
-      border: 3px solid rgba(255,255,255,.12);
-      border-top-color: var(--theme-accent);
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    footer {
-      padding: 18px;
-      color: #64748b;
-      font-size: 10px;
-      text-align: center;
-    }
-
-    @media(max-width:480px) {
-      .login-card { padding: 25px 21px; }
-      .header { padding: 14px 17px; }
-    }
-  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
+  <link rel="stylesheet" href="./css/admin.css">
 </head>
-
 <body data-theme="save-trees">
 
-  <header class="header">
-    <div class="brand">
-      <div class="logo">SRP</div>
-      <div>
-        <strong>SRP ESPORTS</strong>
-        <small>MASTER ADMINISTRATION</small>
+  <!-- AUTHENTICATION -->
+  <section class="auth-screen" id="auth-screen">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="brand-mark">SRP</div>
+        <div><strong style="font-size:14px;letter-spacing:.1em">SRP ESPORTS</strong><small style="display:block;margin-top:4px;color:#7d9586;font-size:8px;letter-spacing:.2em;font-weight:900">SEASON 06 · CONTROL SYSTEM</small></div>
       </div>
-    </div>
-
-    <a href="index.html" class="back-link">
-      <span>←</span>
-      Return to Website
-    </a>
-  </header>
-
-  <main>
-
-    <section class="custom-card login-card" id="checking" hidden>
-      <div class="loader"></div>
-      <h2 style="text-align:center">Verifying Access</h2>
-      <p class="muted" style="text-align:center">
-        Checking administrator credentials...
-      </p>
-    </section>
-
-    <section class="custom-card login-card" id="login">
-
-      <div class="section-kicker">SRP CONTROL SYSTEM</div>
-
-      <h1 class="brand-text">Administrator Login</h1>
-
-      <p class="muted">
-        Sign in using your authorized master administrator account.
-      </p>
-
-      <form id="loginForm">
-
-        <label for="email">Email Address</label>
-        <input
-          id="email"
-          type="email"
-          autocomplete="username"
-          placeholder="Administrator email"
-          required
-        >
-
-        <label for="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          autocomplete="current-password"
-          placeholder="Your password"
-          required
-        >
-
-        <button class="login-button" id="loginButton" type="submit">
-          SIGN IN TO ADMIN
-        </button>
-
-        <div id="message" role="alert"></div>
-
-        <a href="index.html" class="cancel-button">
-          <svg viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5"/>
-            <path d="m12 19-7-7 7-7"/>
-          </svg>
-          Cancel and return to homepage
-        </a>
-
+      <div class="eyebrow">Secure administrator access</div>
+      <h1 class="auth-title brand-text">Control Center.</h1>
+      <p class="auth-sub">Sign in with your SRP administrator account. Master and permission-based sub-admin accounts are supported.</p>
+      <form id="auth-form">
+        <label class="field-label" for="auth-email">Email address</label>
+        <input class="admin-field" id="auth-email" type="email" autocomplete="username" placeholder="admin@example.com" required>
+        <label class="field-label" for="auth-password">Password</label>
+        <input class="admin-field" id="auth-password" type="password" autocomplete="current-password" placeholder="Your password" required>
+        <button class="auth-submit" id="auth-submit" type="submit"><i class="fa-solid fa-shield-halved"></i> Sign in to SRP Admin</button>
+        <div class="auth-message" id="auth-message" role="alert"></div>
       </form>
+      <p style="margin-top:20px;color:#607568;font-size:9px;line-height:1.6;text-align:center">Authentication and database access are enforced by Firebase Authentication and Firestore Security Rules.</p>
+    </div>
+  </section>
 
-      <p class="muted" style="margin-top:20px;text-align:center;font-size:10px">
-        Protected by Firebase Authentication and master-role verification.
-      </p>
+  <!-- SINGLE ADMIN WORKSPACE -->
+  <div class="admin-shell" id="admin-app" hidden>
+    <div class="mobile-backdrop" id="mobile-backdrop"></div>
+    <aside class="sidebar" id="admin-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-mark">SRP</div>
+        <div><strong>SRP-ESPORTS</strong><small>SEASON 06 CONTROL</small></div>
+      </div>
+      <div id="admin-navigation"></div>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-user">
+        <span class="role-chip" id="admin-role-chip"><i class="fa-solid fa-circle-check"></i> Master Admin</span>
+        <div id="admin-user-name" style="margin-top:9px;font-size:11px;font-weight:900;overflow-wrap:anywhere">Administrator</div>
+        <div id="admin-user-email" style="margin-top:3px;color:#819087;font-size:9px;overflow-wrap:anywhere"></div>
+      </div>
+    </aside>
 
-    </section>
+    <main class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-action" id="sidebar-toggle" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+          <div style="min-width:0"><div class="topbar-title" id="topbar-title">Dashboard</div><div class="topbar-sub">SRP ESPORTS / SEASON 06</div></div>
+        </div>
+        <div class="topbar-actions">
+          <a class="quiet-action" href="./index.html"><i class="fa-solid fa-arrow-up-right-from-square"></i><span>Public Website</span></a>
+          <button class="danger-action" id="logout-button"><i class="fa-solid fa-right-from-bracket"></i><span> Logout</span></button>
+        </div>
+      </header>
 
-  </main>
+      <section class="admin-page active" id="page-overview">
+        <div class="hero-card">
+          <div class="eyebrow">Master administration workspace</div>
+          <h1 class="hero-title">Welcome back, <span id="welcome-name">Administrator</span>.</h1>
+          <p class="hero-copy">Your Season 6 tournament operations in one place. Manage teams, players, scoreboards, progression, announcements, access and backups.</p>
+        </div>
+        <div class="stat-grid">
+          <article class="stat-card"><div class="stat-top"><span>Registered teams</span><span class="stat-icon"><i class="fa-solid fa-users"></i></span></div><div class="stat-number" id="stat-teams">—</div><div class="stat-note">Teams in Firestore</div></article>
+          <article class="stat-card"><div class="stat-top"><span>Players</span><span class="stat-icon"><i class="fa-solid fa-user-group"></i></span></div><div class="stat-number" id="stat-players">—</div><div class="stat-note">Starters and substitutes</div></article>
+          <article class="stat-card"><div class="stat-top"><span>Matches</span><span class="stat-icon"><i class="fa-solid fa-gamepad"></i></span></div><div class="stat-number" id="stat-matches">—</div><div class="stat-note">Recorded scoreboards</div></article>
+          <article class="stat-card"><div class="stat-top"><span>Active tokens</span><span class="stat-icon"><i class="fa-solid fa-ticket"></i></span></div><div class="stat-number" id="stat-tokens">—</div><div class="stat-note">Unused registration tokens</div></article>
+        </div>
+        <div class="content-grid">
+          <section class="panel-card"><div class="panel-title">Quick actions</div><p class="panel-subtitle">Jump directly into common tournament operations.</p><div class="quick-grid">
+            <button class="quick-link" data-open-page="teams"><i class="fa-solid fa-users"></i> Manage teams</button>
+            <button class="quick-link" data-open-page="players"><i class="fa-solid fa-user-group"></i> Manage players</button>
+            <button class="quick-link" data-open-page="matches"><i class="fa-solid fa-gamepad"></i> Match center</button>
+            <button class="quick-link" data-open-page="tournament"><i class="fa-solid fa-trophy"></i> Tournament progression</button>
+            <button class="quick-link" data-open-page="content"><i class="fa-solid fa-bullhorn"></i> Announcements & settings</button>
+            <button class="quick-link" data-open-page="subadmins"><i class="fa-solid fa-user-shield"></i> Sub-admin access</button>
+          </div></section>
+          <section class="panel-card"><div class="panel-title">System status</div><p class="panel-subtitle">Connection and current account details.</p><div style="display:grid;gap:13px;margin-top:17px">
+            <div style="display:flex;justify-content:space-between;gap:10px"><span class="muted">Firebase Auth</span><span class="status-pill" id="status-auth">Checking</span></div>
+            <div style="display:flex;justify-content:space-between;gap:10px"><span class="muted">Firestore</span><span class="status-pill" id="status-db">Connecting</span></div>
+            <div style="display:flex;justify-content:space-between;gap:10px"><span class="muted">Active season</span><strong id="overview-season" style="font-size:10px">Season 6</strong></div>
+            <div style="display:flex;justify-content:space-between;gap:10px"><span class="muted">Website theme</span><strong id="overview-theme" style="font-size:10px">Save Trees</strong></div>
+          </div></section>
+        </div>
+        <section class="panel-card" style="margin-top:14px"><div class="panel-title">Recent matches</div><p class="panel-subtitle">Latest scoreboard records.</p><div id="overview-recent-matches" style="margin-top:12px"></div></section>
+      </section>
 
-  <footer>SRP ESPORTS © 2026 · SEASON 06</footer>
+      <section class="admin-page" id="page-teams">
+        <div class="section-heading"><div><div class="eyebrow">Tournament management</div><h1 class="page-heading">Teams</h1><p class="page-description">Create and maintain Season 6 teams, logos, qualification status and roster locks.</p></div><button class="primary-action" id="add-team-button"><i class="fa-solid fa-plus"></i> Add team</button></div>
+        <div class="data-toolbar"><input class="search-field" id="team-search" placeholder="Search team name or document ID..."><button class="quiet-action" data-refresh="teams"><i class="fa-solid fa-rotate"></i> Refresh</button></div>
+        <div class="panel-card table-card"><div class="table-wrap"><table class="admin-table"><thead><tr><th>Team</th><th>Group</th><th>Status</th><th>Roster</th><th style="text-align:right">Actions</th></tr></thead><tbody id="teams-body"></tbody></table></div></div>
+      </section>
 
-  <script>
-    const loginView = document.getElementById("login");
-    const checkingView = document.getElementById("checking");
-    const message = document.getElementById("message");
-    const loginButton = document.getElementById("loginButton");
+      <section class="admin-page" id="page-players">
+        <div class="section-heading"><div><div class="eyebrow">Tournament management</div><h1 class="page-heading">Players</h1><p class="page-description">Manage player IGN, UID, device, role, team assignment and substitute status.</p></div><button class="primary-action" id="add-player-button"><i class="fa-solid fa-plus"></i> Add player</button></div>
+        <div class="data-toolbar"><input class="search-field" id="player-search" placeholder="Search IGN, UID or team..."><button class="quiet-action" data-refresh="players"><i class="fa-solid fa-rotate"></i> Refresh</button></div>
+        <div class="panel-card table-card"><div class="table-wrap"><table class="admin-table"><thead><tr><th>Player</th><th>Team</th><th>UID</th><th>Device</th><th>Role</th><th style="text-align:right">Actions</th></tr></thead><tbody id="players-body"></tbody></table></div></div>
+      </section>
 
-    let authCheckRunning = false;
+      <section class="admin-page" id="page-matches">
+        <div class="section-heading"><div><div class="eyebrow">Scoreboard control</div><h1 class="page-heading">Match Center</h1><p class="page-description">Create match records, update results, add player statistics and proof links.</p></div><button class="primary-action" id="add-match-button"><i class="fa-solid fa-plus"></i> Create match</button></div>
+        <div class="data-toolbar"><input class="search-field" id="match-search" placeholder="Search teams, map or match ID..."><button class="quiet-action" data-refresh="matches"><i class="fa-solid fa-rotate"></i> Refresh</button></div>
+        <div class="panel-card table-card"><div class="table-wrap"><table class="admin-table"><thead><tr><th>Match</th><th>Score</th><th>Map / Round</th><th>Date</th><th style="text-align:right">Actions</th></tr></thead><tbody id="matches-body"></tbody></table></div></div>
+      </section>
 
-    function showLogin() {
-      checkingView.hidden = true;
-      loginView.hidden = false;
-    }
+      <section class="admin-page" id="page-tournament">
+        <div class="section-heading"><div><div class="eyebrow">Competition structure</div><h1 class="page-heading">Tournament Progression</h1><p class="page-description">Edit slot assignments and published tournament match documents.</p></div></div>
+        <div class="note-box" style="margin-bottom:14px">Tournament slots and tournament match objects have different shapes depending on the current stage. Their editor preserves the full document as JSON so existing Season 6 fields are not silently discarded.</div>
+        <div class="content-grid">
+          <section class="panel-card"><div class="section-heading" style="margin-bottom:12px"><div><div class="panel-title">Tournament slots</div><div class="panel-subtitle">Collection: tournament_slots</div></div><button class="primary-action" id="add-slot-button"><i class="fa-solid fa-plus"></i> Add slot</button></div><div id="slots-list"></div></section>
+          <section class="panel-card"><div class="section-heading" style="margin-bottom:12px"><div><div class="panel-title">Tournament matches</div><div class="panel-subtitle">Collection: tournament_matches</div></div><button class="primary-action" id="add-tmatch-button"><i class="fa-solid fa-plus"></i> Add match</button></div><div id="tournament-matches-list"></div></section>
+        </div>
+      </section>
 
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        authCheckRunning = false;
-        showLogin();
-        return;
-      }
+      <section class="admin-page" id="page-content">
+        <div class="section-heading"><div><div class="eyebrow">Public website controls</div><h1 class="page-heading">Content & Settings</h1><p class="page-description">Manage public announcements, livestream banner, season theme, maintenance state, prize pool and rules.</p></div></div>
+        <div class="content-grid">
+          <section class="panel-card"><div class="panel-title">Announcement board</div><p class="panel-subtitle">Published on the public tournament website.</p>
+            <label class="field-label" for="announcement-text">Announcement</label><textarea class="admin-textarea" id="announcement-text" style="min-height:90px" placeholder="Type your announcement..."></textarea>
+            <label class="check-row" style="margin-top:10px"><input type="checkbox" id="announcement-active"> Show announcement publicly</label>
+            <button class="primary-action" id="save-announcement" style="margin-top:14px"><i class="fa-solid fa-bullhorn"></i> Publish announcement</button>
+          </section>
+          <section class="panel-card"><div class="panel-title">Livestream banner</div><p class="panel-subtitle">Control the public Live Now banner.</p>
+            <label class="field-label" for="live-title">Stream title</label><input class="admin-field" id="live-title" placeholder="SRP-ESPORTS Season 6 Live">
+            <label class="field-label" for="live-url">YouTube URL</label><input class="admin-field" id="live-url" type="url" placeholder="https://youtube.com/...">
+            <label class="check-row" style="margin-top:10px"><input type="checkbox" id="live-active"> Show Live Now banner</label>
+            <button class="primary-action" id="save-livestream" style="margin-top:14px"><i class="fa-solid fa-tower-broadcast"></i> Save livestream</button>
+          </section>
+          <section class="panel-card"><div class="panel-title">Season settings</div><p class="panel-subtitle">General tournament configuration.</p>
+            <div class="form-grid" style="margin-top:12px">
+              <div class="form-row"><label class="field-label" for="setting-season">Season display</label><input class="admin-field" id="setting-season"></div>
+              <div class="form-row"><label class="field-label" for="setting-theme">Website theme</label><select class="admin-select" id="setting-theme"><option value="save-trees">Save Trees</option><option value="midnight-blue">Midnight Blue</option><option value="crimson-void">Crimson Void</option><option value="cyber-emerald">Cyber Emerald</option><option value="save-our-oceans">Save Our Oceans</option></select></div>
+              <div class="form-row"><label class="field-label" for="setting-team-limit">Team capacity</label><input class="admin-field" id="setting-team-limit" type="number" min="2" max="128"></div>
+              <div class="form-row"><label class="field-label" for="setting-matches-per-team">Matches per team</label><input class="admin-field" id="setting-matches-per-team" type="number" min="1" max="50"></div>
+              <div class="form-row"><label class="field-label" for="setting-max-subs">Maximum substitutes</label><input class="admin-field" id="setting-max-subs" type="number" min="0" max="10"></div>
+              <div class="form-row"><label class="field-label" for="setting-prize">Prize pool (₹)</label><input class="admin-field" id="setting-prize" placeholder="e.g. 10000"></div>
+              <div class="form-row full"><label class="field-label" for="setting-maintenance-note">Maintenance notice</label><input class="admin-field" id="setting-maintenance-note"></div>
+              <div class="form-row full"><label class="check-row"><input type="checkbox" id="setting-maintenance"> Enable public maintenance mode</label></div>
+            </div>
+            <button class="primary-action" id="save-settings" style="margin-top:15px"><i class="fa-solid fa-floppy-disk"></i> Save settings</button>
+          </section>
+          <section class="panel-card"><div class="panel-title">Rules document</div><p class="panel-subtitle">Edit settings/rules as JSON. Existing fields are preserved when you save a valid object.</p>
+            <label class="field-label" for="rules-json">Rules JSON</label><textarea class="admin-textarea" id="rules-json" style="min-height:260px"></textarea>
+            <button class="primary-action" id="save-rules" style="margin-top:12px"><i class="fa-solid fa-scale-balanced"></i> Save rules</button>
+          </section>
+        </div>
+      </section>
 
-      if (authCheckRunning) return;
+      <section class="admin-page" id="page-tokens">
+        <div class="section-heading"><div><div class="eyebrow">Registration access</div><h1 class="page-heading">Season Tokens</h1><p class="page-description">Generate 16-character season-bound tokens, copy them and revoke unused tokens.</p></div><button class="primary-action" id="generate-token"><i class="fa-solid fa-plus"></i> Generate token</button></div>
+        <div class="data-toolbar"><input class="search-field" id="token-search" placeholder="Search token or redemption details..."><button class="quiet-action" data-refresh="tokens"><i class="fa-solid fa-rotate"></i> Refresh</button></div>
+        <div class="panel-card table-card"><div class="table-wrap"><table class="admin-table"><thead><tr><th>Token</th><th>Season</th><th>Status</th><th>Redeemed by</th><th style="text-align:right">Actions</th></tr></thead><tbody id="tokens-body"></tbody></table></div></div>
+      </section>
 
-      authCheckRunning = true;
-      loginView.hidden = true;
-      checkingView.hidden = false;
+      <section class="admin-page" id="page-subadmins">
+        <div class="section-heading"><div><div class="eyebrow">Role based access control</div><h1 class="page-heading">Sub-admins</h1><p class="page-description">Create named staff accounts and give each person only the permissions they need.</p></div><button class="primary-action" id="add-subadmin"><i class="fa-solid fa-user-plus"></i> Create sub-admin</button></div>
+        <div class="note-box" style="margin-bottom:14px">Account creation runs through a Firebase callable Cloud Function. The function must be deployed before this action can create accounts. Sub-admins receive a one-time temporary password; share it privately and ask them to change it after sign-in.</div>
+        <div class="panel-card table-card"><div class="table-wrap"><table class="admin-table"><thead><tr><th>Account</th><th>Status</th><th>Permissions</th><th>Created</th><th style="text-align:right">Actions</th></tr></thead><tbody id="subadmins-body"></tbody></table></div></div>
+      </section>
 
-      try {
-        const valid = await verifyMaster();
+      <section class="admin-page" id="page-backups">
+        <div class="section-heading"><div><div class="eyebrow">Data protection</div><h1 class="page-heading">Backups</h1><p class="page-description">Export tournament data to JSON and restore a backup by merging its documents into Firestore.</p></div></div>
+        <div class="content-grid">
+          <section class="panel-card"><div class="panel-title">Create backup</div><p class="panel-subtitle">Exports teams, players, matches, tournament slots, tournament matches, tokens and settings. Sub-admin password data is never exported.</p><button class="primary-action" id="export-backup" style="margin-top:16px"><i class="fa-solid fa-file-arrow-down"></i> Export JSON backup</button></section>
+          <section class="panel-card"><div class="panel-title">Restore backup</div><p class="panel-subtitle">Import uses merge writes and does not delete documents that are missing from the backup.</p><label class="field-label" for="backup-file">Select SRP backup JSON</label><input class="admin-field" id="backup-file" type="file" accept="application/json,.json"><button class="primary-action" id="import-backup" style="margin-top:14px"><i class="fa-solid fa-file-import"></i> Import and merge</button></section>
+        </div>
+        <div class="note-box" style="margin-top:14px"><strong>Restore safety:</strong> This first version never wipes collections. It merges backed-up documents by ID. Take a fresh export before importing any backup.</div>
+      </section>
+    </main>
+  </div>
 
-        if (valid) {
-          window.location.replace("vault.html");
-          return;
-        }
+  <!-- reusable modal -->
+  <div class="modal-backdrop" id="admin-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card"><div class="modal-head"><div><div class="eyebrow">SRP data manager</div><div id="modal-title" style="margin-top:4px;font-size:14px;font-weight:1000">Edit record</div></div><button class="quiet-action" id="modal-close" aria-label="Close dialog"><i class="fa-solid fa-xmark"></i></button></div><div class="modal-body" id="modal-body"></div><div class="modal-foot" id="modal-foot"></div></div>
+  </div>
+  <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
 
-        await auth.signOut();
-        message.textContent =
-          "This account does not have master administrator access.";
-
-      } catch (error) {
-        console.error(error);
-        message.textContent =
-          "Unable to verify your administrator session.";
-      }
-
-      authCheckRunning = false;
-      showLogin();
-    });
-
-    document.getElementById("loginForm").addEventListener("submit", async (event) => {
-      event.preventDefault();
-
-      message.textContent = "";
-      loginButton.disabled = true;
-      loginButton.textContent = "VERIFYING...";
-
-      try {
-        await masterLogin(
-          document.getElementById("email").value.trim(),
-          document.getElementById("password").value
-        );
-
-        window.location.replace("vault.html");
-
-      } catch (error) {
-        message.textContent = error.message || "Login failed.";
-      } finally {
-        loginButton.disabled = false;
-        loginButton.textContent = "SIGN IN TO ADMIN";
-      }
-    });
-  </script>
-
+  <script src="./js/admin-auth.js"></script>
+  <script src="./js/admin-panel.js" defer></script>
 </body>
 </html>
