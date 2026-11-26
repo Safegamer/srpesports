@@ -55,6 +55,70 @@
     if (form) form.querySelectorAll('button[type="submit"]').forEach((button) => { button.disabled = !canApply; });
     renderSocialLinks();
   }
+  function compressPhoto(file) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      const url = URL.createObjectURL(file);
+      image.onload = () => {
+        URL.revokeObjectURL(url);
+        const scale = Math.min(1, 512 / Math.max(image.width, image.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+        let quality = 0.72;
+        let data = canvas.toDataURL('image/jpeg', quality);
+        while (data.length > 85000 && quality > 0.35) { quality -= 0.08; data = canvas.toDataURL('image/jpeg', quality); }
+        if (data.length > 92000) reject(new Error('One photo is still too large. Choose a smaller image.'));
+        else resolve(data);
+      };
+      image.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read one of the selected photos.')); };
+      image.src = url;
+    });
+  }
+  async function submitRegistration(form) {
+    const status = $('registration-message');
+    const button = $('submit-registration');
+    if (!form.reportValidity()) return;
+    const original = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Sending application…';
+    status.hidden = false; status.className = 'registration-message'; status.textContent = 'Checking details and preparing photos…';
+    try {
+      if (!window.firebase?.functions) throw new Error('The registration service is not available yet. Please contact the tournament team.');
+      const formData = new FormData(form);
+      const players = [];
+      for (let index = 1; index <= 6; index++) {
+        const prefix = index <= 4 ? `starter${index}` : `sub${index - 4}`;
+        const ign = String(formData.get(`${prefix}Ign`) || '').trim();
+        const uid = String(formData.get(`${prefix}Uid`) || '').trim();
+        const device = String(formData.get(`${prefix}Device`) || '').trim();
+        const file = formData.get(`${prefix}Photo`);
+        if (index > 4 && !ign && !uid && !device && (!file || !file.size)) continue;
+        if (index > 4 && (!ign || !uid || !device)) throw new Error(`Complete all details for Substitute ${index - 4}, or leave it empty.`);
+        players.push({ ign, uid, device, photo: file?.size ? await compressPhoto(file) : null });
+      }
+      status.textContent = 'Securely submitting your application…';
+      const submit = firebase.app().functions('asia-south1').httpsCallable('submitTeamRegistration');
+      await submit({
+        teamName: formData.get('teamName'), captainName: formData.get('captainName'),
+        contactEmail: formData.get('contactEmail'), discordContact: formData.get('discordContact'),
+        registrationToken: formData.get('registrationToken'), accuracyConfirmation: formData.get('accuracyConfirmation') === 'confirmed', players
+      });
+      location.assign('./register-success.html');
+    } catch (error) {
+      console.error('Team registration failed:', error);
+      status.hidden = false; status.className = 'registration-message error';
+      const messages = {
+        'functions/permission-denied': 'The token is invalid or has already been used. Check it with your tournament contact.',
+        'functions/failed-precondition': 'Registration is closed right now.',
+        'functions/resource-exhausted': 'All team places are full.',
+        'functions/not-found': 'The registration service has not been installed yet. Please contact the site owner.'
+      };
+      status.textContent = messages[error.code] || error.message || 'Could not submit the application. Please try again.';
+      button.disabled = false; button.innerHTML = original;
+    }
+  }
   function pick(value, keys) {
     for (const key of keys) if (value && value[key] !== undefined && value[key] !== null && value[key] !== '') return value[key];
     return '';
@@ -94,6 +158,7 @@
   }
   function wire() {
     const registrationForm = $('team-registration-form');
+    registrationForm?.addEventListener('submit', (event) => { event.preventDefault(); submitRegistration(registrationForm); });
     registrationForm?.querySelectorAll('.player-photo-input').forEach((input) => {
       input.addEventListener('change', () => {
         const help = input.closest('.player-photo-field')?.querySelector('.photo-help');

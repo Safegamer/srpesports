@@ -33,7 +33,7 @@
   const state = {
     identity: null,
     activePage: 'overview',
-    teams: [], players: [], matches: [], slots: [], tournamentMatches: [], tokens: [], subAdmins: [],
+    teams: [], players: [], matches: [], slots: [], tournamentMatches: [], tokens: [], subAdmins: [], applications: [],
     settings: { tournament: {}, rules: {}, past_season: {} },
     unsubs: [],
     loaded: false
@@ -42,7 +42,7 @@
   const TITLES = {
     overview: 'Dashboard', teams: 'Teams', players: 'Players', matches: 'Match Center',
     tournament: 'Tournament Progression', content: 'Content & Settings', tokens: 'Season Tokens',
-    subadmins: 'Sub-admin Management', backups: 'Backups'
+    subadmins: 'Sub-admin Management', backups: 'Backups', applications: 'Team Applications'
   };
 
   const PAGE_ACCESS = {
@@ -109,6 +109,7 @@
         {id:'teams',icon:'fa-users',label:'Teams'}, {id:'players',icon:'fa-user-group',label:'Players'},
         {id:'matches',icon:'fa-gamepad',label:'Match Center'}, {id:'tournament',icon:'fa-trophy',label:'Tournament Progression'}
       ]},
+      { label: 'Registration', pages: [{id:'applications',icon:'fa-clipboard-check',label:'Team Applications',master:true}] },
       { label: 'System', pages: [
         {id:'content',icon:'fa-sliders',label:'Content & Settings'}, {id:'tokens',icon:'fa-ticket',label:'Season Tokens'},
         {id:'subadmins',icon:'fa-user-shield',label:'Sub-admins',master:true}, {id:'backups',icon:'fa-box-archive',label:'Backups',master:true}
@@ -126,11 +127,11 @@
   }
 
   function openPage(page) {
-    if (page !== 'overview' && page !== 'subadmins' && page !== 'backups' && !canAny(PAGE_ACCESS[page] || [])) {
+    if (page !== 'overview' && page !== 'subadmins' && page !== 'backups' && page !== 'applications' && !canAny(PAGE_ACCESS[page] || [])) {
       showToast('Your account has no access to this section.', 'error');
       return;
     }
-    if (page === 'subadmins' || page === 'backups') {
+    if (page === 'subadmins' || page === 'backups' || page === 'applications') {
       if (!isMaster()) return showToast('Master administrator access required.', 'error');
     }
     state.activePage = page;
@@ -182,6 +183,50 @@
     subscribeDocument('past_season', 'past_season');
     if (can('token_view') || isMaster()) subscribeCollection('tokens', 'tokens');
     if (isMaster()) subscribeCollection('sub_admins', 'subAdmins');
+    if (isMaster()) loadApplications();
+  }
+
+  async function loadApplications() {
+    if (!isMaster() || !functions) return;
+    try {
+      const result = await functions.httpsCallable('listTeamRegistrations')();
+      state.applications = result.data?.applications || [];
+      renderActivePage();
+    } catch (error) {
+      console.error('Applications could not be loaded:', error);
+      if (state.activePage === 'applications') showToast(error.message || 'Could not load applications. Deploy the registration functions first.', 'error');
+    }
+  }
+
+  function renderApplications() {
+    const target = $('applications-body');
+    if (!target) return;
+    target.innerHTML = state.applications.length ? state.applications.map(app => `<tr>
+      <td><div class="table-primary">${esc(app.teamName || 'Team application')}</div><span class="table-secondary">${esc(app.id)}</span></td>
+      <td><div class="table-primary">${esc(app.captainName || '—')}</div><span class="table-secondary">${esc(app.email || '')}</span></td>
+      <td>${(app.players || []).length}</td><td>${esc(asDate(app.createdAt) || '—')}</td>
+      <td><span class="status-pill ${app.status === 'pending' ? 'warning' : app.status === 'rejected' ? 'danger' : ''}">${esc(app.status || 'pending')}</span></td>
+      <td><div class="table-actions"><button class="mini-action" data-view-application="${esc(app.id)}"><i class="fa-solid fa-eye"></i> View</button></div></td></tr>`).join('') : '<tr><td colspan="6"><div class="empty-state">No team applications have been submitted yet.</div></td></tr>';
+  }
+
+  async function viewApplication(id) {
+    requireMaster();
+    const result = await functions.httpsCallable('getTeamRegistration')({ applicationId: id });
+    const app = result.data;
+    const players = (app.players || []).map((p, index) => `<div class="info-tile" style="margin-top:10px"><strong>${p.isSub ? 'Substitute' : 'Player'} ${index + 1} · ${esc(p.ign || '')}</strong><div class="table-secondary">UID: ${esc(p.uid || '')} · Device: ${esc(p.device || '')}</div>${p.photo ? `<img src="${esc(p.photo)}" alt="${esc(p.ign)} player photo" style="display:block;max-width:150px;max-height:150px;object-fit:cover;border-radius:12px;margin-top:8px">` : ''}</div>`).join('');
+    const body = `<div class="info-tile"><strong>${esc(app.teamName)}</strong><div class="table-secondary">Captain: ${esc(app.captainName)} · ${esc(app.email)}${app.discord ? ` · Discord: ${esc(app.discord)}` : ''}</div><div class="table-secondary">Status: ${esc(app.status || 'pending')}</div></div>${players}`;
+    const actions = app.status === 'pending' ? `<button class="quiet-action" data-modal-close>Close</button><button class="quiet-action" data-review-application="reject|${esc(id)}">Reject</button><button class="primary-action" data-review-application="approve|${esc(id)}">Approve and add team</button>` : '<button class="quiet-action" data-modal-close>Close</button>';
+    openModal('Review team application', body, actions);
+  }
+
+  async function reviewApplication(decision, id) {
+    requireMaster();
+    const label = decision === 'approve' ? 'approve this application and create its team and players' : 'reject this application and return its token';
+    if (!window.confirm(`Are you sure you want to ${label}?`)) return;
+    await functions.httpsCallable('reviewTeamRegistration')({ applicationId: id, decision });
+    closeModal();
+    showToast(decision === 'approve' ? 'Application approved; team and players added.' : 'Application rejected; token returned.');
+    await loadApplications();
   }
 
   function renderStats() {
@@ -309,6 +354,7 @@
       case 'tokens': renderTokens(); break;
       case 'subadmins': renderSubAdmins(); break;
       case 'backups': break;
+      case 'applications': renderApplications(); break;
     }
   }
 
@@ -715,7 +761,7 @@
   function clearApplication() {
     state.unsubs.forEach(fn => { try { fn(); } catch (_) {} }); state.unsubs = [];
     state.identity = null;
-    state.teams = []; state.players = []; state.matches = []; state.slots = []; state.tournamentMatches = []; state.tokens = []; state.subAdmins = [];
+    state.teams = []; state.players = []; state.matches = []; state.slots = []; state.tournamentMatches = []; state.tokens = []; state.subAdmins = []; state.applications = [];
     state.settings = {tournament:{},rules:{},past_season:{}};
     $('admin-app').hidden = true; $('auth-screen').hidden = false;
   }
@@ -729,7 +775,7 @@
     const close = event.target.closest('[data-modal-close]');
     if (close) { closeModal(); return; }
     try {
-      const target = event.target.closest('[data-edit-team],[data-delete-team],[data-edit-player],[data-delete-player],[data-edit-match],[data-delete-match],[data-raw-edit],[data-delete-token],[data-copy-token],[data-edit-subadmin],[data-reset-subadmin],[data-delete-subadmin]');
+    const target = event.target.closest('[data-edit-team],[data-delete-team],[data-edit-player],[data-delete-player],[data-edit-match],[data-delete-match],[data-raw-edit],[data-delete-token],[data-copy-token],[data-edit-subadmin],[data-reset-subadmin],[data-delete-subadmin],[data-view-application],[data-review-application]');
       if (!target) return;
       if (target.dataset.editTeam) return openTeamEditor(target.dataset.editTeam);
       if (target.dataset.deleteTeam) return await deleteTeam(target.dataset.deleteTeam);
@@ -743,6 +789,8 @@
       if (target.dataset.editSubadmin) { const record = state.subAdmins.find(a => (a.uid || a.id) === target.dataset.editSubadmin); if (record) return openSubAdminEditor(record); }
       if (target.dataset.resetSubadmin) return await resetSubAdminPassword(target.dataset.resetSubadmin);
       if (target.dataset.deleteSubadmin) return await deleteSubAdmin(target.dataset.deleteSubadmin);
+      if (target.dataset.viewApplication) return await viewApplication(target.dataset.viewApplication);
+      if (target.dataset.reviewApplication) { const [decision, id] = target.dataset.reviewApplication.split('|'); return await reviewApplication(decision, id); }
     } catch (error) { console.error(error); showToast(error.message || 'Action failed.','error'); }
   });
 
@@ -792,6 +840,7 @@
   $('import-backup').addEventListener('click', async () => { try { await importBackup(); } catch(e) { showToast(e.message || 'Backup import failed.','error'); } });
   document.querySelectorAll('[data-refresh]').forEach(button => button.addEventListener('click', () => {
     const page = button.dataset.refresh;
+    if (page === 'applications') { loadApplications().then(() => showToast('Applications refreshed.')); return; }
     const collection = ({teams:'teams',players:'players',matches:'matches',tokens:'tokens'})[page];
     if (!collection) return;
     db.collection(collection).get().then(snapshot => {
