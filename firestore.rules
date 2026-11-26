@@ -88,9 +88,9 @@ service cloud.firestore {
     // Public tournament data remains readable. Writes are role- and action-scoped.
     match /teams/{teamId} {
       allow read: if true;
-      allow create: if isMaster() || teamCreateAllowed();
+      allow create: if isMaster() || (teamCreateAllowed() && validAdminTeamReservation());
       allow update: if isMaster() || teamUpdateAllowed();
-      allow delete: if isMaster() || hasPerm('team_delete');
+      allow delete: if isMaster() || (hasPerm('team_delete') && validAdminTeamRelease());
     }
 
     match /players/{playerId} {
@@ -124,6 +124,8 @@ service cloud.firestore {
       allow create: if isMaster();
       allow update: if isMaster()
         || (documentId == 'tournament' && validPublicReservationUpdate())
+        || (documentId == 'tournament' && validAdminTeamReservation())
+        || (documentId == 'tournament' && validAdminTeamRelease())
         || (documentId == 'tournament'
           && hasPerm('announcement_edit')
           && changedOnly(['announcement']))
@@ -650,6 +652,32 @@ service cloud.firestore {
         && application.status == 'pending'
         && application.reservationId == applicationId
         && application.teamName is string;
+    }
+
+    function validAdminTeamReservation() {
+      let teamId = request.resource.data.lastManualTeamId;
+      let team = getAfter(/databases/$(database)/documents/teams/$(teamId)).data;
+      return signedIn()
+        && (isMaster() || hasPerm('team_add'))
+        && teamId is string && teamId.size() == 20
+        && changedOnly(['registrationReservedCount', 'lastManualTeamId'])
+        && request.resource.data.registrationReservedCount == resource.data.get('registrationReservedCount', 0) + 1
+        && request.resource.data.registrationReservedCount <= resource.data.get('totalTeams', 24)
+        && team.createdAt == request.time
+        && team.name is string;
+    }
+
+    function validAdminTeamRelease() {
+      let teamId = request.resource.data.lastReleasedTeamId;
+      let teamPath = /databases/$(database)/documents/teams/$(teamId);
+      return signedIn()
+        && (isMaster() || hasPerm('team_delete'))
+        && teamId is string && teamId.size() == 20
+        && changedOnly(['registrationReservedCount', 'lastReleasedTeamId'])
+        && resource.data.get('registrationReservedCount', 0) > 0
+        && request.resource.data.registrationReservedCount == resource.data.get('registrationReservedCount', 0) - 1
+        && exists(teamPath)
+        && !existsAfter(teamPath);
     }
 
     function changedOnly(fields) {
