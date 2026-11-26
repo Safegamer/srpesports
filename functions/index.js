@@ -76,6 +76,121 @@ async function requireSubAdmin(uid) {
   return user;
 }
 
+function cleanRegistration(data) {
+  const text = (value, max) => {
+    const result = String(value || '').trim();
+    if (result.length > max) throw new HttpsError('invalid-argument', 'Some registration details are too long.');
+    return result;
+  };
+  const teamName = text(data?.teamName, 40);
+  const captainName = text(data?.captainName, 50);
+  const email = validateEmail(data?.contactEmail);
+  const token = text(data?.registrationToken, 40).toUpperCase();
+  const starters = Array.isArray(data?.players) ? data.players.slice(0, 6) : [];
+  const players = starters.map((player, index) => ({
+    ign: text(player?.ign, 30), uid: text(player?.uid, 24), device: text(player?.device, 50),
+    isSub: index >= 4, photo: player?.photo || null
+  }));
+  if (!teamName || !captainName || !token || players.length < 4 || players.slice(0, 4).some(p => !p.ign || !p.uid || !p.device)) {
+    throw new HttpsError('invalid-argument', 'Enter team contact details and all four required players.');
+  }
+  if (data?.accuracyConfirmation !== true) throw new HttpsError('invalid-argument', 'Confirm that you are authorised to submit these player details.');
+  if (players.slice(4).some(p => !p.ign && !p.uid && !p.device)) players.splice(4);
+  if (players.slice(4).some(p => !p.ign || !p.uid || !p.device)) throw new HttpsError('invalid-argument', 'Complete both substitute details or leave that substitute blank.');
+  for (const player of players) {
+    if (!player.photo) continue;
+    if (typeof player.photo !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(player.photo) || player.photo.length > 92000) {
+      throw new HttpsError('invalid-argument', 'A player photo is invalid or too large. Please choose a smaller image.');
+    }
+  }
+  return {
+    teamName, captainName, email, token,
+    discord: text(data?.discordContact, 70), players, accuracyConfirmed: true,
+    createdAt: FieldValue.serverTimestamp(), status: 'pending'
+  };
+}
+
+exports.submitTeamRegistration = onCall({ enforceAppCheck: false }, async (request) => {
+  const application = cleanRegistration(request.data);
+  const settingsRef = db.collection('settings').doc('tournament');
+  const tokenQuery = db.collection('tokens').where('token', '==', application.token).limit(1);
+  const teamsQuery = db.collection('teams');
+  const pendingQuery = db.collection('registration_applications').where('status', '==', 'pending');
+  const appRef = db.collection('registration_applications').doc();
+  await db.runTransaction(async (tx) => {
+    const [settingsSnap, tokenSnap, teamsSnap, pendingSnap] = await Promise.all([
+      tx.get(settingsRef), tx.get(tokenQuery), tx.get(teamsQuery), tx.get(pendingQuery)
+    ]);
+    const settings = settingsSnap.exists ? settingsSnap.data() : {};
+    if (settings.registrationOpen !== true && settings.registration?.open !== true) {
+      throw new HttpsError('failed-precondition', 'Team registration is closed.');
+    }
+    const capacity = Math.max(1, Math.min(128, Number(settings.totalTeams) || 24));
+    if (teamsSnap.size + pendingSnap.size >= capacity) throw new HttpsError('resource-exhausted', 'All team places are currently full.');
+    const tokenDoc = tokenSnap.docs[0];
+    if (!tokenDoc || tokenDoc.data().used === true) throw new HttpsError('permission-denied', 'That registration token is invalid or has already been used.');
+    tx.update(tokenDoc.ref, { used: true, usedBy: application.teamName, redeemedAt: FieldValue.serverTimestamp(), registrationApplicationId: appRef.id });
+    tx.set(appRef, { ...application, tokenDocumentId: tokenDoc.id });
+  });
+  return { applicationId: appRef.id };
+});
+
+exports.listTeamRegistrations = onCall(async (request) => {
+  assertMaster(request);
+  const snap = await db.collection('registration_applications').orderBy('createdAt', 'desc').limit(100).get();
+  return { applications: snap.docs.map(doc => {
+    const data = doc.data();
+    return { id: doc.id, ...data,
+      createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
+      players: (data.players || []).map(({ photo, ...player }) => player)
+    };
+  }) };
+});
+
+exports.getTeamRegistration = onCall(async (request) => {
+  assertMaster(request);
+  const id = String(request.data?.applicationId || '').trim();
+  const snap = id ? await db.collection('registration_applications').doc(id).get() : null;
+  if (!snap?.exists) throw new HttpsError('not-found', 'Application not found.');
+  return { id: snap.id, ...snap.data() };
+});
+
+exports.reviewTeamRegistration = onCall(async (request) => {
+  assertMaster(request);
+  const id = String(request.data?.applicationId || '').trim();
+  const decision = request.data?.decision;
+  if (!id || !['approve', 'reject'].includes(decision)) throw new HttpsError('invalid-argument', 'Choose approve or reject for an application.');
+  const appRef = db.collection('registration_applications').doc(id);
+  const teamRef = db.collection('teams').doc();
+  const playerRefs = Array.from({ length: 6 }, () => db.collection('players').doc());
+  await db.runTransaction(async (tx) => {
+    const appSnap = await tx.get(appRef);
+    if (!appSnap.exists) throw new HttpsError('not-found', 'Application not found.');
+    const app = appSnap.data();
+    if (app.status !== 'pending') throw new HttpsError('failed-precondition', 'This application has already been reviewed.');
+    if (decision === 'reject') {
+      tx.update(appRef, { status: 'rejected', reviewedAt: FieldValue.serverTimestamp(), reviewedBy: request.auth.uid });
+      if (app.tokenDocumentId) tx.set(db.collection('tokens').doc(app.tokenDocumentId), { used: false, usedBy: null, registrationApplicationId: FieldValue.delete(), redeemedAt: FieldValue.delete() }, { merge: true });
+      return;
+    }
+    const teamsSnap = await tx.get(db.collection('teams'));
+    const settingsSnap = await tx.get(db.collection('settings').doc('tournament'));
+    const pendingSnap = await tx.get(db.collection('registration_applications').where('status', '==', 'pending'));
+    const settings = settingsSnap.exists ? settingsSnap.data() : {};
+    const capacity = Math.max(1, Math.min(128, Number(settings.totalTeams) || 24));
+    if (teamsSnap.size >= capacity) throw new HttpsError('resource-exhausted', 'The season is full; this application cannot be approved.');
+    const group = String.fromCharCode(65 + Math.min(3, Math.floor(teamsSnap.size / Math.max(1, Math.ceil(capacity / 4)))));
+    const team = { name: app.teamName, group, disqualified: false, rosterLocked: false, createdAt: FieldValue.serverTimestamp(), registrationApplicationId: id };
+    tx.set(teamRef, team);
+    (app.players || []).forEach((p, index) => tx.set(playerRefs[index], {
+      teamId: teamRef.id, ign: p.ign, uid: p.uid, device: p.device, role: p.isSub ? 'Sub' : (index === 0 ? 'Captain' : 'Starter'),
+      isSub: !!p.isSub, slotOrder: index, createdAt: FieldValue.serverTimestamp()
+    }));
+    tx.update(appRef, { status: 'approved', teamId: teamRef.id, reviewedAt: FieldValue.serverTimestamp(), reviewedBy: request.auth.uid });
+  });
+  return { status: decision === 'approve' ? 'approved' : 'rejected' };
+});
+
 exports.createSubAdmin = onCall(async (request) => {
   assertMaster(request);
   const displayName = String(request.data?.displayName || '').trim();
