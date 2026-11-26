@@ -4,126 +4,758 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SRP Esports | Master Admin</title>
+  <meta name="theme-color" content="#08090d">
 
-  <link rel="stylesheet" href="css/theme.css">
+  <title>SRP Esports | Master Control</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="js/admin-auth.js"></script>
 
   <style>
-    * { box-sizing: border-box; }
-    body {
+    :root {
+      --bg: #08090d;
+      --panel: #11131b;
+      --panel-light: #171a24;
+      --red: #ff3548;
+      --orange: #ff7138;
+      --white: #f8fafc;
+      --muted: #9299a8;
+      --border: rgba(255,255,255,.085);
+      --green: #36d99a;
+    }
+
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
       min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 20px;
-      background: #080b12;
-      color: #fff;
-      font-family: Arial, sans-serif;
+      color: var(--white);
+      background:
+        radial-gradient(ellipse at 12% 10%, rgba(255,53,72,.16), transparent 35%),
+        radial-gradient(ellipse at 90% 90%, rgba(255,113,56,.11), transparent 35%),
+        var(--bg);
+      font-family: "Inter", sans-serif;
+      overflow-x: hidden;
     }
-    .panel {
-      width: 100%;
-      max-width: 420px;
-      padding: 32px;
-      border: 1px solid #273044;
-      border-radius: 16px;
-      background: #111827;
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .13;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 90%);
     }
-    h1 { margin-top: 0; }
-    p { color: #9ca3af; line-height: 1.5; }
-    input, button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 14px;
-      border-radius: 8px;
-      font-size: 15px;
+
+    button, input {
+      font: inherit;
     }
-    input {
-      border: 1px solid #374151;
-      background: #080b12;
-      color: white;
-    }
+
     button {
-      border: 0;
-      background: #e63946;
-      color: white;
-      font-weight: bold;
       cursor: pointer;
     }
-    button:disabled { opacity: .6; cursor: wait; }
-    #message { color: #f87171; }
-    #dashboard { display: none; }
-    a { color: #fb7185; }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .topbar {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 78px;
+      padding: 0 7%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,9,13,.72);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .brand-logo {
+      width: 43px;
+      height: 43px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: white;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--red), var(--orange));
+      box-shadow: 0 5px 25px rgba(255,53,72,.28);
+    }
+
+    .brand-name {
+      font-weight: 900;
+      font-size: 17px;
+      letter-spacing: 1.2px;
+    }
+
+    .brand-subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      font-weight: 700;
+    }
+
+    .system-status {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 13px;
+      color: #c7ced9;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px var(--green);
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      min-height: calc(100vh - 78px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 55px 20px;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 470px;
+      animation: appear .6s ease both;
+    }
+
+    @keyframes appear {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin-bottom: 18px;
+      color: var(--red);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before,
+    .eyebrow::after {
+      content: "";
+      width: 24px;
+      height: 1px;
+      background: var(--red);
+      opacity: .7;
+    }
+
+    .auth-card {
+      position: relative;
+      padding: 39px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 21px;
+      background: linear-gradient(145deg, rgba(23,26,36,.97), rgba(13,15,22,.97));
+      box-shadow:
+        0 25px 90px rgba(0,0,0,.55),
+        0 0 50px rgba(255,53,72,.055);
+    }
+
+    .auth-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 12%;
+      width: 76%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--red), var(--orange), transparent);
+      box-shadow: 0 0 18px var(--red);
+    }
+
+    .card-icon {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 25px;
+      border: 1px solid rgba(255,53,72,.24);
+      border-radius: 16px;
+      background: rgba(255,53,72,.09);
+      color: var(--red);
+    }
+
+    .card-icon svg {
+      width: 27px;
+      height: 27px;
+    }
+
+    h1 {
+      font-size: 27px;
+      font-weight: 900;
+      letter-spacing: -1.1px;
+    }
+
+    .description {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .divider {
+      height: 1px;
+      margin: 26px 0;
+      background: var(--border);
+    }
+
+    .field {
+      margin-bottom: 19px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 9px;
+      color: #cbd0db;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap svg {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      width: 17px;
+      height: 17px;
+      color: #777f8f;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      height: 51px;
+      padding: 0 15px 0 44px;
+      color: white;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 10px;
+      outline: none;
+      background: rgba(255,255,255,.035);
+      font-size: 13px;
+      transition: .2s ease;
+    }
+
+    input:focus {
+      border-color: var(--red);
+      background: rgba(255,255,255,.055);
+      box-shadow: 0 0 0 3px rgba(255,53,72,.10);
+    }
+
+    input::placeholder {
+      color: #697182;
+    }
+
+    .login-button {
+      position: relative;
+      width: 100%;
+      height: 53px;
+      margin-top: 7px;
+      overflow: hidden;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      background: linear-gradient(105deg, #ff3548, #ff7138);
+      box-shadow: 0 8px 27px rgba(255,53,72,.22);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      transition: .25s ease;
+    }
+
+    .login-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(255,53,72,.35);
+      filter: brightness(1.08);
+    }
+
+    .login-button:disabled {
+      cursor: wait;
+      opacity: .65;
+    }
+
+    .message {
+      min-height: 19px;
+      margin-top: 14px;
+      color: #ff7581;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .security-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 23px;
+      color: #788090;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .security-note svg {
+      width: 14px;
+      height: 14px;
+      color: var(--green);
+    }
+
+    .footer {
+      margin-top: 25px;
+      color: #626a79;
+      font-size: 10px;
+      text-align: center;
+      letter-spacing: .7px;
+    }
+
+    /* Checking session */
+
+    .checking-card {
+      padding: 42px 30px;
+      text-align: center;
+    }
+
+    .loader {
+      width: 37px;
+      height: 37px;
+      margin: 0 auto 22px;
+      border: 3px solid rgba(255,255,255,.10);
+      border-top-color: var(--red);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Dashboard */
+
+    .dashboard-card {
+      padding: 35px;
+    }
+
+    .verified-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 11px;
+      margin-bottom: 23px;
+      border: 1px solid rgba(54,217,154,.2);
+      border-radius: 30px;
+      color: var(--green);
+      background: rgba(54,217,154,.07);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .dashboard-card h1 {
+      font-size: 26px;
+    }
+
+    .dashboard-actions {
+      display: grid;
+      gap: 12px;
+      margin-top: 27px;
+    }
+
+    .action-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 17px;
+      border: 1px solid rgba(255,53,72,.23);
+      border-radius: 11px;
+      color: white;
+      background: rgba(255,53,72,.065);
+      text-decoration: none;
+      transition: .2s ease;
+    }
+
+    .action-link:hover {
+      border-color: var(--red);
+      background: rgba(255,53,72,.12);
+      transform: translateY(-2px);
+    }
+
+    .action-link strong {
+      display: block;
+      font-size: 12px;
+    }
+
+    .action-link span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .action-arrow {
+      color: var(--red);
+      font-size: 20px;
+    }
+
+    .logout-button {
+      width: 100%;
+      height: 47px;
+      margin-top: 21px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: #b5bdca;
+      background: rgba(255,255,255,.035);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      transition: .2s ease;
+    }
+
+    .logout-button:hover {
+      border-color: rgba(255,53,72,.4);
+      color: white;
+      background: rgba(255,53,72,.08);
+    }
+
+    @media (max-width: 600px) {
+      .topbar {
+        height: 68px;
+        padding: 0 20px;
+      }
+
+      .brand-logo {
+        width: 39px;
+        height: 39px;
+      }
+
+      .brand-name {
+        font-size: 14px;
+      }
+
+      .system-status {
+        padding: 8px 10px;
+        font-size: 9px;
+      }
+
+      main {
+        min-height: calc(100vh - 68px);
+        padding: 35px 16px;
+      }
+
+      .auth-card {
+        padding: 29px 23px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .dashboard-card {
+        padding: 28px 23px;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <main class="panel">
-    <section id="login">
-      <h1>SRP Master Admin</h1>
-      <p>Sign in using your authorized master administrator account.</p>
 
-      <form id="loginForm">
-        <input id="email" type="email" placeholder="Admin email" required>
-        <input id="password" type="password" placeholder="Password" required>
-        <button id="loginButton" type="submit">Secure Login</button>
-      </form>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">SRP</div>
+      <div>
+        <div class="brand-name">SRP ESPORTS</div>
+        <div class="brand-subtitle">SEASON 06 CONTROL</div>
+      </div>
+    </div>
 
-      <p id="message" role="alert"></p>
-    </section>
+    <div class="system-status">
+      <span class="status-dot"></span>
+      SECURE SYSTEM
+    </div>
+  </header>
 
-    <section id="dashboard">
-      <h1>Master Access Verified</h1>
-      <p>You are authenticated as the master administrator.</p>
-      <p><a href="vault.html">Open Admin Vault →</a></p>
-      <button id="logoutButton" type="button">Logout</button>
-    </section>
+  <main>
+    <div class="main-container">
+
+      <div class="eyebrow">MASTER CONTROL CENTER</div>
+
+      <!-- SESSION CHECK -->
+
+      <section class="auth-card checking-card" id="checkingView">
+        <div class="loader"></div>
+        <h1>Verifying Session</h1>
+        <p class="description">
+          Checking your administrator credentials...
+        </p>
+      </section>
+
+      <!-- LOGIN -->
+
+      <section class="auth-card" id="loginView" hidden>
+
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="10" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            <path d="M12 15v2"/>
+          </svg>
+        </div>
+
+        <h1>Welcome Back.</h1>
+
+        <p class="description">
+          Sign in to access the SRP Esports master administration system.
+          Authorized master access only.
+        </p>
+
+        <div class="divider"></div>
+
+        <form id="loginForm">
+
+          <div class="field">
+            <label for="email">Administrator Email</label>
+
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="5" width="18" height="14" rx="2"/>
+                <path d="m3 7 9 6 9-6"/>
+              </svg>
+
+              <input
+                id="email"
+                type="email"
+                placeholder="Enter your admin email"
+                autocomplete="username"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="10" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+
+              <input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                required
+              >
+            </div>
+          </div>
+
+          <button class="login-button" id="loginButton" type="submit">
+            AUTHENTICATE &amp; CONTINUE
+          </button>
+
+          <p class="message" id="message" role="alert"></p>
+
+        </form>
+
+        <div class="security-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+          FIREBASE AUTHENTICATION PROTECTED
+        </div>
+
+      </section>
+
+      <!-- MASTER DASHBOARD LANDING -->
+
+      <section class="auth-card dashboard-card" id="dashboardView" hidden>
+
+        <div class="verified-tag">
+          <span class="status-dot"></span>
+          MASTER ACCESS VERIFIED
+        </div>
+
+        <h1>Access Granted.</h1>
+
+        <p class="description">
+          Your master administrator identity has been verified.
+          Welcome to the SRP Esports control center.
+        </p>
+
+        <div class="divider"></div>
+
+        <div class="dashboard-actions">
+
+          <a class="action-link" href="vault.html">
+            <div>
+              <strong>Open Admin Vault</strong>
+              <span>Access the master administration area</span>
+            </div>
+            <span class="action-arrow">→</span>
+          </a>
+
+          <a class="action-link" href="index.html">
+            <div>
+              <strong>View Tournament Website</strong>
+              <span>Return to the public SRP Esports website</span>
+            </div>
+            <span class="action-arrow">↗</span>
+          </a>
+
+        </div>
+
+        <button class="logout-button" id="logoutButton" type="button">
+          SIGN OUT OF MASTER SESSION
+        </button>
+
+      </section>
+
+      <div class="footer">
+        SRP ESPORTS © 2026 · MASTER ADMINISTRATION
+      </div>
+
+    </div>
   </main>
 
   <script>
-    const loginSection = document.getElementById("login");
-    const dashboard = document.getElementById("dashboard");
-    const message = document.getElementById("message");
-    const loginButton = document.getElementById("loginButton");
+    const checkingView = document.getElementById("checkingView");
+    const loginView = document.getElementById("loginView");
+    const dashboardView = document.getElementById("dashboardView");
 
-    async function refreshPage() {
+    const loginForm = document.getElementById("loginForm");
+    const loginButton = document.getElementById("loginButton");
+    const message = document.getElementById("message");
+
+    function showView(view) {
+      checkingView.hidden = view !== "checking";
+      loginView.hidden = view !== "login";
+      dashboardView.hidden = view !== "dashboard";
+    }
+
+    async function checkMasterSession() {
+      showView("checking");
+
       try {
         const valid = await verifyMaster();
-        loginSection.style.display = valid ? "none" : "block";
-        dashboard.style.display = valid ? "block" : "none";
-      } catch {
-        loginSection.style.display = "block";
-        dashboard.style.display = "none";
+
+        if (valid) {
+          showView("dashboard");
+        } else {
+          await auth.signOut();
+          message.textContent = "This account does not have master administrator access.";
+          showView("login");
+        }
+      } catch (error) {
+        console.error("Master verification error:", error);
+        message.textContent = "Unable to verify your session. Please sign in again.";
+        showView("login");
       }
     }
 
-    document.getElementById("loginForm").addEventListener("submit", async (event) => {
+    loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
+
       message.textContent = "";
       loginButton.disabled = true;
-      loginButton.textContent = "Verifying...";
+      loginButton.textContent = "VERIFYING CREDENTIALS...";
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
 
       try {
-        await masterLogin(
-          document.getElementById("email").value.trim(),
-          document.getElementById("password").value
-        );
-        await refreshPage();
+        await masterLogin(email, password);
+        showView("dashboard");
+        loginForm.reset();
       } catch (error) {
-        message.textContent = error.message;
+        console.error("Master login error:", error);
+        message.textContent = error.message || "Authentication failed.";
       } finally {
         loginButton.disabled = false;
-        loginButton.textContent = "Secure Login";
+        loginButton.textContent = "AUTHENTICATE & CONTINUE";
       }
     });
 
-    document.getElementById("logoutButton").addEventListener("click", masterLogout);
+    document.getElementById("logoutButton").addEventListener("click", async () => {
+      try {
+        await masterLogout();
+      } catch (error) {
+        console.error("Logout error:", error);
+        message.textContent = "Logout failed. Please try again.";
+      }
+    });
 
-    auth.onAuthStateChanged(() => refreshPage());
-    refreshPage();
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        showView("login");
+        return;
+      }
+
+      checkMasterSession();
+    });
   </script>
+
 </body>
 </html>
