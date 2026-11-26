@@ -459,7 +459,32 @@
         if (old && can('team_lock_roster')) patch.rosterLocked = $('team-roster-lock').checked;
         if (!old) {
           patch.disqualified = false; patch.rosterLocked = false; patch.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-          const ref = await db.collection('teams').add(patch);
+          const ref = db.collection('teams').doc();
+          if (isMaster()) {
+            const settingsRef = db.collection('settings').doc('tournament');
+            await db.runTransaction(async transaction => {
+              const settingsSnap = await transaction.get(settingsRef);
+              const settings = settingsSnap.exists ? settingsSnap.data() : {};
+              const reserved = Number(settings.registrationReservedCount);
+              const capacity = Math.max(1, Math.min(128, Number(settings.totalTeams) || 24));
+              if (!Number.isInteger(reserved)) throw new Error('Registration capacity is not initialized. Open the admin dashboard again and retry.');
+              if (reserved >= capacity) throw new Error('The season has no free team places.');
+              transaction.set(ref, patch);
+              transaction.update(settingsRef, { registrationReservedCount: reserved + 1, lastManualTeamId: ref.id });
+            });
+          } else {
+            const settingsRef = db.collection('settings').doc('tournament');
+            await db.runTransaction(async transaction => {
+              const settingsSnap = await transaction.get(settingsRef);
+              const settings = settingsSnap.exists ? settingsSnap.data() : {};
+              const reserved = Number(settings.registrationReservedCount);
+              const capacity = Math.max(1, Math.min(128, Number(settings.totalTeams) || 24));
+              if (!Number.isInteger(reserved)) throw new Error('Registration capacity is not initialized. Ask the master administrator to open the admin dashboard.');
+              if (reserved >= capacity) throw new Error('The season has no free team places.');
+              transaction.set(ref, patch);
+              transaction.update(settingsRef, { registrationReservedCount: reserved + 1, lastManualTeamId: ref.id });
+            });
+          }
           showToast(`Team created (${ref.id}).`);
         } else {
           if (!Object.keys(patch).length) throw new Error('No editable fields are available for your account.');
@@ -643,7 +668,22 @@
     showToast(`${label || 'Record'} deleted.`);
   }
 
-  async function deleteTeam(id) { await deleteDocument('teams',id,'this team','team_delete'); }
+  async function deleteTeam(id) {
+    requirePermission('team_delete');
+    if (!confirm('Delete this team? This cannot be undone.')) return;
+    const teamRef = db.collection('teams').doc(id);
+    const settingsRef = db.collection('settings').doc('tournament');
+    await db.runTransaction(async transaction => {
+      const [teamSnap, settingsSnap] = await Promise.all([transaction.get(teamRef), transaction.get(settingsRef)]);
+      if (!teamSnap.exists) throw new Error('Team not found.');
+      const settings = settingsSnap.exists ? settingsSnap.data() : {};
+      const reserved = Number(settings.registrationReservedCount);
+      if (!Number.isInteger(reserved) || reserved < 1) throw new Error('Registration capacity is not initialized.');
+      transaction.delete(teamRef);
+      transaction.update(settingsRef, { registrationReservedCount: reserved - 1, lastReleasedTeamId: id });
+    });
+    showToast('Team deleted.');
+  }
   async function deletePlayer(id) { await deleteDocument('players',id,'this player','player_manage_subs'); }
   async function deleteMatch(id) { await deleteDocument('matches',id,'this match','match_delete'); }
   async function deleteToken(id) { await deleteDocument('tokens',id,'this token','token_delete'); }
