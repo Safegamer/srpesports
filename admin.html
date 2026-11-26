@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#03170f">
-  <title>SRP Esports | Master Admin</title>
+  <title>SRP Esports | Admin Login</title>
 
   <link rel="stylesheet" href="css/theme.css">
 
@@ -22,40 +22,33 @@
       flex-direction: column;
     }
 
-    .admin-header {
+    .header {
+      padding: 18px 6%;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 18px 6%;
-      border-bottom: 1px solid var(--theme-card-border);
       background: var(--theme-surface);
-      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--theme-card-border);
     }
 
-    .admin-brand {
+    .brand {
       display: flex;
       align-items: center;
-      gap: 13px;
+      gap: 12px;
     }
 
-    .admin-logo {
-      display: grid;
-      place-items: center;
+    .logo {
       width: 44px;
       height: 44px;
-      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
       background: var(--theme-btn-gradient);
-      color: white;
       font-weight: 900;
-      box-shadow: 0 0 20px var(--theme-accent-glow);
+      color: white;
     }
 
-    .admin-brand strong {
-      font-size: 16px;
-      letter-spacing: 1px;
-    }
-
-    .admin-brand small {
+    .brand small {
       display: block;
       margin-top: 4px;
       color: #94a3b8;
@@ -63,51 +56,26 @@
       letter-spacing: 2px;
     }
 
-    .system-pill {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 13px;
-      border: 1px solid var(--theme-card-border);
-      border-radius: 30px;
-      color: var(--theme-accent-text);
-      background: var(--theme-card-bg);
-      font-size: 10px;
-      font-weight: 800;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #4ade80;
-      box-shadow: 0 0 10px #4ade80;
-    }
-
-    .page-main {
+    main {
       flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 55px 20px;
-    }
-
-    .login-wrapper {
-      width: 100%;
-      max-width: 440px;
+      display: grid;
+      place-items: center;
+      padding: 24px;
     }
 
     .login-card {
+      width: 100%;
+      max-width: 430px;
       padding: 35px;
       border: 1px solid var(--theme-card-border);
       border-radius: 20px;
       background: var(--theme-surface);
-      box-shadow: 0 20px 65px rgba(0,0,0,.38);
+      box-shadow: 0 20px 65px rgba(0,0,0,.35);
     }
 
     .login-card h1 {
-      margin: 12px 0;
-      font-size: clamp(26px, 5vw, 34px);
+      margin: 15px 0 10px;
+      font-size: 29px;
       font-weight: 900;
     }
 
@@ -117,158 +85,58 @@
       line-height: 1.8;
     }
 
-    .section-kicker {
-      color: var(--theme-accent-text);
-      font-size: 10px;
-      letter-spacing: 2.5px;
-      font-weight: 900;
-      text-transform: uppercase;
-    }
-
-    .icon-box {
-      width: 58px;
-      height: 58px;
-      display: grid;
-      place-items: center;
-      border: 1px solid var(--theme-card-border);
-      border-radius: 16px;
-      background: var(--theme-card-bg);
-      color: var(--theme-accent-text);
-      font-size: 26px;
-    }
-
-    .form-group {
-      margin-top: 20px;
-    }
-
-    .form-group label {
+    label {
       display: block;
-      margin-bottom: 9px;
-      color: #cbd5e1;
+      margin: 20px 0 8px;
       font-size: 11px;
+      color: #cbd5e1;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 1px;
     }
 
-    .admin-input {
+    input {
       width: 100%;
-      padding: 14px 15px;
+      padding: 14px;
       color: white;
-      background: rgba(2,12,8,.82);
+      background: rgba(2,12,8,.8);
       border: 1px solid rgba(255,255,255,.12);
       border-radius: 11px;
       outline: none;
-      font-size: 14px;
     }
 
-    .admin-input:focus {
+    input:focus {
       border-color: var(--theme-accent);
-      box-shadow: 0 0 15px var(--theme-accent-glow);
+      box-shadow: 0 0 14px var(--theme-accent-glow);
     }
 
-    .login-btn {
+    button {
       width: 100%;
-      margin-top: 25px;
       padding: 15px;
+      margin-top: 24px;
       border: none;
       border-radius: 11px;
       background: var(--theme-btn-gradient);
       color: white;
-      font-size: 12px;
       font-weight: 900;
       letter-spacing: 1px;
-      box-shadow: 0 8px 25px var(--theme-accent-glow);
-      transition: .25s ease;
+      cursor: pointer;
     }
 
-    .login-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      filter: brightness(1.12);
-    }
-
-    .login-btn:disabled {
+    button:disabled {
       opacity: .6;
       cursor: wait;
     }
 
-    .error-message {
-      min-height: 20px;
+    #message {
+      min-height: 22px;
       margin-top: 12px;
       color: #fb7185;
       font-size: 12px;
-      line-height: 1.5;
-    }
-
-    .security-note {
-      margin-top: 25px;
-      text-align: center;
-      color: #94a3b8;
-      font-size: 10px;
-      letter-spacing: .7px;
-    }
-
-    .dashboard-actions {
-      display: grid;
-      gap: 13px;
-      margin-top: 25px;
-    }
-
-    .dashboard-link {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 18px;
-      color: white;
-      text-decoration: none;
-      border: 1px solid var(--theme-card-border);
-      border-radius: 13px;
-      background: var(--theme-card-bg);
-      transition: .25s ease;
-    }
-
-    .dashboard-link:hover {
-      border-color: var(--theme-accent);
-      background: var(--theme-nav-active);
-      transform: translateY(-3px);
-    }
-
-    .dashboard-link strong {
-      font-size: 13px;
-    }
-
-    .dashboard-link small {
-      display: block;
-      margin-top: 5px;
-      color: #94a3b8;
-      font-size: 11px;
-    }
-
-    .arrow {
-      color: var(--theme-accent-text);
-      font-size: 22px;
-    }
-
-    .logout-btn {
-      width: 100%;
-      margin-top: 20px;
-      padding: 13px;
-      border: 1px solid var(--theme-card-border);
-      border-radius: 11px;
-      color: #cbd5e1;
-      background: rgba(255,255,255,.04);
-      font-weight: 800;
-    }
-
-    .logout-btn:hover {
-      background: rgba(239,68,68,.12);
-      border-color: #ef4444;
-      color: white;
     }
 
     .loader {
-      width: 35px;
-      height: 35px;
+      width: 34px;
+      height: 34px;
       margin: 0 auto 20px;
       border: 3px solid rgba(255,255,255,.12);
       border-top-color: var(--theme-accent);
@@ -280,202 +148,130 @@
       to { transform: rotate(360deg); }
     }
 
-    .center { text-align: center; }
-
     footer {
       padding: 18px;
       text-align: center;
       color: #64748b;
       font-size: 10px;
-      letter-spacing: 1px;
-    }
-
-    @media(max-width: 500px) {
-      .admin-header { padding: 15px 18px; }
-      .login-card { padding: 26px 21px; }
-      .admin-brand strong { font-size: 13px; }
-      .system-pill { font-size: 8px; }
     }
   </style>
 </head>
 
 <body data-theme="save-trees">
 
-  <header class="admin-header">
-    <div class="admin-brand">
-      <div class="admin-logo">SRP</div>
+  <header class="header">
+    <div class="brand">
+      <div class="logo">SRP</div>
       <div>
         <strong>SRP ESPORTS</strong>
-        <small>SEASON 06 CONTROL</small>
+        <small>MASTER ADMINISTRATION</small>
       </div>
     </div>
-
-    <div class="system-pill">
-      <span class="status-dot"></span>
-      SECURE SYSTEM
-    </div>
+    <span class="cs-pill">SECURE ACCESS</span>
   </header>
 
-  <main class="page-main">
-    <div class="login-wrapper">
+  <main>
 
-      <section class="custom-card login-card center" id="checkingView">
-        <div class="loader"></div>
-        <h2>Verifying Session</h2>
-        <p class="muted">Checking administrator authentication...</p>
-      </section>
+    <section class="custom-card login-card" id="checking" hidden>
+      <div class="loader"></div>
+      <h2 style="text-align:center">Verifying Access</h2>
+      <p class="muted" style="text-align:center">
+        Checking your master administrator credentials...
+      </p>
+    </section>
 
-      <section class="custom-card login-card" id="loginView" hidden>
-        <div class="icon-box">⌑</div>
+    <section class="custom-card login-card" id="login">
 
-        <div class="section-kicker" style="margin-top:24px">
-          MASTER ADMINISTRATION
-        </div>
+      <div class="section-kicker">SRP CONTROL SYSTEM</div>
 
-        <h1 class="brand-text">Welcome Back.</h1>
+      <h1 class="brand-text">Administrator Login</h1>
 
-        <p class="muted">
-          Access the SRP Esports master control system.
-          Authorized master administrator access only.
-        </p>
+      <p class="muted">
+        Sign in with your authorized master administrator account.
+      </p>
 
-        <div style="height:1px;background:var(--theme-card-border);margin:25px 0"></div>
+      <form id="loginForm">
 
-        <form id="loginForm">
-          <div class="form-group">
-            <label for="email">Administrator Email</label>
-            <input class="admin-input"
-              type="email"
-              id="email"
-              placeholder="Enter your admin email"
-              autocomplete="username"
-              required>
-          </div>
+        <label for="email">Email Address</label>
+        <input
+          id="email"
+          type="email"
+          autocomplete="username"
+          placeholder="Administrator email"
+          required
+        >
 
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input class="admin-input"
-              type="password"
-              id="password"
-              placeholder="Enter your password"
-              autocomplete="current-password"
-              required>
-          </div>
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Your password"
+          required
+        >
 
-          <button class="login-btn" id="loginButton" type="submit">
-            AUTHENTICATE & CONTINUE
-          </button>
-
-          <div class="error-message" id="message" role="alert"></div>
-        </form>
-
-        <div class="security-note">
-          <span style="color:var(--theme-accent-text)">●</span>
-          FIREBASE AUTHENTICATION PROTECTED
-        </div>
-      </section>
-
-      <section class="custom-card login-card" id="dashboardView" hidden>
-        <div class="system-pill" style="display:inline-flex">
-          <span class="status-dot"></span>
-          MASTER ACCESS VERIFIED
-        </div>
-
-        <div class="section-kicker" style="margin-top:25px">
-          AUTHENTICATION SUCCESSFUL
-        </div>
-
-        <h1 class="brand-text" style="margin-top:10px">
-          Access Granted.
-        </h1>
-
-        <p class="muted">
-          Your master administrator identity has been verified.
-          Welcome to the SRP Esports control center.
-        </p>
-
-        <div class="dashboard-actions">
-          <a href="vault.html" class="dashboard-link">
-            <div>
-              <strong>Open Admin Vault</strong>
-              <small>Manage tournament administration</small>
-            </div>
-            <span class="arrow">→</span>
-          </a>
-
-          <a href="index.html" class="dashboard-link">
-            <div>
-              <strong>Public Tournament Website</strong>
-              <small>Return to SRP Esports</small>
-            </div>
-            <span class="arrow">↗</span>
-          </a>
-        </div>
-
-        <button class="logout-btn" id="logoutButton" type="button">
-          SIGN OUT
+        <button id="loginButton" type="submit">
+          SIGN IN TO ADMIN
         </button>
-      </section>
 
-    </div>
+        <div id="message" role="alert"></div>
+
+      </form>
+
+      <p class="muted" style="margin-top:18px;text-align:center;font-size:10px">
+        Protected by Firebase Authentication and master-role verification.
+      </p>
+
+    </section>
+
   </main>
 
-  <footer>
-    SRP ESPORTS © 2026 · MASTER ADMINISTRATION
-  </footer>
+  <footer>SRP ESPORTS © 2026 · SEASON 06</footer>
 
   <script>
-    const checkingView = document.getElementById("checkingView");
-    const loginView = document.getElementById("loginView");
-    const dashboardView = document.getElementById("dashboardView");
-    const loginForm = document.getElementById("loginForm");
-    const loginButton = document.getElementById("loginButton");
+    const loginView = document.getElementById("login");
+    const checkingView = document.getElementById("checking");
     const message = document.getElementById("message");
+    const loginButton = document.getElementById("loginButton");
 
-    let authCheckId = 0;
+    let checkingUser = false;
 
-    function showView(name) {
-      checkingView.hidden = name !== "checking";
-      loginView.hidden = name !== "login";
-      dashboardView.hidden = name !== "dashboard";
-    }
-
-    async function handleAuthChange(user) {
-      const currentCheck = ++authCheckId;
+    async function checkExistingSession(user) {
+      if (checkingUser) return;
 
       if (!user) {
-        showView("login");
+        loginView.hidden = false;
+        checkingView.hidden = true;
         return;
       }
 
-      showView("checking");
+      checkingUser = true;
+      loginView.hidden = true;
+      checkingView.hidden = false;
 
       try {
         const valid = await verifyMaster();
 
-        if (currentCheck !== authCheckId) return;
-
         if (valid) {
-          showView("dashboard");
-        } else {
-          await auth.signOut();
-          if (currentCheck === authCheckId) {
-            message.textContent = "This account is not authorized as master.";
-            showView("login");
-          }
+          window.location.replace("vault.html");
+          return;
         }
+
+        await auth.signOut();
+        message.textContent = "This account is not authorized as master.";
       } catch (error) {
         console.error(error);
-        if (currentCheck === authCheckId) {
-          message.textContent = "Session verification failed. Please sign in again.";
-          showView("login");
-        }
+        message.textContent = "Unable to verify your administrator session.";
       }
+
+      checkingUser = false;
+      checkingView.hidden = true;
+      loginView.hidden = false;
     }
 
-    auth.onAuthStateChanged(handleAuthChange);
+    auth.onAuthStateChanged(checkExistingSession);
 
-    loginForm.addEventListener("submit", async (event) => {
+    document.getElementById("loginForm").addEventListener("submit", async (event) => {
       event.preventDefault();
 
       message.textContent = "";
@@ -488,19 +284,16 @@
           document.getElementById("password").value
         );
 
-        showView("dashboard");
-        loginForm.reset();
+        window.location.replace("vault.html");
+
       } catch (error) {
         message.textContent = error.message || "Login failed.";
       } finally {
         loginButton.disabled = false;
-        loginButton.textContent = "AUTHENTICATE & CONTINUE";
+        loginButton.textContent = "SIGN IN TO ADMIN";
       }
     });
-
-    document.getElementById("logoutButton").addEventListener("click", async () => {
-      await masterLogout();
-    });
   </script>
+
 </body>
 </html>
