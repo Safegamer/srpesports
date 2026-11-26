@@ -91,11 +91,12 @@
       for (let index = 1; index <= 6; index++) {
         const prefix = index <= 4 ? `starter${index}` : `sub${index - 4}`;
         const ign = String(formData.get(`${prefix}Ign`) || '').trim();
-        const uid = String(formData.get(`${prefix}Uid`) || '').trim();
+        const uid = String(formData.get(`${prefix}Uid`) || '').replace(/\\D/g, '');
         const device = String(formData.get(`${prefix}Device`) || '').trim();
         const file = formData.get(`${prefix}Photo`);
         if (index > 4 && !ign && !uid && !device && (!file || !file.size)) continue;
         if (index > 4 && (!ign || !uid || !device)) throw new Error(`Complete all details for Substitute ${index - 4}, or leave it empty.`);
+        if (!/^\\d{6,20}$/.test(uid)) throw new Error(`Player ${index}: enter a Free Fire UID with 6 to 20 digits.`);
         players.push({ ign, uid, device, photo: file?.size ? await compressPhoto(file) : null });
       }
       status.textContent = 'Securely submitting your application…';
@@ -113,7 +114,8 @@
         'functions/permission-denied': 'The token is invalid or has already been used. Check it with your tournament contact.',
         'functions/failed-precondition': 'Registration is closed right now.',
         'functions/resource-exhausted': 'All team places are full.',
-        'functions/not-found': 'The registration service has not been installed yet. Please contact the site owner.'
+        'functions/not-found': 'The registration service has not been installed yet. Please contact the site owner.',
+        'functions/internal': 'The registration service had a server error. Try again later. If it continues, contact SRP staff and include the error code shown.'
       };
       status.textContent = messages[error.code] || error.message || 'Could not submit the application. Please try again.';
       button.disabled = false; button.innerHTML = original;
@@ -158,6 +160,9 @@
   }
   function wire() {
     const registrationForm = $('team-registration-form');
+    registrationForm?.addEventListener('input', (event) => {
+      if (/Uid$/.test(event.target?.name || '')) event.target.value = event.target.value.replace(/\\D/g, '').slice(0, 20);
+    });
     registrationForm?.addEventListener('submit', (event) => { event.preventDefault(); submitRegistration(registrationForm); });
     registrationForm?.querySelectorAll('.player-photo-input').forEach((input) => {
       input.addEventListener('change', () => {
