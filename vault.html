@@ -5,443 +5,1274 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#03170f">
-
-  <title>SRP Esports | Admin Vault</title>
+  <title>SRP Esports | Master Control</title>
 
   <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="js/admin-auth.js"></script>
 
   <style>
-    [hidden] { display: none !important; }
+    [hidden] { display:none !important; }
 
-    body {
-      min-height: 100vh;
+    body { min-height:100vh; }
+
+    .layout {
+      display:grid;
+      grid-template-columns:245px minmax(0,1fr);
+      min-height:100vh;
     }
 
-    .vault-header {
-      height: 75px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 5%;
-      background: var(--theme-surface);
-      border-bottom: 1px solid var(--theme-card-border);
-      backdrop-filter: blur(14px);
+    .sidebar {
+      position:sticky;
+      top:0;
+      height:100vh;
+      padding:22px 15px;
+      overflow-y:auto;
+      background:var(--theme-surface);
+      border-right:1px solid var(--theme-card-border);
     }
 
-    .vault-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .logo {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:5px 8px 25px;
+      border-bottom:1px solid var(--theme-card-border);
+      margin-bottom:22px;
     }
 
-    .vault-logo {
-      width: 42px;
-      height: 42px;
-      display: grid;
-      place-items: center;
-      border-radius: 12px;
-      background: var(--theme-btn-gradient);
-      color: white;
-      font-weight: 900;
+    .logo-icon {
+      width:43px;
+      height:43px;
+      display:grid;
+      place-items:center;
+      border-radius:12px;
+      color:white;
+      font-weight:900;
+      background:var(--theme-btn-gradient);
     }
 
-    .vault-brand strong {
-      font-size: 15px;
-      letter-spacing: 1px;
+    .logo small {
+      display:block;
+      margin-top:4px;
+      font-size:9px;
+      letter-spacing:2px;
+      color:#94a3b8;
     }
 
-    .vault-brand small {
-      display: block;
-      margin-top: 4px;
-      color: #94a3b8;
-      font-size: 9px;
-      letter-spacing: 2px;
+    .nav-label {
+      padding:12px 11px 6px;
+      font-size:9px;
+      color:#64748b;
+      font-weight:900;
+      letter-spacing:1.6px;
+      text-transform:uppercase;
     }
 
-    .vault-main {
-      max-width: 1150px;
-      margin: auto;
-      padding: 45px 22px 70px;
+    .nav-button {
+      width:100%;
+      padding:12px;
+      margin:3px 0;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      border:1px solid transparent;
+      border-radius:11px;
+      background:transparent;
+      color:#cbd5e1;
+      font-size:12px;
+      font-weight:700;
+      text-align:left;
+      cursor:pointer;
+      transition:.2s ease;
     }
 
-    .vault-title {
-      margin-bottom: 10px;
-      font-size: clamp(27px, 5vw, 38px);
-      font-weight: 900;
+    .nav-button i {
+      width:18px;
+      text-align:center;
+      color:var(--theme-accent-text);
     }
 
-    .vault-description {
-      color: #94a3b8;
-      font-size: 13px;
-      line-height: 1.8;
+    .nav-button:hover,
+    .nav-button.active {
+      color:white;
+      background:var(--theme-nav-active);
+      border-color:var(--theme-card-border);
     }
 
-    .verified {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 20px;
-      padding: 8px 12px;
-      border-radius: 30px;
-      border: 1px solid var(--theme-badge-border);
-      background: var(--theme-badge-bg);
-      color: var(--theme-accent-text);
-      font-size: 10px;
-      font-weight: 900;
-      letter-spacing: 1px;
+    .sidebar-bottom {
+      margin-top:30px;
+      padding:12px;
+      border:1px solid var(--theme-card-border);
+      border-radius:12px;
+      background:var(--theme-card-bg);
     }
 
-    .green-dot {
-      height: 8px;
-      width: 8px;
-      border-radius: 50%;
-      background: #4ade80;
-      box-shadow: 0 0 10px #4ade80;
+    .main {
+      min-width:0;
+      padding:0 28px 45px;
     }
 
-    .module-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 17px;
-      margin-top: 30px;
+    .topbar {
+      position:sticky;
+      top:0;
+      z-index:20;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:17px 0;
+      margin-bottom:25px;
+      background:rgba(2,15,9,.88);
+      backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--theme-card-border);
     }
 
-    .module-card {
-      min-height: 150px;
-      padding: 21px;
-      border-radius: 17px;
-      border: 1px solid var(--theme-card-border);
-      background: var(--theme-card-bg);
+    .topbar h1 {
+      font-size:19px;
+      font-weight:900;
     }
 
-    .module-icon {
-      font-size: 25px;
-      margin-bottom: 17px;
+    .top-actions {
+      display:flex;
+      align-items:center;
+      gap:9px;
     }
 
-    .module-card h3 {
-      font-size: 14px;
-      font-weight: 800;
+    .top-button {
+      padding:10px 13px;
+      border:1px solid var(--theme-card-border);
+      border-radius:10px;
+      background:var(--theme-card-bg);
+      color:#e2e8f0;
+      font-size:11px;
+      font-weight:800;
+      cursor:pointer;
     }
 
-    .module-card p {
-      margin-top: 8px;
-      color: #94a3b8;
-      font-size: 11px;
-      line-height: 1.7;
+    .top-button:hover { border-color:var(--theme-accent); }
+
+    .top-button.logout {
+      color:#fca5a5;
+      border-color:rgba(239,68,68,.25);
     }
 
-    .module-status {
-      display: inline-block;
-      margin-top: 13px;
-      color: var(--theme-accent-text);
-      font-size: 9px;
-      font-weight: 900;
-      letter-spacing: 1px;
+    .welcome {
+      padding:27px;
+      margin-bottom:23px;
+      background:
+        radial-gradient(circle at 90% 10%,rgba(74,222,128,.19),transparent 35%),
+        linear-gradient(120deg,rgba(6,45,29,.94),rgba(2,12,8,.85));
     }
 
-    .vault-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 32px;
+    .welcome h2 {
+      margin-top:8px;
+      font-size:clamp(23px,4vw,33px);
+      font-weight:900;
     }
 
-    .toolbar-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    .muted {
+      color:#94a3b8;
+      font-size:12px;
+      line-height:1.7;
     }
 
-    .toolbar-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 11px 15px;
-      border-radius: 10px;
-      border: 1px solid var(--theme-card-border);
-      background: var(--theme-card-bg);
-      color: white;
-      text-decoration: none;
-      font-size: 11px;
-      font-weight: 800;
+    .stat-grid {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:13px;
+      margin-bottom:23px;
     }
 
-    .toolbar-link:hover {
-      border-color: var(--theme-accent);
+    .stat {
+      padding:17px;
+      min-width:0;
     }
 
-    .logout-button {
-      padding: 11px 15px;
-      color: white;
-      border: 0;
-      border-radius: 10px;
-      background: linear-gradient(135deg,#dc2626,#991b1b);
-      font-weight: 800;
-      font-size: 11px;
+    .stat-name {
+      color:#94a3b8;
+      font-size:10px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:1px;
+    }
+
+    .stat-number {
+      margin-top:10px;
+      font-size:27px;
+      font-weight:900;
+      color:white;
+    }
+
+    .section {
+      display:none;
+      animation:fade .2s ease;
+    }
+
+    .section.active { display:block; }
+
+    @keyframes fade {
+      from { opacity:0; transform:translateY(7px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+
+    .section-heading {
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:15px;
+      flex-wrap:wrap;
+      margin-bottom:20px;
+    }
+
+    .section-heading h2 {
+      font-size:25px;
+      font-weight:900;
+    }
+
+    .toolbar {
+      display:flex;
+      gap:9px;
+      flex-wrap:wrap;
+      margin-bottom:15px;
+    }
+
+    .search {
+      min-width:180px;
+      flex:1;
+      padding:12px 14px;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:11px;
+      outline:none;
+      background:rgba(2,12,8,.8);
+      color:white;
+      font-size:12px;
+    }
+
+    .search:focus {
+      border-color:var(--theme-accent);
+    }
+
+    .primary-button {
+      padding:11px 16px;
+      border:0;
+      border-radius:10px;
+      background:var(--theme-btn-gradient);
+      color:white;
+      font-size:11px;
+      font-weight:900;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .primary-button:hover {
+      transform:translateY(-2px);
+      box-shadow:0 8px 20px var(--theme-accent-glow);
+    }
+
+    .table-card {
+      padding:0;
+      overflow:hidden;
+    }
+
+    .table-scroll { overflow-x:auto; }
+
+    table {
+      width:100%;
+      min-width:650px;
+      border-collapse:collapse;
+      text-align:left;
+    }
+
+    th {
+      padding:14px;
+      background:rgba(255,255,255,.035);
+      color:#94a3b8;
+      font-size:9px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+    }
+
+    td {
+      padding:13px 14px;
+      border-top:1px solid rgba(255,255,255,.055);
+      color:#e2e8f0;
+      font-size:11px;
+    }
+
+    tr:hover td { background:rgba(34,197,94,.035); }
+
+    .record-id {
+      max-width:180px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      font-family:monospace;
+      color:var(--theme-accent-text);
+    }
+
+    .row-actions {
+      display:flex;
+      gap:7px;
+    }
+
+    .small-button {
+      padding:7px 10px;
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:8px;
+      background:rgba(255,255,255,.05);
+      color:#e2e8f0;
+      font-size:10px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .small-button.edit:hover {
+      border-color:var(--theme-accent);
+      color:var(--theme-accent-text);
+    }
+
+    .small-button.delete:hover {
+      border-color:#ef4444;
+      color:#fca5a5;
+    }
+
+    .empty {
+      padding:35px 15px;
+      color:#94a3b8;
+      font-size:12px;
+      text-align:center;
     }
 
     .notice {
-      margin-top: 25px;
-      padding: 18px;
-      border: 1px solid var(--theme-card-border);
-      border-radius: 13px;
-      background: var(--theme-card-bg);
-      color: #cbd5e1;
-      font-size: 12px;
-      line-height: 1.8;
+      padding:17px;
+      border:1px solid var(--theme-card-border);
+      border-radius:13px;
+      background:var(--theme-card-bg);
+      margin-bottom:18px;
+      color:#cbd5e1;
+      font-size:12px;
+      line-height:1.8;
     }
 
-    .center-screen {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
+    .editor-overlay {
+      position:fixed;
+      inset:0;
+      z-index:100;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:15px;
+      background:rgba(0,0,0,.78);
+      backdrop-filter:blur(8px);
     }
 
-    .center-card {
-      width: 100%;
-      max-width: 450px;
-      padding: 32px;
-      text-align: center;
+    .editor-overlay.active { display:flex; }
+
+    .editor {
+      width:100%;
+      max-width:750px;
+      max-height:92vh;
+      display:flex;
+      flex-direction:column;
+      border:1px solid var(--theme-card-border);
+      border-radius:18px;
+      background:#04150e;
+      box-shadow:0 25px 80px rgba(0,0,0,.6);
+      overflow:hidden;
     }
 
-    .loader {
-      width: 36px;
-      height: 36px;
-      margin: 0 auto 20px;
-      border-radius: 50%;
-      border: 3px solid rgba(255,255,255,.12);
-      border-top-color: var(--theme-accent);
-      animation: spin .8s linear infinite;
+    .editor-header {
+      padding:18px 20px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      border-bottom:1px solid var(--theme-card-border);
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .editor-body {
+      padding:20px;
+      overflow-y:auto;
     }
 
-    @media(max-width: 750px) {
-      .module-grid {
-        grid-template-columns: repeat(2,minmax(0,1fr));
+    .editor label {
+      display:block;
+      margin:15px 0 8px;
+      font-size:10px;
+      color:#cbd5e1;
+      font-weight:900;
+      text-transform:uppercase;
+    }
+
+    .editor input,
+    .editor textarea {
+      width:100%;
+      padding:12px;
+      color:white;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:10px;
+      background:rgba(0,0,0,.3);
+      outline:none;
+      font-size:12px;
+    }
+
+    .editor textarea {
+      min-height:300px;
+      resize:vertical;
+      font-family:Consolas,monospace;
+      line-height:1.6;
+      tab-size:2;
+    }
+
+    .editor input:focus,
+    .editor textarea:focus {
+      border-color:var(--theme-accent);
+    }
+
+    .editor-footer {
+      padding:15px 20px;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      border-top:1px solid var(--theme-card-border);
+    }
+
+    .secondary-button {
+      padding:11px 16px;
+      color:#cbd5e1;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:10px;
+      background:rgba(255,255,255,.05);
+      font-size:11px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .mobile-menu { display:none; }
+
+    @media(max-width:950px) {
+      .layout { grid-template-columns:210px minmax(0,1fr); }
+      .main { padding:0 18px 35px; }
+      .stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+
+    @media(max-width:650px) {
+      .layout { display:block; }
+
+      .sidebar {
+        position:fixed;
+        left:0;
+        top:0;
+        z-index:60;
+        width:260px;
+        transform:translateX(-105%);
+        transition:transform .25s ease;
+        box-shadow:15px 0 50px rgba(0,0,0,.4);
       }
-    }
 
-    @media(max-width: 480px) {
-      .module-grid {
-        grid-template-columns: 1fr;
-      }
+      .sidebar.open { transform:translateX(0); }
 
-      .vault-header {
-        padding: 0 17px;
-      }
+      .mobile-menu { display:inline-block; }
 
-      .vault-brand strong {
-        font-size: 12px;
-      }
+      .main { padding:0 13px 30px; }
+
+      .topbar { padding:13px 0; }
+
+      .topbar h1 { font-size:16px; }
+
+      .welcome { padding:20px; }
+
+      .stat-grid { gap:9px; }
+
+      .stat { padding:13px; }
+
+      .stat-number { font-size:23px; }
+
+      .section-heading h2 { font-size:21px; }
     }
   </style>
 </head>
 
 <body data-theme="save-trees">
 
-  <section class="center-screen" id="checkingView">
-    <div class="custom-card center-card">
-      <div class="loader"></div>
-      <h2>Checking Master Access</h2>
-      <p class="vault-description">
-        Verifying your Firebase administrator credentials...
-      </p>
-    </div>
-  </section>
+  <div class="layout" id="application" hidden>
 
-  <section class="center-screen" id="deniedView" hidden>
-    <div class="custom-card center-card">
-      <div style="font-size:42px;margin-bottom:17px">🔒</div>
-      <div class="section-kicker">RESTRICTED AREA</div>
-      <h1 class="brand-text" style="margin:14px 0">
-        Access Required
-      </h1>
-      <p class="vault-description">
-        You need a valid master administrator session to open this vault.
-      </p>
-      <a href="admin.html" class="custom-btn" style="margin-top:22px">
-        RETURN TO MASTER LOGIN
-      </a>
-    </div>
-  </section>
+    <aside class="sidebar" id="sidebar">
 
-  <section id="vaultView" hidden>
-
-    <header class="vault-header">
-      <div class="vault-brand">
-        <div class="vault-logo">SRP</div>
+      <div class="logo">
+        <div class="logo-icon">SRP</div>
         <div>
           <strong>SRP ESPORTS</strong>
-          <small>MASTER ADMIN VAULT</small>
+          <small>MASTER CONTROL</small>
         </div>
       </div>
 
-      <button class="logout-button" id="logoutButton">
-        SIGN OUT
+      <div class="nav-label">Overview</div>
+
+      <button class="nav-button active" data-page="overview">
+        <i class="fas fa-gauge-high"></i> Dashboard
       </button>
-    </header>
 
-    <main class="vault-main">
+      <div class="nav-label">Tournament Management</div>
 
-      <div class="vault-toolbar">
-        <div>
-          <div class="section-kicker">SEASON 06 / CONTROL SYSTEM</div>
-          <h1 class="vault-title brand-text">Admin Vault.</h1>
-          <p class="vault-description">
-            Master administration workspace for SRP Esports.
+      <button class="nav-button" data-page="teams">
+        <i class="fas fa-users"></i> Teams
+      </button>
+
+      <button class="nav-button" data-page="players">
+        <i class="fas fa-user-group"></i> Players
+      </button>
+
+      <button class="nav-button" data-page="matches">
+        <i class="fas fa-gamepad"></i> Matches
+      </button>
+
+      <button class="nav-button" data-page="tournament_slots">
+        <i class="fas fa-table-cells"></i> Tournament Slots
+      </button>
+
+      <button class="nav-button" data-page="tournament_matches">
+        <i class="fas fa-trophy"></i> Tournament Matches
+      </button>
+
+      <div class="nav-label">System Management</div>
+
+      <button class="nav-button" data-page="settings">
+        <i class="fas fa-sliders"></i> Settings
+      </button>
+
+      <button class="nav-button" data-page="tokens">
+        <i class="fas fa-ticket"></i> Tokens
+      </button>
+
+      <button class="nav-button" data-page="sub_admins">
+        <i class="fas fa-shield-halved"></i> Sub-admins
+      </button>
+
+      <div class="sidebar-bottom">
+        <div class="section-kicker">Security status</div>
+        <div style="margin-top:8px;font-size:12px;font-weight:800;color:#4ade80">
+          <i class="fas fa-circle-check"></i> MASTER VERIFIED
+        </div>
+      </div>
+
+    </aside>
+
+    <main class="main">
+
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="top-button mobile-menu" id="menuButton">
+            <i class="fas fa-bars"></i>
+          </button>
+
+          <div>
+            <h1 id="pageTitle">Dashboard</h1>
+            <div class="muted" style="font-size:10px">
+              SRP Esports · Season 6
+            </div>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <a href="index.html" class="top-button" style="text-decoration:none">
+            <i class="fas fa-globe"></i>
+            Website
+          </a>
+
+          <button class="top-button logout" id="logoutButton">
+            <i class="fas fa-right-from-bracket"></i>
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <!-- OVERVIEW -->
+
+      <section class="section active" id="page-overview">
+
+        <div class="custom-card welcome">
+          <div class="section-kicker">MASTER ADMINISTRATION</div>
+          <h2>Welcome to SRP Control.</h2>
+          <p class="muted" style="margin-top:8px">
+            Manage your tournament records and website data from one place.
           </p>
         </div>
 
-        <div class="toolbar-actions">
-          <a href="admin.html" class="toolbar-link">← Admin Home</a>
-          <a href="index.html" class="toolbar-link">Website ↗</a>
+        <div class="stat-grid">
+          <article class="custom-card stat">
+            <div class="stat-name">Teams</div>
+            <div class="stat-number" id="statTeams">—</div>
+          </article>
+
+          <article class="custom-card stat">
+            <div class="stat-name">Players</div>
+            <div class="stat-number" id="statPlayers">—</div>
+          </article>
+
+          <article class="custom-card stat">
+            <div class="stat-name">Matches</div>
+            <div class="stat-number" id="statMatches">—</div>
+          </article>
+
+          <article class="custom-card stat">
+            <div class="stat-name">Sub-admins</div>
+            <div class="stat-number" id="statSubs">—</div>
+          </article>
         </div>
-      </div>
 
-      <div class="verified">
-        <span class="green-dot"></span>
-        MASTER IDENTITY VERIFIED
-      </div>
+        <div class="custom-card">
+          <div class="section-kicker">Quick actions</div>
+          <h2 style="font-size:19px;font-weight:900;margin:8px 0 18px">
+            Tournament Operations
+          </h2>
 
-      <section class="custom-card">
-        <div class="section-kicker">SYSTEM OVERVIEW</div>
-        <h2 style="margin:12px 0;font-size:22px">
-          Welcome to the Master Vault
-        </h2>
-        <p class="vault-description">
-          Your Firebase master authentication is active.
-          This workspace is the secure entry point for tournament
-          management and administrative operations.
-        </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="primary-button" onclick="openSection('teams')">
+              <i class="fas fa-users"></i> Manage Teams
+            </button>
+
+            <button class="primary-button" onclick="openSection('matches')">
+              <i class="fas fa-gamepad"></i> Manage Matches
+            </button>
+
+            <button class="primary-button" onclick="openSection('settings')">
+              <i class="fas fa-sliders"></i> Edit Settings
+            </button>
+
+            <button class="primary-button" onclick="openSection('sub_admins')">
+              <i class="fas fa-shield-halved"></i> Sub-admins
+            </button>
+          </div>
+        </div>
+
       </section>
 
-      <div class="section-kicker" style="margin-top:35px">
-        ADMINISTRATION MODULES
-      </div>
+      <!-- DYNAMIC COLLECTION MANAGER -->
 
-      <div class="module-grid">
+      <section class="section" id="page-manager">
 
-        <article class="module-card">
-          <div class="module-icon">👥</div>
-          <h3>Team Management</h3>
-          <p>Manage registered teams and team information.</p>
-          <span class="module-status">MODULE TO BE CONNECTED</span>
-        </article>
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">DATABASE MANAGEMENT</div>
+            <h2 id="collectionTitle">Manage Records</h2>
+            <p class="muted" id="collectionDescription">
+              Create, update and delete records.
+            </p>
+          </div>
 
-        <article class="module-card">
-          <div class="module-icon">🎮</div>
-          <h3>Player Management</h3>
-          <p>Review player records and roster information.</p>
-          <span class="module-status">MODULE TO BE CONNECTED</span>
-        </article>
+          <button class="primary-button" id="createButton">
+            <i class="fas fa-plus"></i> Create Record
+          </button>
+        </div>
 
-        <article class="module-card">
-          <div class="module-icon">🏆</div>
-          <h3>Match Management</h3>
-          <p>Manage tournament matches and results.</p>
-          <span class="module-status">MODULE TO BE CONNECTED</span>
-        </article>
+        <div class="notice">
+          Changes are saved directly to Firestore. Editing a record replaces
+          its document with the complete JSON shown in the editor.
+          Keep existing fields unless you deliberately intend to remove them.
+        </div>
 
-        <article class="module-card">
-          <div class="module-icon">📊</div>
-          <h3>Tournament Slots</h3>
-          <p>Manage tournament positions and match slots.</p>
-          <span class="module-status">MODULE TO BE CONNECTED</span>
-        </article>
+        <div class="toolbar">
+          <input
+            class="search"
+            id="searchInput"
+            type="search"
+            placeholder="Search document IDs or record contents..."
+          >
 
-        <article class="module-card">
-          <div class="module-icon">🛡️</div>
-          <h3>Sub-admins</h3>
-          <p>Manage administrator accounts and permissions.</p>
-          <span class="module-status">MODULE TO BE CONNECTED</span>
-        </article>
+          <button class="top-button" id="refreshButton">
+            <i class="fas fa-rotate"></i> Refresh
+          </button>
+        </div>
 
-        <article class="module-card">
-          <div class="module-icon">⚙️</div>
-          <h3>System Settings</h3>
-          <p>Manage tournament settings and public website data.</p>
-          <span class="module-status">MODULE TO BE CONNECTED</span>
-        </article>
+        <div class="custom-card table-card">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Document ID</th>
+                  <th>Record summary</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="recordTable">
+                <tr>
+                  <td colspan="3">
+                    <div class="empty">Loading records...</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-      </div>
+      </section>
 
-      <div class="notice">
-        <strong style="color:var(--theme-accent-text)">
-          Security status:
-        </strong>
-        The vault verifies the Firebase master custom claim before
-        displaying this workspace. The management modules above are
-        currently a visual framework; database operations still need
-        to be implemented and tested individually.
-      </div>
+      <!-- SUB ADMIN MANAGEMENT -->
+
+      <section class="section" id="page-sub_admins">
+
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">ACCESS CONTROL</div>
+            <h2>Sub-admin Management</h2>
+            <p class="muted">
+              View existing sub-admin permission records.
+            </p>
+          </div>
+        </div>
+
+        <div class="notice">
+          <strong style="color:#fbbf24">Account creation needs a secure backend.</strong>
+          <br>
+          A Firestore document cannot create a Firebase Authentication
+          account or securely assign custom claims. We must deploy a
+          Firebase Cloud Function before enabling the Create Sub-admin
+          action. This section will not create fake or insecure accounts.
+        </div>
+
+        <div class="toolbar">
+          <button class="top-button" onclick="loadSubAdmins()">
+            <i class="fas fa-rotate"></i> Refresh Sub-admins
+          </button>
+        </div>
+
+        <div class="custom-card table-card">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Account UID / Document ID</th>
+                  <th>Status</th>
+                  <th>Permission count</th>
+                </tr>
+              </thead>
+              <tbody id="subAdminTable">
+                <tr>
+                  <td colspan="3">
+                    <div class="empty">Loading sub-admin records...</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
 
     </main>
+
+  </div>
+
+  <!-- JSON EDITOR -->
+
+  <div class="editor-overlay" id="editorOverlay">
+    <div class="editor">
+
+      <div class="editor-header">
+        <div>
+          <div class="section-kicker">FIRESTORE DOCUMENT</div>
+          <strong id="editorTitle">Create Record</strong>
+        </div>
+
+        <button class="secondary-button" onclick="closeEditor()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="editor-body">
+
+        <label for="documentId">Document ID</label>
+
+        <input id="documentId" placeholder="Leave empty to generate automatically">
+
+        <label for="documentJson">Document JSON</label>
+
+        <textarea id="documentJson" spellcheck="false"></textarea>
+
+        <p class="muted" id="editorHelp" style="margin-top:12px">
+          Enter a valid JSON object. Do not paste passwords or private keys.
+        </p>
+
+        <p id="editorError" style="color:#fb7185;font-size:12px;margin-top:10px"></p>
+
+      </div>
+
+      <div class="editor-footer">
+        <button class="secondary-button" onclick="closeEditor()">
+          Cancel
+        </button>
+
+        <button class="primary-button" id="saveButton" onclick="saveRecord()">
+          <i class="fas fa-floppy-disk"></i> Save Record
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <section id="authLoading" style="min-height:100vh;display:grid;place-items:center">
+    <div class="custom-card" style="padding:30px;text-align:center">
+      <i class="fas fa-circle-notch fa-spin" style="font-size:28px;color:var(--theme-accent-text)"></i>
+      <h2 style="margin-top:15px;font-weight:900">Verifying Master Access</h2>
+      <p class="muted">Checking your administrator session...</p>
+    </div>
   </section>
 
   <script>
-    const checkingView = document.getElementById("checkingView");
-    const deniedView = document.getElementById("deniedView");
-    const vaultView = document.getElementById("vaultView");
+    const db = firebase.firestore();
 
-    function showVaultView(view) {
-      checkingView.hidden = view !== "checking";
-      deniedView.hidden = view !== "denied";
-      vaultView.hidden = view !== "vault";
+    const COLLECTIONS = {
+      teams: {
+        title: "Teams",
+        description: "Manage registered tournament teams.",
+        collection: "teams"
+      },
+      players: {
+        title: "Players",
+        description: "Manage player IGN, UID, roster and team information.",
+        collection: "players"
+      },
+      matches: {
+        title: "Matches",
+        description: "Manage match results, scores and statistics.",
+        collection: "matches"
+      },
+      tournament_slots: {
+        title: "Tournament Slots",
+        description: "Manage the tournament slot documents.",
+        collection: "tournament_slots"
+      },
+      tournament_matches: {
+        title: "Tournament Matches",
+        description: "Manage tournament stage and bracket records.",
+        collection: "tournament_matches"
+      },
+      settings: {
+        title: "Settings",
+        description: "Manage settings/tournament, settings/rules and archived season documents.",
+        collection: "settings"
+      },
+      tokens: {
+        title: "Registration Tokens",
+        description: "Manage token documents.",
+        collection: "tokens"
+      }
+    };
+
+    let currentCollection = "teams";
+    let currentRecords = [];
+    let editingId = null;
+
+    const application = document.getElementById("application");
+    const authLoading = document.getElementById("authLoading");
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[char]);
     }
 
-    let verificationRun = 0;
+    function safeSummary(data) {
+      const keys = [
+        "name", "ign", "teamName", "title",
+        "status", "roundName", "season", "active"
+      ];
 
-    async function verifyVaultAccess(user) {
-      const run = ++verificationRun;
+      for (const key of keys) {
+        if (data[key] !== undefined && data[key] !== null) {
+          return key + ": " + String(data[key]).slice(0, 100);
+        }
+      }
 
-      if (!user) {
-        showVaultView("denied");
+      return Object.keys(data).slice(0, 4).join(", ") || "Empty document";
+    }
+
+    function toast(message, error = false) {
+      let box = document.getElementById("adminToast");
+
+      if (!box) {
+        box = document.createElement("div");
+        box.id = "adminToast";
+        box.style.cssText =
+          "position:fixed;bottom:25px;right:20px;z-index:200;padding:15px 20px;border-radius:12px;background:#062a1c;border:1px solid rgba(74,222,128,.35);color:white;font-size:12px;box-shadow:0 15px 45px #0008";
+        document.body.appendChild(box);
+      }
+
+      box.style.borderColor = error ? "#ef4444" : "#4ade80";
+      box.textContent = message;
+      box.style.display = "block";
+
+      clearTimeout(window.adminToastTimer);
+      window.adminToastTimer = setTimeout(() => {
+        box.style.display = "none";
+      }, 3500);
+    }
+
+    function requireMaster() {
+      if (!auth.currentUser) {
+        throw new Error("Your administrator session has expired.");
+      }
+    }
+
+    async function verifyCurrentMaster() {
+      requireMaster();
+
+      const valid = await verifyMaster();
+
+      if (!valid) {
+        throw new Error("Master administrator permission is required.");
+      }
+
+      return true;
+    }
+
+    async function secureLoad(collection) {
+      await verifyCurrentMaster();
+      const snap = await db.collection(collection).get();
+
+      return snap.docs.map(doc => ({
+        id: doc.id,
+        data: doc.data()
+      }));
+    }
+
+    async function loadStats() {
+      const collections = [
+        ["teams", "statTeams"],
+        ["players", "statPlayers"],
+        ["matches", "statMatches"],
+        ["sub_admins", "statSubs"]
+      ];
+
+      for (const [collection, elementId] of collections) {
+        try {
+          const records = await secureLoad(collection);
+          document.getElementById(elementId).textContent = records.length;
+        } catch (error) {
+          console.error(collection, error);
+          document.getElementById(elementId).textContent = "—";
+        }
+      }
+    }
+
+    function openSection(page) {
+      if (page === "sub_admins") {
+        document.querySelectorAll(".section").forEach(el => el.classList.remove("active"));
+        document.getElementById("page-sub_admins").classList.add("active");
+
+        document.querySelectorAll(".nav-button").forEach(el => {
+          el.classList.toggle("active", el.dataset.page === page);
+        });
+
+        document.getElementById("pageTitle").textContent = "Sub-admin Management";
+        loadSubAdmins();
+        document.getElementById("sidebar").classList.remove("open");
         return;
       }
 
-      showVaultView("checking");
+      if (page === "overview") {
+        document.querySelectorAll(".section").forEach(el => el.classList.remove("active"));
+        document.getElementById("page-overview").classList.add("active");
+        document.getElementById("pageTitle").textContent = "Dashboard";
+
+        document.querySelectorAll(".nav-button").forEach(el => {
+          el.classList.toggle("active", el.dataset.page === "overview");
+        });
+
+        loadStats();
+        document.getElementById("sidebar").classList.remove("open");
+        return;
+      }
+
+      if (!COLLECTIONS[page]) return;
+
+      currentCollection = page;
+
+      document.querySelectorAll(".section").forEach(el => el.classList.remove("active"));
+      document.getElementById("page-manager").classList.add("active");
+
+      document.querySelectorAll(".nav-button").forEach(el => {
+        el.classList.toggle("active", el.dataset.page === page);
+      });
+
+      const config = COLLECTIONS[page];
+
+      document.getElementById("pageTitle").textContent = config.title;
+      document.getElementById("collectionTitle").textContent = config.title;
+      document.getElementById("collectionDescription").textContent = config.description;
+
+      document.getElementById("searchInput").value = "";
+
+      document.getElementById("createButton").style.display =
+        page === "settings" ? "none" : "inline-flex";
+
+      document.getElementById("sidebar").classList.remove("open");
+
+      loadRecords();
+    }
+
+    async function loadRecords() {
+      const table = document.getElementById("recordTable");
+
+      table.innerHTML =
+        '<tr><td colspan="3"><div class="empty"><i class="fas fa-circle-notch fa-spin"></i> Loading records...</div></td></tr>';
 
       try {
-        const valid = await verifyMaster();
-
-        if (run !== verificationRun) return;
-
-        if (valid) {
-          showVaultView("vault");
-        } else {
-          await auth.signOut();
-
-          if (run === verificationRun) {
-            showVaultView("denied");
-          }
-        }
+        currentRecords = await secureLoad(COLLECTIONS[currentCollection].collection);
+        renderRecords();
       } catch (error) {
-        console.error("Vault verification failed:", error);
+        console.error(error);
 
-        if (run === verificationRun) {
-          showVaultView("denied");
-        }
+        table.innerHTML =
+          `<tr><td colspan="3"><div class="empty">${escapeHtml(error.message || "Could not load records.")}</div></td></tr>`;
+
+        toast(error.message || "Loading failed.", true);
       }
     }
 
-    auth.onAuthStateChanged(verifyVaultAccess);
+    function renderRecords() {
+      const query = document.getElementById("searchInput").value.toLowerCase();
+
+      const filtered = currentRecords.filter(record => {
+        return record.id.toLowerCase().includes(query) ||
+          JSON.stringify(record.data).toLowerCase().includes(query);
+      });
+
+      const table = document.getElementById("recordTable");
+
+      if (!filtered.length) {
+        table.innerHTML =
+          '<tr><td colspan="3"><div class="empty">No records found.</div></td></tr>';
+        return;
+      }
+
+      table.innerHTML = filtered.map(record => `
+        <tr>
+          <td><div class="record-id" title="${escapeHtml(record.id)}">${escapeHtml(record.id)}</div></td>
+          <td>${escapeHtml(safeSummary(record.data))}</td>
+          <td>
+            <div class="row-actions">
+              <button class="small-button edit" data-action="edit" data-id="${escapeHtml(record.id)}">
+                <i class="fas fa-pen"></i> Edit
+              </button>
+
+              <button class="small-button delete" data-action="delete" data-id="${escapeHtml(record.id)}">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function openEditor(id = null) {
+      editingId = id;
+
+      const record = id
+        ? currentRecords.find(item => item.id === id)
+        : null;
+
+      document.getElementById("editorTitle").textContent =
+        record ? "Edit Document" : "Create Document";
+
+      const idInput = document.getElementById("documentId");
+
+      idInput.value = id || "";
+      idInput.disabled = !!record;
+
+      document.getElementById("editorError").textContent = "";
+
+      document.getElementById("documentJson").value =
+        record
+          ? JSON.stringify(record.data, null, 2)
+          : JSON.stringify({}, null, 2);
+
+      document.getElementById("editorOverlay").classList.add("active");
+    }
+
+    function closeEditor() {
+      document.getElementById("editorOverlay").classList.remove("active");
+      editingId = null;
+    }
+
+    async function saveRecord() {
+      const saveButton = document.getElementById("saveButton");
+      const errorBox = document.getElementById("editorError");
+
+      errorBox.textContent = "";
+      saveButton.disabled = true;
+      saveButton.textContent = "Saving...";
+
+      try {
+        await verifyCurrentMaster();
+
+        let data;
+
+        try {
+          data = JSON.parse(document.getElementById("documentJson").value);
+        } catch {
+          throw new Error("Invalid JSON. Please correct the document syntax.");
+        }
+
+        if (!data || typeof data !== "object" || Array.isArray(data)) {
+          throw new Error("The document must be a JSON object.");
+        }
+
+        const id = editingId ||
+          document.getElementById("documentId").value.trim();
+
+        const collection = db.collection(COLLECTIONS[currentCollection].collection);
+        const ref = id ? collection.doc(id) : collection.doc();
+
+        await ref.set(data);
+
+        closeEditor();
+
+        toast(editingId ? "Document updated successfully." : "Document created successfully.");
+
+        await loadRecords();
+        await loadStats();
+
+      } catch (error) {
+        console.error(error);
+        errorBox.textContent = error.message || "Failed to save document.";
+      } finally {
+        saveButton.disabled = false;
+        saveButton.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Record';
+      }
+    }
+
+    async function deleteRecord(id) {
+      if (!confirm("Delete document " + id + " permanently? This cannot be undone.")) {
+        return;
+      }
+
+      try {
+        await verifyCurrentMaster();
+
+        await db.collection(COLLECTIONS[currentCollection].collection)
+          .doc(id)
+          .delete();
+
+        toast("Document deleted.");
+        await loadRecords();
+        await loadStats();
+
+      } catch (error) {
+        console.error(error);
+        toast(error.message || "Delete failed.", true);
+      }
+    }
+
+    async function loadSubAdmins() {
+      const table = document.getElementById("subAdminTable");
+
+      table.innerHTML =
+        '<tr><td colspan="3"><div class="empty">Loading sub-admin records...</div></td></tr>';
+
+      try {
+        const records = await secureLoad("sub_admins");
+
+        if (!records.length) {
+          table.innerHTML =
+            '<tr><td colspan="3"><div class="empty">No sub-admin records exist yet.</div></td></tr>';
+          return;
+        }
+
+        table.innerHTML = records.map(record => {
+          const data = record.data || {};
+          const permissions = data.permissions || {};
+          const permissionCount = Object.values(permissions).filter(Boolean).length;
+
+          return `
+            <tr>
+              <td><div class="record-id">${escapeHtml(record.id)}</div></td>
+              <td>${data.active === false
+                ? '<span style="color:#fca5a5">Inactive</span>'
+                : '<span style="color:#4ade80">Active</span>'}</td>
+              <td>${permissionCount}</td>
+            </tr>
+          `;
+        }).join("");
+
+      } catch (error) {
+        console.error(error);
+        table.innerHTML =
+          `<tr><td colspan="3"><div class="empty">${escapeHtml(error.message)}</div></td></tr>`;
+      }
+    }
+
+    document.querySelectorAll(".nav-button").forEach(button => {
+      button.addEventListener("click", () => openSection(button.dataset.page));
+    });
+
+    document.getElementById("createButton").addEventListener("click", () => {
+      openEditor();
+    });
+
+    document.getElementById("refreshButton").addEventListener("click", () => {
+      loadRecords();
+    });
+
+    document.getElementById("searchInput").addEventListener("input", renderRecords);
+
+    document.getElementById("recordTable").addEventListener("click", event => {
+      const button = event.target.closest("[data-action]");
+      if (!button) return;
+
+      const id = button.dataset.id;
+
+      if (button.dataset.action === "edit") openEditor(id);
+      if (button.dataset.action === "delete") deleteRecord(id);
+    });
+
+    document.getElementById("menuButton").addEventListener("click", () => {
+      document.getElementById("sidebar").classList.toggle("open");
+    });
+
+    document.getElementById("editorOverlay").addEventListener("click", event => {
+      if (event.target.id === "editorOverlay") closeEditor();
+    });
 
     document.getElementById("logoutButton").addEventListener("click", async () => {
       await masterLogout();
     });
-  </script>
 
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        window.location.replace("admin.html");
+        return;
+      }
+
+      try {
+        const valid = await verifyMaster();
+
+        if (!valid) {
+          await auth.signOut();
+          window.location.replace("admin.html");
+          return;
+        }
+
+        authLoading.hidden = true;
+        application.hidden = false;
+
+        loadStats();
+
+      } catch (error) {
+        console.error(error);
+        await auth.signOut();
+        window.location.replace("admin.html");
+      }
+    });
+  </script>
 </body>
 </html>
