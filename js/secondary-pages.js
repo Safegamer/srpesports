@@ -43,8 +43,9 @@
     const settings = window.SRP?.settings || {};
     const total = Math.max(1, Number(settings.totalTeams) || 24);
     const current = Array.isArray(window.SRP?.teams) ? window.SRP.teams.length : 0;
+    const reserved = Number.isFinite(Number(settings.registrationReservedCount)) ? Number(settings.registrationReservedCount) : current;
     const open = settings.registrationOpen === true || settings.registration?.open === true;
-    const available = Math.max(0, total - current);
+    const available = Math.max(0, total - reserved);
     if ($('registration-capacity')) $('registration-capacity').textContent = `${total} teams`;
     if ($('registration-current')) $('registration-current').textContent = String(current);
     if ($('registration-available')) $('registration-available').textContent = String(available);
@@ -85,7 +86,7 @@
     button.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Sending application…';
     status.hidden = false; status.className = 'registration-message'; status.textContent = 'Checking details and preparing photos…';
     try {
-      if (!window.firebase?.functions) throw new Error('The registration service is not available yet. Please contact the tournament team.');
+      if (!window.firebase?.firestore) throw new Error('The registration database is not available. Please contact the tournament team.');
       const formData = new FormData(form);
       const players = [];
       for (let index = 1; index <= 6; index++) {
@@ -100,22 +101,63 @@
         players.push({ ign, uid, device, photo: file?.size ? await compressPhoto(file) : null });
       }
       status.textContent = 'Securely submitting your application…';
-      const submit = firebase.app().functions('asia-south1').httpsCallable('submitTeamRegistration');
-      await submit({
-        teamName: formData.get('teamName'), captainName: formData.get('captainName'),
-        contactEmail: formData.get('contactEmail'), discordContact: formData.get('discordContact'),
-        registrationToken: formData.get('registrationToken'), accuracyConfirmation: formData.get('accuracyConfirmation') === 'confirmed', players
+      const db = firebase.firestore();
+      const token = String(formData.get('registrationToken') || '').trim().toUpperCase();
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
+      const tokenId = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+      const settingsRef = db.collection('settings').doc('tournament');
+      const tokenRef = db.collection('tokens').doc(tokenId);
+      const applicationRef = db.collection('registration_applications').doc();
+      const application = {
+        teamName: String(formData.get('teamName') || '').trim(),
+        captainName: String(formData.get('captainName') || '').trim(),
+        email: String(formData.get('contactEmail') || '').trim(),
+        discord: String(formData.get('discordContact') || '').trim(),
+        players: players.map((player, index) => ({ ...player, isSub: index >= 4 })),
+        accuracyConfirmed: formData.get('accuracyConfirmation') === 'confirmed',
+        status: 'pending',
+        tokenDocumentId: tokenId,
+        reservationId: applicationRef.id,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      await db.runTransaction(async transaction => {
+        const [settingsSnap, tokenSnap] = await Promise.all([
+          transaction.get(settingsRef),
+          transaction.get(tokenRef)
+        ]);
+        const settings = settingsSnap.exists ? settingsSnap.data() : {};
+        if (settings.registrationOpen !== true && settings.registration?.open !== true) {
+          throw new Error('Registration is closed right now.');
+        }
+        const capacity = Math.max(1, Math.min(128, Number(settings.totalTeams) || 24));
+        const reserved = Number(settings.registrationReservedCount);
+        if (!Number.isInteger(reserved)) throw new Error('Registration setup is incomplete. Please contact the tournament administrator.');
+        if (reserved >= capacity) throw new Error('All team places are full.');
+        if (!tokenSnap.exists || tokenSnap.data().tokenHash !== tokenId || tokenSnap.data().used === true) {
+          throw new Error('The token is invalid or has already been used.');
+        }
+        transaction.update(tokenRef, {
+          used: true, usedBy: application.teamName,
+          redeemedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          registrationApplicationId: applicationRef.id
+        });
+        transaction.update(settingsRef, {
+          registrationReservedCount: reserved + 1,
+          lastRegistrationId: applicationRef.id
+        });
+        transaction.set(applicationRef, application);
       });
       location.assign('./register-success.html');
     } catch (error) {
       console.error('Team registration failed:', error);
       status.hidden = false; status.className = 'registration-message error';
       const messages = {
-        'functions/permission-denied': 'The token is invalid or has already been used. Check it with your tournament contact.',
-        'functions/failed-precondition': 'Registration is closed right now.',
-        'functions/resource-exhausted': 'All team places are full.',
-        'functions/not-found': 'The registration service has not been installed yet. Please contact the site owner.',
-        'functions/internal': 'The registration service had a server error. Try again later. If it continues, contact SRP staff and include the error code shown.'
+        'permission-denied': 'The token is invalid or has already been used. Check it with your tournament contact.',
+        'failed-precondition': 'Registration is closed right now.',
+        'resource-exhausted': 'All team places are full.',
+        'not-found': 'That registration token is invalid or has already been used.',
+        'unavailable': 'The registration service is temporarily unavailable. Please try again.',
+        'internal': 'The application could not be saved. Please try again or contact SRP staff.'
       };
       status.textContent = messages[error.code] || error.message || 'Could not submit the application. Please try again.';
       button.disabled = false; button.innerHTML = original;
