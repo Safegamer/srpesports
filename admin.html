@@ -144,11 +144,52 @@
       font-weight: 900;
       letter-spacing: 1px;
       cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .login-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
     }
 
     .login-button:disabled {
       opacity: .6;
       cursor: wait;
+    }
+
+    .cancel-button {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 13px 15px;
+      border: 1px solid var(--theme-card-border);
+      border-radius: 11px;
+      color: #cbd5e1;
+      background: rgba(255,255,255,.035);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      transition: .2s ease;
+    }
+
+    .cancel-button:hover {
+      color: white;
+      border-color: var(--theme-accent);
+      background: var(--theme-nav-active);
+      transform: translateY(-1px);
+    }
+
+    .cancel-button svg {
+      width: 16px;
+      height: 16px;
+      transition: transform .2s ease;
+    }
+
+    .cancel-button:hover svg {
+      transform: translateX(-3px);
     }
 
     #message {
@@ -172,19 +213,6 @@
       to { transform: rotate(360deg); }
     }
 
-    .bottom-link {
-      display: inline-block;
-      margin-top: 22px;
-      color: var(--theme-accent-text);
-      font-size: 12px;
-      font-weight: 800;
-      text-decoration: none;
-    }
-
-    .bottom-link:hover {
-      text-decoration: underline;
-    }
-
     footer {
       padding: 18px;
       color: #64748b;
@@ -202,7 +230,6 @@
 <body data-theme="save-trees">
 
   <header class="header">
-
     <div class="brand">
       <div class="logo">SRP</div>
       <div>
@@ -211,12 +238,10 @@
       </div>
     </div>
 
-    <!-- ALWAYS AVAILABLE: RETURN TO PUBLIC WEBSITE -->
     <a href="index.html" class="back-link">
       <span>←</span>
       Return to Website
     </a>
-
   </header>
 
   <main>
@@ -265,13 +290,17 @@
 
         <div id="message" role="alert"></div>
 
-      </form>
-
-      <div style="text-align:center">
-        <a href="index.html" class="bottom-link">
-          ← Cancel and return to the homepage
+        <a href="index.html" class="cancel-button">
+          <svg viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5"/>
+            <path d="m12 19-7-7 7-7"/>
+          </svg>
+          Cancel and return to homepage
         </a>
-      </div>
+
+      </form>
 
       <p class="muted" style="margin-top:20px;text-align:center;font-size:10px">
         Protected by Firebase Authentication and master-role verification.
@@ -281,9 +310,7 @@
 
   </main>
 
-  <footer>
-    SRP ESPORTS © 2026 · SEASON 06
-  </footer>
+  <footer>SRP ESPORTS © 2026 · SEASON 06</footer>
 
   <script>
     const loginView = document.getElementById("login");
@@ -299,7 +326,6 @@
     }
 
     auth.onAuthStateChanged(async (user) => {
-
       if (!user) {
         authCheckRunning = false;
         showLogin();
@@ -321,7 +347,6 @@
         }
 
         await auth.signOut();
-
         message.textContent =
           "This account does not have master administrator access.";
 
@@ -336,7 +361,6 @@
     });
 
     document.getElementById("loginForm").addEventListener("submit", async (event) => {
-
       event.preventDefault();
 
       message.textContent = "";
@@ -357,7 +381,6 @@
         loginButton.disabled = false;
         loginButton.textContent = "SIGN IN TO ADMIN";
       }
-
     });
   </script>
 
