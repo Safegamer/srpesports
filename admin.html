@@ -169,7 +169,7 @@
       </section>
 
       <section class="admin-page" id="page-tokens">
-        <div class="section-heading"><div><div class="eyebrow">Registration access</div><h1 class="page-heading">Season Tokens</h1><p class="page-description">Generate 16-character season-bound tokens, copy them and revoke unused tokens.</p></div><button class="primary-action" id="generate-token"><i class="fa-solid fa-plus"></i> Generate token</button></div>
+        <div class="section-heading"><div><div class="eyebrow">Registration access</div><h1 class="page-heading">Season Tokens</h1><p class="page-description">Generate 16-character season-bound tokens, copy them and revoke unused tokens.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="quiet-action" id="migrate-tokens"><i class="fa-solid fa-right-left"></i> Prepare existing tokens</button><button class="primary-action" id="generate-token"><i class="fa-solid fa-plus"></i> Generate token</button></div></div>
         <div class="data-toolbar"><input class="search-field" id="token-search" placeholder="Search token or redemption details..."><button class="quiet-action" data-refresh="tokens"><i class="fa-solid fa-rotate"></i> Refresh</button></div>
         <div class="panel-card table-card"><div class="table-wrap"><table class="admin-table"><thead><tr><th>Token</th><th>Season</th><th>Status</th><th>Redeemed by</th><th style="text-align:right">Actions</th></tr></thead><tbody id="tokens-body"></tbody></table></div></div>
       </section>
