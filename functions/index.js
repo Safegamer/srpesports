@@ -97,7 +97,7 @@ function cleanRegistration(data) {
   if (data?.accuracyConfirmation !== true) throw new HttpsError('invalid-argument', 'Confirm that you are authorised to submit these player details.');
   if (players.slice(4).some(p => !p.ign && !p.uid && !p.device)) players.splice(4);
   if (players.slice(4).some(p => !p.ign || !p.uid || !p.device)) throw new HttpsError('invalid-argument', 'Complete both substitute details or leave that substitute blank.');
-  if (players.some(p => !/^\\d{6,20}$/.test(p.uid))) throw new HttpsError('invalid-argument', 'Each player UID must contain 6 to 20 digits.');
+  if (players.some(p => !/^\d{6,20}$/.test(p.uid))) throw new HttpsError('invalid-argument', 'Each player UID must contain 6 to 20 digits.');
   for (const player of players) {
     if (!player.photo) continue;
     if (typeof player.photo !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(player.photo) || player.photo.length > 92000) {
