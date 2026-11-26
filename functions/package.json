@@ -1,0 +1,13 @@
+{
+  "name": "srp-esports-admin-functions",
+  "private": true,
+  "description": "Trusted Firebase functions for SRP-ESPORTS Season 6 admin accounts",
+  "main": "index.js",
+  "engines": {
+    "node": "22"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^7.0.0"
+  }
+}
