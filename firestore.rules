@@ -24,10 +24,86 @@ service cloud.firestore {
     }
 
     function validRegistrationPlayer(player) {
-      return player is map
-        && player.keys().hasOnly(['ign', 'uid', 'device', 'photo', 'isSub'])
+      return player is map && player.keys().hasOnly(['ign', 'uid', 'device', 'photo', 'isSub'])
         && player.ign is string && player.ign.size() > 0 && player.ign.size() <= 30
-        && player.uid is string && player.uid.matches('^[0-9]{6,20}
+        && player.uid is string && player.uid.matches('^[0-9]{6,20}$')
+        && player.device is string && player.device.size() > 0 && player.device.size() <= 50
+        && player.isSub is bool
+        && (player.photo == null || (player.photo is string && player.photo.size() <= 92000 && player.photo.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$')));
+    }
+    function validRegistrationRoster(players) {
+      return players is list && players.size() >= 4 && players.size() <= 6
+        && validRegistrationPlayer(players[0]) && players[0].isSub == false
+        && validRegistrationPlayer(players[1]) && players[1].isSub == false
+        && validRegistrationPlayer(players[2]) && players[2].isSub == false
+        && validRegistrationPlayer(players[3]) && players[3].isSub == false
+        && (players.size() < 5 || (validRegistrationPlayer(players[4]) && players[4].isSub == true))
+        && (players.size() < 6 || (validRegistrationPlayer(players[5]) && players[5].isSub == true));
+    }
+    function validPublicApplicationCreate(applicationId) {
+      let data = request.resource.data;
+      let before = get(/databases/$(database)/documents/settings/tournament).data;
+      let after = getAfter(/databases/$(database)/documents/settings/tournament).data;
+      let token = getAfter(/databases/$(database)/documents/tokens/$(data.tokenDocumentId)).data;
+      return request.auth == null
+        && data.keys().hasOnly(['teamName', 'captainName', 'email', 'discord', 'players', 'accuracyConfirmed', 'status', 'tokenDocumentId', 'reservationId', 'createdAt'])
+        && data.teamName is string && data.teamName.size() > 0 && data.teamName.size() <= 40
+        && data.captainName is string && data.captainName.size() > 0 && data.captainName.size() <= 50
+        && data.email is string && data.email.size() <= 254 && data.email.matches('.*@.*[.].*')
+        && data.discord is string && data.discord.size() <= 70
+        && validRegistrationRoster(data.players) && data.accuracyConfirmed == true
+        && data.status == 'pending' && data.createdAt == request.time
+        && data.reservationId == applicationId
+        && data.tokenDocumentId is string && data.tokenDocumentId.matches('^[a-f0-9]{64}$')
+        && (before.get('registrationOpen', false) == true || before.get('registration', {}).get('open', false) == true)
+        && after.lastRegistrationId == applicationId
+        && after.registrationReservedCount == before.get('registrationReservedCount', 0) + 1
+        && after.registrationReservedCount <= after.get('totalTeams', 24)
+        && token.tokenHash == data.tokenDocumentId && token.used == true
+        && token.usedBy == data.teamName && token.registrationApplicationId == applicationId;
+    }
+    function validPublicTokenClaim(tokenId) {
+      let applicationId = request.resource.data.registrationApplicationId;
+      let app = getAfter(/databases/$(database)/documents/registration_applications/$(applicationId)).data;
+      return request.auth == null && applicationId is string && applicationId.size() == 20
+        && resource.data.tokenHash == tokenId && resource.data.used == false
+        && changedOnly(['used', 'usedBy', 'redeemedAt', 'registrationApplicationId'])
+        && request.resource.data.used == true && request.resource.data.usedBy is string
+        && app.status == 'pending' && app.reservationId == applicationId
+        && app.tokenDocumentId == tokenId && app.teamName == request.resource.data.usedBy;
+    }
+    function validPublicReservationUpdate() {
+      let applicationId = request.resource.data.lastRegistrationId;
+      let app = getAfter(/databases/$(database)/documents/registration_applications/$(applicationId)).data;
+      return request.auth == null && applicationId is string && applicationId.size() == 20
+        && changedOnly(['registrationReservedCount', 'lastRegistrationId'])
+        && (resource.data.get('registrationOpen', false) == true || resource.data.get('registration', {}).get('open', false) == true)
+        && request.resource.data.registrationReservedCount == resource.data.get('registrationReservedCount', 0) + 1
+        && request.resource.data.registrationReservedCount <= resource.data.get('totalTeams', 24)
+        && app.status == 'pending' && app.reservationId == applicationId;
+    }
+    function validAdminTeamReservation() {
+      let teamId = request.resource.data.lastManualTeamId;
+      let team = getAfter(/databases/$(database)/documents/teams/$(teamId)).data;
+      return signedIn() && (isMaster() || hasPerm('team_add'))
+        && teamId is string && teamId.size() == 20
+        && changedOnly(['registrationReservedCount', 'lastManualTeamId'])
+        && request.resource.data.registrationReservedCount == resource.data.get('registrationReservedCount', 0) + 1
+        && request.resource.data.registrationReservedCount <= resource.data.get('totalTeams', 24)
+        && team.createdAt == request.time && team.name is string;
+    }
+    function validAdminTeamRelease() {
+      let teamId = request.resource.data.lastReleasedTeamId;
+      let teamPath = /databases/$(database)/documents/teams/$(teamId);
+      return signedIn() && (isMaster() || hasPerm('team_delete'))
+        && teamId is string && teamId.size() == 20
+        && changedOnly(['registrationReservedCount', 'lastReleasedTeamId'])
+        && resource.data.get('registrationReservedCount', 0) > 0
+        && request.resource.data.registrationReservedCount == resource.data.get('registrationReservedCount', 0) - 1
+        && exists(teamPath) && !existsAfter(teamPath);
+    }
+
+    function changedOnly(fields) {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
     }
 
@@ -140,8 +216,7 @@ service cloud.firestore {
     }
 
     match /tokens/{tokenId} {
-      // A public applicant can only get one unused token when they know its
-      // SHA-256 document ID; they cannot list or read the token collection.
+      // Public applicants can only get an unused token when they know its hash ID.
       allow get: if isMaster() || hasPerm('token_view')
         || (resource.data.tokenHash == tokenId && resource.data.used == false);
       allow list: if isMaster() || hasPerm('token_view');
@@ -159,653 +234,10 @@ service cloud.firestore {
 
     // Keep application review data private to master administrators.
     match /registration_applications/{applicationId} {
-      // Applications remain private. Public clients can create only a pending,
-      // token-backed application in the same transaction that reserves a slot.
+      // Public clients can only create a token-backed pending application.
       allow get, list: if isMaster();
       allow create: if isMaster() || validPublicApplicationCreate(applicationId);
       allow update, delete: if isMaster();
-    }
-
-    // Explicit deny for any collection not listed above.
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
-})
-        && player.device is string && player.device.size() > 0 && player.device.size() <= 50
-        && player.isSub is bool
-        && (player.photo == null
-          || (player.photo is string
-            && player.photo.size() <= 92000
-            && player.photo.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
-    }
-
-    function teamUpdateAllowed() {
-      let changed = request.resource.data.diff(resource.data).affectedKeys();
-      return changed.hasOnly(['name', 'logoUrl', 'group', 'rosterLocked', 'disqualified', 'dqReason'])
-        && (!changed.hasAny(['name', 'logoUrl', 'group']) || hasPerm('team_edit_info'))
-        && (!changed.hasAny(['rosterLocked']) || hasPerm('team_lock_roster'))
-        && (!changed.hasAny(['disqualified', 'dqReason']) || hasPerm('team_dq'));
-    }
-
-    function playerUpdateAllowed() {
-      let changed = request.resource.data.diff(resource.data).affectedKeys();
-      return changed.hasOnly(['ign', 'uid', 'device', 'role', 'photoUrl', 'isSub', 'slotOrder', 'teamId'])
-        && (!changed.hasAny(['ign', 'uid', 'device']) || hasPerm('player_edit_details'))
-        && (!changed.hasAny(['photoUrl']) || hasPerm('player_edit_photo'))
-        && (!changed.hasAny(['isSub', 'slotOrder', 'teamId']) || hasPerm('player_manage_subs'))
-        && (!changed.hasAny(['role']) || hasPerm('player_edit_details') || hasPerm('player_manage_subs'));
-    }
-
-    function matchUpdateAllowed() {
-      let changed = request.resource.data.diff(resource.data).affectedKeys();
-      return changed.hasOnly([
-          'teamAId', 'teamAName', 'teamAScore', 'teamBId', 'teamBName', 'teamBScore',
-          'map', 'roundName', 'round', 'date', 'status', 'timestamp', 'title',
-          'stats', 'vodUrl', 'proofUrl', 'matchProofUrl', 'youtubeUrl'
-        ])
-        && (!changed.hasAny([
-          'teamAId', 'teamAName', 'teamAScore', 'teamBId', 'teamBName',
-          'teamBScore', 'map', 'roundName', 'round', 'date', 'status', 'timestamp', 'title'
-        ]) || hasPerm('match_edit_score'))
-        && (!changed.hasAny(['stats']) || hasPerm('match_edit_stats'))
-        && (!changed.hasAny(['vodUrl', 'proofUrl', 'matchProofUrl', 'youtubeUrl']) || hasPerm('match_edit_vod'));
-    }
-
-    function teamCreateAllowed() {
-      let keys = request.resource.data.keys();
-      return hasPerm('team_add')
-        && keys.hasOnly(['name', 'logoUrl', 'group', 'disqualified', 'rosterLocked', 'createdAt'])
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() <= 48;
-    }
-
-    function playerCreateAllowed() {
-      let keys = request.resource.data.keys();
-      return keys.hasOnly(['teamId', 'ign', 'uid', 'device', 'role', 'photoUrl', 'isSub', 'slotOrder', 'createdAt'])
-        && (!keys.hasAny(['ign', 'uid', 'device']) || hasPerm('player_edit_details'))
-        && (!keys.hasAny(['photoUrl']) || hasPerm('player_edit_photo'))
-        && (!keys.hasAny(['teamId', 'isSub', 'slotOrder'])
-          || hasPerm('player_manage_subs')
-          || (hasPerm('player_edit_details') && request.resource.data.isSub == false))
-        && (!keys.hasAny(['role']) || hasPerm('player_edit_details') || hasPerm('player_manage_subs'))
-        && request.resource.data.ign is string
-        && request.resource.data.ign.size() > 0;
-    }
-
-    // Public tournament data remains readable. Writes are role- and action-scoped.
-    match /teams/{teamId} {
-      allow read: if true;
-      allow create: if isMaster() || teamCreateAllowed();
-      allow update: if isMaster() || teamUpdateAllowed();
-      allow delete: if isMaster() || hasPerm('team_delete');
-    }
-
-    match /players/{playerId} {
-      allow read: if true;
-      allow create: if isMaster() || playerCreateAllowed();
-      allow update: if isMaster() || playerUpdateAllowed();
-      allow delete: if isMaster() || hasPerm('player_manage_subs');
-    }
-
-    match /matches/{matchId} {
-      allow read: if true;
-      allow create: if isMaster() || hasPerm('match_create');
-      allow update: if isMaster() || matchUpdateAllowed();
-      allow delete: if isMaster() || hasPerm('match_delete');
-    }
-
-    match /tournament_slots/{slotId} {
-      allow read: if true;
-      allow write: if isMaster() || hasPerm('tourney_slots');
-    }
-
-    match /tournament_matches/{matchId} {
-      allow read: if true;
-      allow write: if isMaster() || hasPerm('tourney_scores');
-    }
-
-    match /settings/{documentId} {
-      // Only the three documents consumed by the public Season 6 pages are public.
-      // Other settings documents are private to master administrators.
-      allow read: if isMaster() || documentId in ['tournament', 'rules', 'past_season'];
-      allow create: if isMaster();
-      allow update: if isMaster()
-        || (documentId == 'tournament'
-          && hasPerm('announcement_edit')
-          && changedOnly(['announcement']))
-        || (documentId == 'tournament'
-          && hasPerm('livestream_edit')
-          && changedOnly(['liveStream']))
-        || (documentId == 'tournament'
-          && hasPerm('prize_edit')
-          && changedOnly(['prizePool', 'prize_pool', 'prize', 'updatedAt']))
-        || (documentId == 'rules' && hasPerm('rules_edit'));
-      allow delete: if isMaster();
-    }
-
-    match /tokens/{tokenId} {
-      allow read: if isMaster() || hasPerm('token_view');
-      allow create: if isMaster() || hasPerm('token_create');
-      allow update: if isMaster() || hasPerm('token_create');
-      allow delete: if isMaster() || hasPerm('token_delete');
-    }
-
-    // Sub-admin account records are written only by trusted Cloud Functions
-    // using the Firebase Admin SDK. Browser clients may only read them as master.
-    match /sub_admins/{uid} {
-      allow read: if isMaster();
-      allow write: if false;
-    }
-
-    // Keep application review data private to master administrators.
-    match /registration_applications/{applicationId} {
-      allow read, write: if isMaster();
-    }
-
-    // Explicit deny for any collection not listed above.
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
-})));
-    }
-
-    function validApplicationPlayers(players) {
-      return players is list && players.size() >= 4 && players.size() <= 6
-        && validRegistrationPlayer(players[0]) && players[0].isSub == false
-        && validRegistrationPlayer(players[1]) && players[1].isSub == false
-        && validRegistrationPlayer(players[2]) && players[2].isSub == false
-        && validRegistrationPlayer(players[3]) && players[3].isSub == false
-        && (players.size() < 5 || (validRegistrationPlayer(players[4]) && players[4].isSub == true))
-        && (players.size() < 6 || (validRegistrationPlayer(players[5]) && players[5].isSub == true));
-    }
-
-    function validPublicApplicationCreate(applicationId) {
-      let data = request.resource.data;
-      let settingsBefore = get(/databases/$(database)/documents/settings/tournament).data;
-      let settingsAfter = getAfter(/databases/$(database)/documents/settings/tournament).data;
-      let token = getAfter(/databases/$(database)/documents/tokens/$(data.tokenDocumentId)).data;
-      return request.auth == null
-        && data.keys().hasOnly([
-          'teamName', 'captainName', 'email', 'discord', 'players', 'accuracyConfirmed',
-          'status', 'tokenDocumentId', 'reservationId', 'createdAt'
-        ])
-        && data.teamName is string && data.teamName.size() > 0 && data.teamName.size() <= 40
-        && data.captainName is string && data.captainName.size() > 0 && data.captainName.size() <= 50
-        && data.email is string && data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
-    }
-
-    function teamUpdateAllowed() {
-      let changed = request.resource.data.diff(resource.data).affectedKeys();
-      return changed.hasOnly(['name', 'logoUrl', 'group', 'rosterLocked', 'disqualified', 'dqReason'])
-        && (!changed.hasAny(['name', 'logoUrl', 'group']) || hasPerm('team_edit_info'))
-        && (!changed.hasAny(['rosterLocked']) || hasPerm('team_lock_roster'))
-        && (!changed.hasAny(['disqualified', 'dqReason']) || hasPerm('team_dq'));
-    }
-
-    function playerUpdateAllowed() {
-      let changed = request.resource.data.diff(resource.data).affectedKeys();
-      return changed.hasOnly(['ign', 'uid', 'device', 'role', 'photoUrl', 'isSub', 'slotOrder', 'teamId'])
-        && (!changed.hasAny(['ign', 'uid', 'device']) || hasPerm('player_edit_details'))
-        && (!changed.hasAny(['photoUrl']) || hasPerm('player_edit_photo'))
-        && (!changed.hasAny(['isSub', 'slotOrder', 'teamId']) || hasPerm('player_manage_subs'))
-        && (!changed.hasAny(['role']) || hasPerm('player_edit_details') || hasPerm('player_manage_subs'));
-    }
-
-    function matchUpdateAllowed() {
-      let changed = request.resource.data.diff(resource.data).affectedKeys();
-      return changed.hasOnly([
-          'teamAId', 'teamAName', 'teamAScore', 'teamBId', 'teamBName', 'teamBScore',
-          'map', 'roundName', 'round', 'date', 'status', 'timestamp', 'title',
-          'stats', 'vodUrl', 'proofUrl', 'matchProofUrl', 'youtubeUrl'
-        ])
-        && (!changed.hasAny([
-          'teamAId', 'teamAName', 'teamAScore', 'teamBId', 'teamBName',
-          'teamBScore', 'map', 'roundName', 'round', 'date', 'status', 'timestamp', 'title'
-        ]) || hasPerm('match_edit_score'))
-        && (!changed.hasAny(['stats']) || hasPerm('match_edit_stats'))
-        && (!changed.hasAny(['vodUrl', 'proofUrl', 'matchProofUrl', 'youtubeUrl']) || hasPerm('match_edit_vod'));
-    }
-
-    function teamCreateAllowed() {
-      let keys = request.resource.data.keys();
-      return hasPerm('team_add')
-        && keys.hasOnly(['name', 'logoUrl', 'group', 'disqualified', 'rosterLocked', 'createdAt'])
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() <= 48;
-    }
-
-    function playerCreateAllowed() {
-      let keys = request.resource.data.keys();
-      return keys.hasOnly(['teamId', 'ign', 'uid', 'device', 'role', 'photoUrl', 'isSub', 'slotOrder', 'createdAt'])
-        && (!keys.hasAny(['ign', 'uid', 'device']) || hasPerm('player_edit_details'))
-        && (!keys.hasAny(['photoUrl']) || hasPerm('player_edit_photo'))
-        && (!keys.hasAny(['teamId', 'isSub', 'slotOrder'])
-          || hasPerm('player_manage_subs')
-          || (hasPerm('player_edit_details') && request.resource.data.isSub == false))
-        && (!keys.hasAny(['role']) || hasPerm('player_edit_details') || hasPerm('player_manage_subs'))
-        && request.resource.data.ign is string
-        && request.resource.data.ign.size() > 0;
-    }
-
-    // Public tournament data remains readable. Writes are role- and action-scoped.
-    match /teams/{teamId} {
-      allow read: if true;
-      allow create: if isMaster() || teamCreateAllowed();
-      allow update: if isMaster() || teamUpdateAllowed();
-      allow delete: if isMaster() || hasPerm('team_delete');
-    }
-
-    match /players/{playerId} {
-      allow read: if true;
-      allow create: if isMaster() || playerCreateAllowed();
-      allow update: if isMaster() || playerUpdateAllowed();
-      allow delete: if isMaster() || hasPerm('player_manage_subs');
-    }
-
-    match /matches/{matchId} {
-      allow read: if true;
-      allow create: if isMaster() || hasPerm('match_create');
-      allow update: if isMaster() || matchUpdateAllowed();
-      allow delete: if isMaster() || hasPerm('match_delete');
-    }
-
-    match /tournament_slots/{slotId} {
-      allow read: if true;
-      allow write: if isMaster() || hasPerm('tourney_slots');
-    }
-
-    match /tournament_matches/{matchId} {
-      allow read: if true;
-      allow write: if isMaster() || hasPerm('tourney_scores');
-    }
-
-    match /settings/{documentId} {
-      // Only the three documents consumed by the public Season 6 pages are public.
-      // Other settings documents are private to master administrators.
-      allow read: if isMaster() || documentId in ['tournament', 'rules', 'past_season'];
-      allow create: if isMaster();
-      allow update: if isMaster()
-        || (documentId == 'tournament'
-          && hasPerm('announcement_edit')
-          && changedOnly(['announcement']))
-        || (documentId == 'tournament'
-          && hasPerm('livestream_edit')
-          && changedOnly(['liveStream']))
-        || (documentId == 'tournament'
-          && hasPerm('prize_edit')
-          && changedOnly(['prizePool', 'prize_pool', 'prize', 'updatedAt']))
-        || (documentId == 'rules' && hasPerm('rules_edit'));
-      allow delete: if isMaster();
-    }
-
-    match /tokens/{tokenId} {
-      allow read: if isMaster() || hasPerm('token_view');
-      allow create: if isMaster() || hasPerm('token_create');
-      allow update: if isMaster() || hasPerm('token_create');
-      allow delete: if isMaster() || hasPerm('token_delete');
-    }
-
-    // Sub-admin account records are written only by trusted Cloud Functions
-    // using the Firebase Admin SDK. Browser clients may only read them as master.
-    match /sub_admins/{uid} {
-      allow read: if isMaster();
-      allow write: if false;
-    }
-
-    // Keep application review data private to master administrators.
-    match /registration_applications/{applicationId} {
-      allow read, write: if isMaster();
-    }
-
-    // Explicit deny for any collection not listed above.
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
-})
-        && data.discord is string && data.discord.size() <= 70
-        && validApplicationPlayers(data.players)
-        && data.accuracyConfirmed == true
-        && data.status == 'pending'
-        && data.createdAt == request.time
-        && data.reservationId == applicationId
-        && data.tokenDocumentId is string
-        && data.tokenDocumentId.matches('^[a-f0-9]{64}
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
-    }
-
-    function teamUpdateAllowed() {
-      let changed = request.resource.data.diff(resource.data).affectedKeys();
-      return changed.hasOnly(['name', 'logoUrl', 'group', 'rosterLocked', 'disqualified', 'dqReason'])
-        && (!changed.hasAny(['name', 'logoUrl', 'group']) || hasPerm('team_edit_info'))
-        && (!changed.hasAny(['rosterLocked']) || hasPerm('team_lock_roster'))
-        && (!changed.hasAny(['disqualified', 'dqReason']) || hasPerm('team_dq'));
-    }
-
-    function playerUpdateAllowed() {
-      let changed = request.resource.data.diff(resource.data).affectedKeys();
-      return changed.hasOnly(['ign', 'uid', 'device', 'role', 'photoUrl', 'isSub', 'slotOrder', 'teamId'])
-        && (!changed.hasAny(['ign', 'uid', 'device']) || hasPerm('player_edit_details'))
-        && (!changed.hasAny(['photoUrl']) || hasPerm('player_edit_photo'))
-        && (!changed.hasAny(['isSub', 'slotOrder', 'teamId']) || hasPerm('player_manage_subs'))
-        && (!changed.hasAny(['role']) || hasPerm('player_edit_details') || hasPerm('player_manage_subs'));
-    }
-
-    function matchUpdateAllowed() {
-      let changed = request.resource.data.diff(resource.data).affectedKeys();
-      return changed.hasOnly([
-          'teamAId', 'teamAName', 'teamAScore', 'teamBId', 'teamBName', 'teamBScore',
-          'map', 'roundName', 'round', 'date', 'status', 'timestamp', 'title',
-          'stats', 'vodUrl', 'proofUrl', 'matchProofUrl', 'youtubeUrl'
-        ])
-        && (!changed.hasAny([
-          'teamAId', 'teamAName', 'teamAScore', 'teamBId', 'teamBName',
-          'teamBScore', 'map', 'roundName', 'round', 'date', 'status', 'timestamp', 'title'
-        ]) || hasPerm('match_edit_score'))
-        && (!changed.hasAny(['stats']) || hasPerm('match_edit_stats'))
-        && (!changed.hasAny(['vodUrl', 'proofUrl', 'matchProofUrl', 'youtubeUrl']) || hasPerm('match_edit_vod'));
-    }
-
-    function teamCreateAllowed() {
-      let keys = request.resource.data.keys();
-      return hasPerm('team_add')
-        && keys.hasOnly(['name', 'logoUrl', 'group', 'disqualified', 'rosterLocked', 'createdAt'])
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() <= 48;
-    }
-
-    function playerCreateAllowed() {
-      let keys = request.resource.data.keys();
-      return keys.hasOnly(['teamId', 'ign', 'uid', 'device', 'role', 'photoUrl', 'isSub', 'slotOrder', 'createdAt'])
-        && (!keys.hasAny(['ign', 'uid', 'device']) || hasPerm('player_edit_details'))
-        && (!keys.hasAny(['photoUrl']) || hasPerm('player_edit_photo'))
-        && (!keys.hasAny(['teamId', 'isSub', 'slotOrder'])
-          || hasPerm('player_manage_subs')
-          || (hasPerm('player_edit_details') && request.resource.data.isSub == false))
-        && (!keys.hasAny(['role']) || hasPerm('player_edit_details') || hasPerm('player_manage_subs'))
-        && request.resource.data.ign is string
-        && request.resource.data.ign.size() > 0;
-    }
-
-    // Public tournament data remains readable. Writes are role- and action-scoped.
-    match /teams/{teamId} {
-      allow read: if true;
-      allow create: if isMaster() || teamCreateAllowed();
-      allow update: if isMaster() || teamUpdateAllowed();
-      allow delete: if isMaster() || hasPerm('team_delete');
-    }
-
-    match /players/{playerId} {
-      allow read: if true;
-      allow create: if isMaster() || playerCreateAllowed();
-      allow update: if isMaster() || playerUpdateAllowed();
-      allow delete: if isMaster() || hasPerm('player_manage_subs');
-    }
-
-    match /matches/{matchId} {
-      allow read: if true;
-      allow create: if isMaster() || hasPerm('match_create');
-      allow update: if isMaster() || matchUpdateAllowed();
-      allow delete: if isMaster() || hasPerm('match_delete');
-    }
-
-    match /tournament_slots/{slotId} {
-      allow read: if true;
-      allow write: if isMaster() || hasPerm('tourney_slots');
-    }
-
-    match /tournament_matches/{matchId} {
-      allow read: if true;
-      allow write: if isMaster() || hasPerm('tourney_scores');
-    }
-
-    match /settings/{documentId} {
-      // Only the three documents consumed by the public Season 6 pages are public.
-      // Other settings documents are private to master administrators.
-      allow read: if isMaster() || documentId in ['tournament', 'rules', 'past_season'];
-      allow create: if isMaster();
-      allow update: if isMaster()
-        || (documentId == 'tournament'
-          && hasPerm('announcement_edit')
-          && changedOnly(['announcement']))
-        || (documentId == 'tournament'
-          && hasPerm('livestream_edit')
-          && changedOnly(['liveStream']))
-        || (documentId == 'tournament'
-          && hasPerm('prize_edit')
-          && changedOnly(['prizePool', 'prize_pool', 'prize', 'updatedAt']))
-        || (documentId == 'rules' && hasPerm('rules_edit'));
-      allow delete: if isMaster();
-    }
-
-    match /tokens/{tokenId} {
-      allow read: if isMaster() || hasPerm('token_view');
-      allow create: if isMaster() || hasPerm('token_create');
-      allow update: if isMaster() || hasPerm('token_create');
-      allow delete: if isMaster() || hasPerm('token_delete');
-    }
-
-    // Sub-admin account records are written only by trusted Cloud Functions
-    // using the Firebase Admin SDK. Browser clients may only read them as master.
-    match /sub_admins/{uid} {
-      allow read: if isMaster();
-      allow write: if false;
-    }
-
-    // Keep application review data private to master administrators.
-    match /registration_applications/{applicationId} {
-      allow read, write: if isMaster();
-    }
-
-    // Explicit deny for any collection not listed above.
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
-})
-        && (settingsBefore.get('registrationOpen', false) == true
-          || settingsBefore.get('registration', {}).get('open', false) == true)
-        && settingsAfter.lastRegistrationId == applicationId
-        && settingsAfter.registrationReservedCount == settingsBefore.get('registrationReservedCount', 0) + 1
-        && settingsAfter.registrationReservedCount <= settingsAfter.get('totalTeams', 24)
-        && token.tokenHash == data.tokenDocumentId
-        && token.used == true
-        && token.usedBy == data.teamName
-        && token.registrationApplicationId == applicationId;
-    }
-
-    function validPublicTokenClaim(tokenId) {
-      let applicationId = request.resource.data.registrationApplicationId;
-      let application = getAfter(/databases/$(database)/documents/registration_applications/$(applicationId)).data;
-      return request.auth == null
-        && applicationId is string && applicationId.size() == 20
-        && resource.data.tokenHash == tokenId
-        && resource.data.used == false
-        && changedOnly(['used', 'usedBy', 'redeemedAt', 'registrationApplicationId'])
-        && request.resource.data.used == true
-        && request.resource.data.usedBy is string
-        && request.resource.data.registrationApplicationId == applicationId
-        && application.status == 'pending'
-        && application.reservationId == applicationId
-        && application.tokenDocumentId == tokenId
-        && application.teamName == request.resource.data.usedBy;
-    }
-
-    function validPublicReservationUpdate() {
-      let applicationId = request.resource.data.lastRegistrationId;
-      let application = getAfter(/databases/$(database)/documents/registration_applications/$(applicationId)).data;
-      let registrationIsOpen = resource.data.get('registrationOpen', false) == true
-        || resource.data.get('registration', {}).get('open', false) == true;
-      return request.auth == null
-        && applicationId is string && applicationId.size() == 20
-        && changedOnly(['registrationReservedCount', 'lastRegistrationId'])
-        && registrationIsOpen
-        && request.resource.data.registrationReservedCount == resource.data.get('registrationReservedCount', 0) + 1
-        && request.resource.data.registrationReservedCount <= resource.data.get('totalTeams', 24)
-        && application.status == 'pending'
-        && application.reservationId == applicationId
-        && application.teamName is string;
-    }
-
-    function validAdminTeamReservation() {
-      let teamId = request.resource.data.lastManualTeamId;
-      let team = getAfter(/databases/$(database)/documents/teams/$(teamId)).data;
-      return signedIn()
-        && (isMaster() || hasPerm('team_add'))
-        && teamId is string && teamId.size() == 20
-        && changedOnly(['registrationReservedCount', 'lastManualTeamId'])
-        && request.resource.data.registrationReservedCount == resource.data.get('registrationReservedCount', 0) + 1
-        && request.resource.data.registrationReservedCount <= resource.data.get('totalTeams', 24)
-        && team.createdAt == request.time
-        && team.name is string;
-    }
-
-    function validAdminTeamRelease() {
-      let teamId = request.resource.data.lastReleasedTeamId;
-      let teamPath = /databases/$(database)/documents/teams/$(teamId);
-      return signedIn()
-        && (isMaster() || hasPerm('team_delete'))
-        && teamId is string && teamId.size() == 20
-        && changedOnly(['registrationReservedCount', 'lastReleasedTeamId'])
-        && resource.data.get('registrationReservedCount', 0) > 0
-        && request.resource.data.registrationReservedCount == resource.data.get('registrationReservedCount', 0) - 1
-        && exists(teamPath)
-        && !existsAfter(teamPath);
-    }
-
-    function changedOnly(fields) {
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
-    }
-
-    function teamUpdateAllowed() {
-      let changed = request.resource.data.diff(resource.data).affectedKeys();
-      return changed.hasOnly(['name', 'logoUrl', 'group', 'rosterLocked', 'disqualified', 'dqReason'])
-        && (!changed.hasAny(['name', 'logoUrl', 'group']) || hasPerm('team_edit_info'))
-        && (!changed.hasAny(['rosterLocked']) || hasPerm('team_lock_roster'))
-        && (!changed.hasAny(['disqualified', 'dqReason']) || hasPerm('team_dq'));
-    }
-
-    function playerUpdateAllowed() {
-      let changed = request.resource.data.diff(resource.data).affectedKeys();
-      return changed.hasOnly(['ign', 'uid', 'device', 'role', 'photoUrl', 'isSub', 'slotOrder', 'teamId'])
-        && (!changed.hasAny(['ign', 'uid', 'device']) || hasPerm('player_edit_details'))
-        && (!changed.hasAny(['photoUrl']) || hasPerm('player_edit_photo'))
-        && (!changed.hasAny(['isSub', 'slotOrder', 'teamId']) || hasPerm('player_manage_subs'))
-        && (!changed.hasAny(['role']) || hasPerm('player_edit_details') || hasPerm('player_manage_subs'));
-    }
-
-    function matchUpdateAllowed() {
-      let changed = request.resource.data.diff(resource.data).affectedKeys();
-      return changed.hasOnly([
-          'teamAId', 'teamAName', 'teamAScore', 'teamBId', 'teamBName', 'teamBScore',
-          'map', 'roundName', 'round', 'date', 'status', 'timestamp', 'title',
-          'stats', 'vodUrl', 'proofUrl', 'matchProofUrl', 'youtubeUrl'
-        ])
-        && (!changed.hasAny([
-          'teamAId', 'teamAName', 'teamAScore', 'teamBId', 'teamBName',
-          'teamBScore', 'map', 'roundName', 'round', 'date', 'status', 'timestamp', 'title'
-        ]) || hasPerm('match_edit_score'))
-        && (!changed.hasAny(['stats']) || hasPerm('match_edit_stats'))
-        && (!changed.hasAny(['vodUrl', 'proofUrl', 'matchProofUrl', 'youtubeUrl']) || hasPerm('match_edit_vod'));
-    }
-
-    function teamCreateAllowed() {
-      let keys = request.resource.data.keys();
-      return hasPerm('team_add')
-        && keys.hasOnly(['name', 'logoUrl', 'group', 'disqualified', 'rosterLocked', 'createdAt'])
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() <= 48;
-    }
-
-    function playerCreateAllowed() {
-      let keys = request.resource.data.keys();
-      return keys.hasOnly(['teamId', 'ign', 'uid', 'device', 'role', 'photoUrl', 'isSub', 'slotOrder', 'createdAt'])
-        && (!keys.hasAny(['ign', 'uid', 'device']) || hasPerm('player_edit_details'))
-        && (!keys.hasAny(['photoUrl']) || hasPerm('player_edit_photo'))
-        && (!keys.hasAny(['teamId', 'isSub', 'slotOrder'])
-          || hasPerm('player_manage_subs')
-          || (hasPerm('player_edit_details') && request.resource.data.isSub == false))
-        && (!keys.hasAny(['role']) || hasPerm('player_edit_details') || hasPerm('player_manage_subs'))
-        && request.resource.data.ign is string
-        && request.resource.data.ign.size() > 0;
-    }
-
-    // Public tournament data remains readable. Writes are role- and action-scoped.
-    match /teams/{teamId} {
-      allow read: if true;
-      allow create: if isMaster() || teamCreateAllowed();
-      allow update: if isMaster() || teamUpdateAllowed();
-      allow delete: if isMaster() || hasPerm('team_delete');
-    }
-
-    match /players/{playerId} {
-      allow read: if true;
-      allow create: if isMaster() || playerCreateAllowed();
-      allow update: if isMaster() || playerUpdateAllowed();
-      allow delete: if isMaster() || hasPerm('player_manage_subs');
-    }
-
-    match /matches/{matchId} {
-      allow read: if true;
-      allow create: if isMaster() || hasPerm('match_create');
-      allow update: if isMaster() || matchUpdateAllowed();
-      allow delete: if isMaster() || hasPerm('match_delete');
-    }
-
-    match /tournament_slots/{slotId} {
-      allow read: if true;
-      allow write: if isMaster() || hasPerm('tourney_slots');
-    }
-
-    match /tournament_matches/{matchId} {
-      allow read: if true;
-      allow write: if isMaster() || hasPerm('tourney_scores');
-    }
-
-    match /settings/{documentId} {
-      // Only the three documents consumed by the public Season 6 pages are public.
-      // Other settings documents are private to master administrators.
-      allow read: if isMaster() || documentId in ['tournament', 'rules', 'past_season'];
-      allow create: if isMaster();
-      allow update: if isMaster()
-        || (documentId == 'tournament'
-          && hasPerm('announcement_edit')
-          && changedOnly(['announcement']))
-        || (documentId == 'tournament'
-          && hasPerm('livestream_edit')
-          && changedOnly(['liveStream']))
-        || (documentId == 'tournament'
-          && hasPerm('prize_edit')
-          && changedOnly(['prizePool', 'prize_pool', 'prize', 'updatedAt']))
-        || (documentId == 'rules' && hasPerm('rules_edit'));
-      allow delete: if isMaster();
-    }
-
-    match /tokens/{tokenId} {
-      allow read: if isMaster() || hasPerm('token_view');
-      allow create: if isMaster() || hasPerm('token_create');
-      allow update: if isMaster() || hasPerm('token_create');
-      allow delete: if isMaster() || hasPerm('token_delete');
-    }
-
-    // Sub-admin account records are written only by trusted Cloud Functions
-    // using the Firebase Admin SDK. Browser clients may only read them as master.
-    match /sub_admins/{uid} {
-      allow read: if isMaster();
-      allow write: if false;
-    }
-
-    // Keep application review data private to master administrators.
-    match /registration_applications/{applicationId} {
-      allow read, write: if isMaster();
     }
 
     // Explicit deny for any collection not listed above.
