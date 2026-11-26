@@ -120,7 +120,7 @@
 
       <section class="admin-page" id="page-tournament">
         <div class="section-heading"><div><div class="eyebrow">Competition structure</div><h1 class="page-heading">Tournament Progression</h1><p class="page-description">Edit slot assignments and published tournament match documents.</p></div></div>
-        <div class="note-box" style="margin-bottom:14px">Tournament slots and tournament match objects have different shapes depending on the current stage. Their editor preserves the full document as JSON so existing Season 6 fields are not silently discarded.</div>
+        <div class="note-box" style="margin-bottom:14px">Add slots with the simple form. Tournament match documents keep the flexible editor because each stage uses different fields.</div>
         <div class="content-grid">
           <section class="panel-card"><div class="section-heading" style="margin-bottom:12px"><div><div class="panel-title">Tournament slots</div><div class="panel-subtitle">Collection: tournament_slots</div></div><button class="primary-action" id="add-slot-button"><i class="fa-solid fa-plus"></i> Add slot</button></div><div id="slots-list"></div></section>
           <section class="panel-card"><div class="section-heading" style="margin-bottom:12px"><div><div class="panel-title">Tournament matches</div><div class="panel-subtitle">Collection: tournament_matches</div></div><button class="primary-action" id="add-tmatch-button"><i class="fa-solid fa-plus"></i> Add match</button></div><div id="tournament-matches-list"></div></section>
@@ -149,8 +149,9 @@
               <div class="form-row"><label class="field-label" for="setting-matches-per-team">Matches per team</label><input class="admin-field" id="setting-matches-per-team" type="number" min="1" max="50"></div>
               <div class="form-row"><label class="field-label" for="setting-max-subs">Maximum substitutes</label><input class="admin-field" id="setting-max-subs" type="number" min="0" max="10"></div>
               <div class="form-row"><label class="field-label" for="setting-prize">Prize pool (₹)</label><input class="admin-field" id="setting-prize" placeholder="e.g. 10000"></div>
+              <div class="form-row full"><label class="check-row setting-toggle"><input type="checkbox" id="setting-registration-open"><span><strong>Open team registration</strong><small>Players can submit team applications while slots remain.</small></span></label></div>
               <div class="form-row full"><label class="field-label" for="setting-maintenance-note">Maintenance notice</label><input class="admin-field" id="setting-maintenance-note"></div>
-              <div class="form-row full"><label class="check-row"><input type="checkbox" id="setting-maintenance"> Enable public maintenance mode</label></div>
+              <div class="form-row full"><label class="check-row setting-toggle"><input type="checkbox" id="setting-maintenance"><span><strong>Maintenance mode</strong><small>Pause public pages and show your notice.</small></span></label></div>
             </div>
             <button class="primary-action" id="save-settings" style="margin-top:15px"><i class="fa-solid fa-floppy-disk"></i> Save settings</button>
           </section>

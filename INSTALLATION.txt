@@ -1,0 +1,30 @@
+SRP-ESPORTS Season 6 — Admin and Registration Fix
+
+GitHub upload paths (replace files on the main branch):
+- admin.html
+- css/admin.css
+- css/theme.css
+- js/admin-panel.js
+- js/firebase.js
+- sw.js
+
+GitHub web upload:
+1. Extract this ZIP on your computer. Do not upload the ZIP as a repository file.
+2. In Safegamer/srpesports, select branch main.
+3. Upload admin.html and sw.js from the extracted folder at the repository root.
+4. Open css/ in the repository and upload admin.css and theme.css there.
+5. Open js/ in the repository and upload admin-panel.js and firebase.js there.
+6. Commit the updates to main. The connected site deployment should then publish them.
+
+What this update does:
+- Adds a master-only Open team registration switch in Content & Settings. It saves registrationOpen in settings/tournament, the same setting read by register.html.
+- Makes maintenance mode cover public pages with a Save Trees glass notice. Admin remains available so the master admin can turn it off.
+- Replaces Add Slot's JSON editor with fields for slot number, group, position, optional team, and lock state. Existing slot and match editing remains available.
+- Restores a green glass appearance, blur, and smoother transitions in the admin panel.
+- Adds Return to Public Website links on login and the admin header.
+- Updates the service worker cache to v5 so the new files replace older cached copies.
+
+Important:
+- Keep the existing Firebase project and master custom claim. This package does not change Firebase config, Firestore rules, Cloud Functions, or credentials.
+- Registration submissions use Netlify Forms. Ensure the GitHub repository is connected to the Netlify site and that the form appears under Netlify Forms after deployment; GitHub Pages alone does not process data-netlify forms.
+- Registration submissions are applications for manual review; they do not automatically create Firestore teams.
