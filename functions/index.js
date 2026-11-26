@@ -97,6 +97,7 @@ function cleanRegistration(data) {
   if (data?.accuracyConfirmation !== true) throw new HttpsError('invalid-argument', 'Confirm that you are authorised to submit these player details.');
   if (players.slice(4).some(p => !p.ign && !p.uid && !p.device)) players.splice(4);
   if (players.slice(4).some(p => !p.ign || !p.uid || !p.device)) throw new HttpsError('invalid-argument', 'Complete both substitute details or leave that substitute blank.');
+  if (players.some(p => !/^\\d{6,20}$/.test(p.uid))) throw new HttpsError('invalid-argument', 'Each player UID must contain 6 to 20 digits.');
   for (const player of players) {
     if (!player.photo) continue;
     if (typeof player.photo !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(player.photo) || player.photo.length > 92000) {
@@ -117,10 +118,14 @@ exports.submitTeamRegistration = onCall({ enforceAppCheck: false }, async (reque
   const teamsQuery = db.collection('teams');
   const pendingQuery = db.collection('registration_applications').where('status', '==', 'pending');
   const appRef = db.collection('registration_applications').doc();
-  await db.runTransaction(async (tx) => {
-    const [settingsSnap, tokenSnap, teamsSnap, pendingSnap] = await Promise.all([
-      tx.get(settingsRef), tx.get(tokenQuery), tx.get(teamsQuery), tx.get(pendingQuery)
-    ]);
+  try {
+    await db.runTransaction(async (tx) => {
+    // Keep transaction reads sequential so each query uses the same live
+    // transaction state before any reservation or application writes occur.
+    const settingsSnap = await tx.get(settingsRef);
+    const tokenSnap = await tx.get(tokenQuery);
+    const teamsSnap = await tx.get(teamsQuery);
+    const pendingSnap = await tx.get(pendingQuery);
     const settings = settingsSnap.exists ? settingsSnap.data() : {};
     if (settings.registrationOpen !== true && settings.registration?.open !== true) {
       throw new HttpsError('failed-precondition', 'Team registration is closed.');
@@ -131,7 +136,17 @@ exports.submitTeamRegistration = onCall({ enforceAppCheck: false }, async (reque
     if (!tokenDoc || tokenDoc.data().used === true) throw new HttpsError('permission-denied', 'That registration token is invalid or has already been used.');
     tx.update(tokenDoc.ref, { used: true, usedBy: application.teamName, redeemedAt: FieldValue.serverTimestamp(), registrationApplicationId: appRef.id });
     tx.set(appRef, { ...application, tokenDocumentId: tokenDoc.id });
-  });
+    });
+  } catch (error) {
+    if (error instanceof HttpsError) throw error;
+    const errorId = crypto.randomUUID().slice(0, 8);
+    console.error(`submitTeamRegistration failed [${errorId}]`, {
+      code: error?.code || 'unknown',
+      message: error?.message || String(error),
+      stack: error?.stack || ''
+    });
+    throw new HttpsError('internal', `Registration could not be saved (error ${errorId}). Please contact SRP staff.`);
+  }
   return { applicationId: appRef.id };
 });
 
