@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#052e1e">
+  <meta name="description" content="Search SRP-ESPORTS Season 6 Free Fire Clash Squad players, view player stats, and follow the MVP leaderboard.">
+  <meta name="color-scheme" content="dark">
+  <title>SRP-ESPORTS Season 6 | Players & MVP</title>
+  <link rel="manifest" href="./app.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="./css/theme.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    .app-sidebar { width: 16rem; }
+    .section-kicker { color: var(--theme-accent-text); font-size: .68rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+    .empty-state { border: 1px dashed rgba(148,163,184,.22); border-radius: 14px; padding: 24px 14px; color: #94a3b8; text-align: center; }
+    .player-row { animation: rowEnter .35s ease both; }
+    .sidebar-backdrop { display: none; }
+    @media (max-width: 767px) {
+      .app-sidebar { transition: transform .28s cubic-bezier(.22,1,.36,1); }
+      .sidebar-backdrop.active { display: block; position: fixed; inset: 0; z-index: 39; background: rgba(0,0,0,.65); backdrop-filter: blur(3px); }
+    }
+  </style>
+</head>
+<body data-theme="save-trees">
+  <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="toggleMobileDrawer()" aria-hidden="true"></div>
+  <aside id="app-sidebar" class="app-sidebar fixed inset-y-0 left-0 z-50 p-5 overflow-y-auto -translate-x-full md:translate-x-0"><div class="text-sm text-slate-400">Loading navigation…</div></aside>
+  <div class="min-h-screen md:ml-64">
+    <header class="sticky top-0 z-30 border-b border-white/10 bg-black/35 backdrop-blur-xl"><div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+      <div class="flex min-w-0 items-center gap-3"><button type="button" onclick="toggleMobileDrawer()" class="md:hidden rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-200" aria-label="Open navigation"><i class="fas fa-bars"></i></button><div class="min-w-0"><div class="text-[10px] font-black uppercase tracking-[.22em] text-emerald-300">Player directory</div><div class="truncate text-sm font-extrabold text-white sm:text-base">Players & MVP <span class="text-emerald-300">/ Season 6</span></div></div></div>
+      <select id="theme-select" class="custom-select !w-auto !max-w-[138px] !py-2 !px-2 text-[11px]" aria-label="Choose site theme"><option value="">Season default</option><option value="save-trees">Save Trees</option><option value="midnight-blue">Midnight Blue</option><option value="crimson-void">Crimson Void</option><option value="cyber-emerald">Cyber Emerald</option><option value="save-our-oceans">Save Our Oceans</option></select>
+    </div></header>
+
+    <main class="mx-auto max-w-7xl px-4 pb-28 pt-5 sm:px-6 md:pb-12 md:pt-8">
+      <div id="live-stream-slot"></div>
+      <section class="custom-card relative overflow-hidden !p-5 sm:!p-8"><div class="pointer-events-none absolute -right-5 -top-8 text-[140px] text-emerald-300/10"><i class="fas fa-users"></i></div><div class="relative z-10"><div class="section-kicker">Squad profiles · live K/D/A</div><h1 class="brand-text mt-2 text-3xl font-black sm:text-5xl">PLAYER ARENA</h1><p class="mt-3 max-w-2xl text-sm leading-6 text-slate-300">Find a competitor, inspect their squad role and Free Fire UID, and follow the Season 6 kill leaderboard.</p></div></section>
+
+      <section class="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <article class="custom-card !mb-0 !p-4"><div class="section-kicker">Registered players</div><div id="player-total" class="mt-2 text-3xl font-black text-white">—</div></article>
+        <article class="custom-card !mb-0 !p-4"><div class="section-kicker">Total kills</div><div id="player-kills-total" class="mt-2 text-3xl font-black text-emerald-300">—</div></article>
+        <article class="custom-card !mb-0 !p-4"><div class="section-kicker">Top fragger</div><div id="player-top-fragger" class="mt-2 truncate text-lg font-black text-white">—</div><div id="player-top-fragger-kills" class="mt-1 text-[10px] text-slate-400"></div></article>
+        <article class="custom-card !mb-0 !p-4"><div class="section-kicker">Teams represented</div><div id="player-team-total" class="mt-2 text-3xl font-black text-white">—</div></article>
+      </section>
+
+      <section class="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(300px,.8fr)]">
+        <article class="custom-card !mb-0 !p-4 sm:!p-5">
+          <div class="flex flex-wrap items-end justify-between gap-3"><div><div class="section-kicker">Season performance</div><h2 class="mt-1 text-xl font-black text-white">MVP leaderboard</h2><p class="mt-1 text-xs text-slate-400">Ranked by kills, then K/D, then assists.</p></div><span class="cs-pill">Top 5</span></div>
+          <div id="mvp-leaderboard" class="mt-4 space-y-3"><div class="empty-state">Player statistics will appear once match data is recorded.</div></div>
+        </article>
+        <article class="custom-card !mb-0 !p-4 sm:!p-5">
+          <div class="section-kicker">How player stats work</div><h2 class="mt-1 text-xl font-black text-white">Live player cards</h2>
+          <p class="mt-3 text-sm leading-6 text-slate-300">Player K/D/A totals are calculated from the statistics attached to published match scoreboards. Profile cards show the registered IGN, role, team, UID and device, alongside those accumulated match stats.</p>
+          <div class="mt-4 space-y-2 text-xs text-slate-400"><div class="flex items-center gap-2"><i class="fas fa-crosshairs w-4 text-emerald-300"></i> Kills — total eliminations</div><div class="flex items-center gap-2"><i class="fas fa-heart-crack w-4 text-red-300"></i> Deaths — total deaths</div><div class="flex items-center gap-2"><i class="fas fa-handshake-angle w-4 text-amber-300"></i> Assists — total assists</div><div class="flex items-center gap-2"><i class="fas fa-chart-line w-4 text-sky-300"></i> K/D — kills divided by deaths</div></div>
+          <a href="index.html" class="custom-btn secondary mt-5 w-full"><i class="fas fa-trophy"></i> Back to standings</a>
+        </article>
+      </section>
+
+      <section class="custom-card mt-5 !p-4 sm:!p-5">
+        <div class="mb-4"><div class="section-kicker">Search all registered squads</div><h2 class="mt-1 text-xl font-black text-white">Player directory</h2></div>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_180px_180px]">
+          <input id="player-search" class="custom-input" type="search" placeholder="Search IGN, UID, team or device…" autocomplete="off">
+          <select id="player-role-filter" class="custom-select"><option value="all">All roles</option><option value="starter">Starters</option><option value="sub">Substitutes</option></select>
+          <select id="player-sort" class="custom-select"><option value="kills">Sort: Most kills</option><option value="kd">Sort: Highest K/D</option><option value="assists">Sort: Most assists</option><option value="deaths">Sort: Most deaths</option><option value="name">Sort: IGN A–Z</option></select>
+        </div>
+        <div class="mt-4 flex items-center justify-between gap-3"><span id="player-result-count" class="text-xs text-slate-400">Loading player directory…</span><span class="text-[10px] text-slate-500">Tap a player for full profile.</span></div>
+        <div id="player-directory" class="mt-3 space-y-2"><div class="empty-state">Connecting to player database…</div></div>
+      </section>
+
+      <footer class="mt-8 border-t border-white/10 py-5 text-center text-[11px] text-slate-500"><div class="font-bold text-slate-300">SRP-ESPORTS · Season 6 — Save Trees</div><div class="mt-1">Player information is shown as submitted and approved by tournament administrators.</div></footer>
+    </main>
+  </div>
+  <nav id="mobile-bottom-nav" class="mobile-bottom-nav md:hidden" aria-label="Mobile navigation"></nav>
+  <div id="social-links" class="socials" aria-label="SRP social links"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="./js/firebase.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      const $ = (id) => document.getElementById(id);
+      const esc = (value) => typeof window.escHtml === 'function' ? window.escHtml(value) : String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c]));
+      let lastPlayers = [];
+      let shareProfileOpened = false;
+      const requestedPlayerId = new URLSearchParams(window.location.search).get('player');
+      const allowedThemes = ['save-trees', 'midnight-blue', 'crimson-void', 'cyber-emerald', 'save-our-oceans'];
+      function applyTheme() {
+        const saved = localStorage.getItem('srp_s6_theme_override');
+        document.body.setAttribute('data-theme', saved && allowedThemes.includes(saved) ? saved : (window.SRP?.settings?.theme || 'save-trees'));
+        if ($('theme-select')) $('theme-select').value = saved || '';
+      }
+      function getPlayers() { return typeof window.getAllPlayersWithStats === 'function' ? window.getAllPlayersWithStats() : []; }
+      function sortPlayers(list, mode) {
+        const copy = [...list];
+        if (mode === 'kd') return copy.sort((a, b) => Number(b.kd) - Number(a.kd) || b.kills - a.kills || String(a.ign || '').localeCompare(String(b.ign || '')));
+        if (mode === 'assists') return copy.sort((a, b) => b.assists - a.assists || b.kills - a.kills || String(a.ign || '').localeCompare(String(b.ign || '')));
+        if (mode === 'deaths') return copy.sort((a, b) => b.deaths - a.deaths || b.kills - a.kills || String(a.ign || '').localeCompare(String(b.ign || '')));
+        if (mode === 'name') return copy.sort((a, b) => String(a.ign).localeCompare(String(b.ign)));
+        return copy.sort((a, b) => b.kills - a.kills || Number(b.kd) - Number(a.kd) || b.assists - a.assists || String(a.ign).localeCompare(String(b.ign)));
+      }
+      function roleText(player) { return player.role || (player.isSub ? 'Substitute' : 'Starter'); }
+      function avatar(player, size = 'w-11 h-11', text = 'text-sm') { return typeof window.getPlayerAvatar === 'function' ? window.getPlayerAvatar(player, size, text) : `<div class="${size} flex items-center justify-center rounded-xl bg-emerald-500/15 font-black text-emerald-300">${esc(String(player.ign || 'P').slice(0, 2).toUpperCase())}</div>`; }
+      function renderMvp(players) {
+        const target = $('mvp-leaderboard'); if (!target) return;
+        const leaders = sortPlayers(players, 'kills').slice(0, 5);
+        if (!leaders.length) { target.innerHTML = '<div class="empty-state">No player stats are available yet. Publish match K/D/A data to start the MVP race.</div>'; return; }
+        target.innerHTML = leaders.map((player, index) => `<button type="button" data-player-id="${esc(player.id)}" class="flex w-full items-center gap-3 rounded-xl border border-white/5 bg-white/[.025] p-3 text-left transition hover:border-emerald-400/30 hover:bg-emerald-400/5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${index === 0 ? 'bg-amber-300/15 text-amber-300' : 'bg-white/5 text-slate-300'} text-xs font-black">${index + 1}</span>${avatar(player, 'w-11 h-11', 'text-xs')}<span class="min-w-0 flex-1"><span class="block truncate text-sm font-black text-white">${esc(player.ign || 'Player')}</span><span class="mt-0.5 block truncate text-[10px] text-slate-400">${esc(player.teamName || 'Unassigned team')} · ${esc(roleText(player))}</span></span><span class="text-right"><span class="block text-lg font-black text-emerald-300">${Number(player.kills || 0)}</span><span class="block text-[9px] uppercase text-slate-500">Kills</span></span></button>`).join('');
+      }
+      function renderDirectory(players) {
+        const target = $('player-directory'); if (!target) return;
+        const query = String($('player-search')?.value || '').trim().toLowerCase();
+        const role = $('player-role-filter')?.value || 'all';
+        const mode = $('player-sort')?.value || 'kills';
+        let filtered = players.filter((player) => {
+          const searchable = [player.ign, player.uid, player.device, player.teamName, player.role].join(' ').toLowerCase();
+          const roleMatch = role === 'all' || (role === 'sub' ? !!player.isSub : !player.isSub);
+          return roleMatch && (!query || searchable.includes(query));
+        });
+        filtered = sortPlayers(filtered, mode);
+        if ($('player-result-count')) $('player-result-count').textContent = `${filtered.length} of ${players.length} players`;
+        if (!filtered.length) { target.innerHTML = '<div class="empty-state"><i class="fas fa-user-slash mb-2 block text-xl text-slate-600"></i>No players match this search.</div>'; return; }
+        target.innerHTML = filtered.map((player, index) => `<button type="button" data-player-id="${esc(player.id)}" class="player-row flex w-full items-center gap-3 rounded-xl border border-white/5 bg-white/[.025] p-3 text-left transition hover:-translate-y-0.5 hover:border-emerald-400/30 hover:bg-emerald-400/5" style="animation-delay:${Math.min(index, 12) * 25}ms">${avatar(player)}<span class="min-w-0 flex-1"><span class="block truncate text-sm font-black text-white">${esc(player.ign || 'Player')}</span><span class="mt-0.5 block truncate text-[10px] text-slate-400">${esc(player.teamName || 'Unassigned team')} · ${esc(roleText(player))}${player.device ? ` · ${esc(player.device)}` : ''}</span></span><span class="hidden text-right sm:block"><span class="block text-sm font-black text-emerald-300">${Number(player.kills || 0)} K</span><span class="text-[10px] text-slate-500">${Number(player.deaths || 0)} D · ${Number(player.assists || 0)} A</span></span><span class="rounded-lg bg-white/5 px-2 py-1 text-[10px] font-black text-white">${Number(player.kd || 0).toFixed(2)} K/D</span><i class="fas fa-chevron-right text-[10px] text-slate-600"></i></button>`).join('');
+      }
+      function renderSocialLinks() {
+        const target = $('social-links'); if (!target) return;
+        const settings = window.SRP?.settings || {}; const links = settings.socialLinks || {};
+        const valid = (value) => { try { const u = new URL(value); return ['http:', 'https:'].includes(u.protocol) ? u.href : ''; } catch (_) { return ''; } };
+        const discord = valid(links.discord || settings.discordUrl || settings.discordInvite || '');
+        const youtube = valid(links.youtube || settings.youtubeUrl || settings.youtubeChannel || '');
+        target.innerHTML = `${discord ? `<a class="discord" href="${esc(discord)}" target="_blank" rel="noopener noreferrer" aria-label="Open SRP Discord"><i class="fab fa-discord"></i></a>` : ''}${youtube ? `<a class="youtube" href="${esc(youtube)}" target="_blank" rel="noopener noreferrer" aria-label="Open SRP YouTube"><i class="fab fa-youtube"></i></a>` : ''}`;
+      }
+      function render() {
+        applyTheme(); renderSocialLinks();
+        const players = getPlayers(); lastPlayers = players;
+        const totalKills = players.reduce((sum, player) => sum + Number(player.kills || 0), 0);
+        const teams = new Set(players.map((player) => player.teamId).filter(Boolean));
+        const top = sortPlayers(players, 'kills')[0];
+        if ($('player-total')) $('player-total').textContent = players.length.toLocaleString('en-IN');
+        if ($('player-kills-total')) $('player-kills-total').textContent = totalKills.toLocaleString('en-IN');
+        if ($('player-team-total')) $('player-team-total').textContent = teams.size.toLocaleString('en-IN');
+        if ($('player-top-fragger')) $('player-top-fragger').textContent = top?.ign || '—';
+        if ($('player-top-fragger-kills')) $('player-top-fragger-kills').textContent = top ? `${Number(top.kills || 0)} total kills · ${top.teamName || 'No team'}` : 'No stats recorded';
+        renderMvp(players); renderDirectory(players);
+        if (requestedPlayerId && !shareProfileOpened && players.some((player) => player.id === requestedPlayerId) && typeof window.openPlayerDrawer === 'function') {
+          shareProfileOpened = true;
+          window.openPlayerDrawer(requestedPlayerId);
+        }
+      }
+      ['player-search', 'player-role-filter', 'player-sort'].forEach((id) => $(id)?.addEventListener(id === 'player-search' ? 'input' : 'change', () => renderDirectory(lastPlayers)));
+      $('theme-select')?.addEventListener('change', function () { const value = $('theme-select').value; if (value && allowedThemes.includes(value)) localStorage.setItem('srp_s6_theme_override', value); else localStorage.removeItem('srp_s6_theme_override'); applyTheme(); });
+      document.addEventListener('click', function (event) {
+        const playerButton = event.target.closest('[data-player-id]');
+        if (playerButton && playerButton.dataset.playerId && typeof window.openPlayerDrawer === 'function') { window.openPlayerDrawer(playerButton.dataset.playerId); return; }
+        const teamButton = event.target.closest('[data-team-id]');
+        if (teamButton && teamButton.dataset.teamId && typeof window.openTeamDrawer === 'function') window.openTeamDrawer(teamButton.dataset.teamId);
+      });
+      window.addEventListener('storage', function (event) { if (event.key === 'srp_s6_theme_override') applyTheme(); });
+      window.addEventListener('keydown', function (event) { if (event.key === 'Escape' && typeof window.closeProfileDrawer === 'function') window.closeProfileDrawer(); });
+      const sharedDrawerToggle = window.toggleMobileDrawer;
+      window.toggleMobileDrawer = function () {
+        if (typeof sharedDrawerToggle === 'function') sharedDrawerToggle();
+        const sidebar = document.getElementById('app-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        const closed = sidebar?.classList.contains('-translate-x-full');
+        backdrop?.classList.toggle('active', !closed && window.innerWidth < 768);
+      };
+      initSrpCore('players');
+      onSrpDataUpdate(render);
+      render();
+      applyTheme();
+    })();
+  </script>
+</body>
+</html>

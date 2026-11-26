@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#052e1e">
+  <meta name="description" content="SRP-ESPORTS Season 6 tournament format, Grove League fixtures, Canopy Knockout, Banyan & Pine Playoffs, and Evergreen Grand Final.">
+  <meta name="color-scheme" content="dark">
+  <title>SRP-ESPORTS Season 6 | Tournament</title>
+  <link rel="manifest" href="./app.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="./css/theme.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    .app-sidebar { width: 16rem; }
+    .stage-anchor { scroll-margin-top: 88px; }
+    .section-kicker { color: var(--theme-accent-text); font-size: .68rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+    .empty-state { border: 1px dashed rgba(148,163,184,.22); border-radius: 14px; padding: 22px 14px; color: #94a3b8; text-align: center; }
+    .sidebar-backdrop { display: none; }
+    .day-heading { border-left: 3px solid var(--theme-accent); padding-left: 10px; }
+    .stage-jump { display: inline-flex; align-items: center; gap: 7px; border: 1px solid rgba(255,255,255,.1); border-radius: 999px; padding: 8px 12px; color: #cbd5e1; font-size: 11px; font-weight: 800; background: rgba(255,255,255,.04); transition: .2s ease; }
+    .stage-jump:hover { background: var(--theme-nav-active); border-color: var(--theme-accent); color: white; transform: translateY(-2px); }
+    @media (max-width: 767px) {
+      .app-sidebar { transition: transform .28s cubic-bezier(.22,1,.36,1); }
+      .sidebar-backdrop.active { display: block; position: fixed; inset: 0; z-index: 39; background: rgba(0,0,0,.65); backdrop-filter: blur(3px); }
+    }
+  </style>
+</head>
+<body data-theme="save-trees">
+  <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="toggleMobileDrawer()" aria-hidden="true"></div>
+  <aside id="app-sidebar" class="app-sidebar fixed inset-y-0 left-0 z-50 p-5 overflow-y-auto -translate-x-full md:translate-x-0"><div class="text-sm text-slate-400">Loading navigation…</div></aside>
+  <div class="min-h-screen md:ml-64">
+    <header class="sticky top-0 z-30 border-b border-white/10 bg-black/35 backdrop-blur-xl">
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div class="flex min-w-0 items-center gap-3">
+          <button type="button" onclick="toggleMobileDrawer()" class="md:hidden rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-200" aria-label="Open navigation"><i class="fas fa-bars"></i></button>
+          <div class="min-w-0"><div class="text-[10px] font-black uppercase tracking-[.22em] text-emerald-300">Season pathway</div><div class="truncate text-sm font-extrabold text-white sm:text-base">Tournament <span class="text-emerald-300">/ Season 6</span></div></div>
+        </div>
+        <select id="theme-select" class="custom-select !w-auto !max-w-[138px] !py-2 !px-2 text-[11px]" aria-label="Choose site theme"><option value="">Season default</option><option value="save-trees">Save Trees</option><option value="midnight-blue">Midnight Blue</option><option value="crimson-void">Crimson Void</option><option value="cyber-emerald">Cyber Emerald</option><option value="save-our-oceans">Save Our Oceans</option></select>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-7xl px-4 pb-28 pt-5 sm:px-6 md:pb-12 md:pt-8">
+      <div id="live-stream-slot"></div>
+      <section class="custom-card relative overflow-hidden !p-5 sm:!p-8">
+        <div class="pointer-events-none absolute -right-5 -top-8 text-[140px] text-emerald-300/10"><i class="fas fa-tree"></i></div>
+        <div class="relative z-10">
+          <span class="cs-pill"><i class="fas fa-sitemap"></i> Official tournament structure</span>
+          <h1 class="brand-text mt-3 text-3xl font-black sm:text-5xl">THE ROAD TO<br class="sm:hidden"> EVERGREEN</h1>
+          <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-300">From the opening Grove League fixtures to the Evergreen Grand Final, follow every stage of the Season 6 Clash Squad competition.</p>
+          <div class="mt-5 flex flex-wrap gap-2">
+            <a class="stage-jump" href="#grove-league">01 · Grove League</a><a class="stage-jump" href="#canopy-knockout">02 · Canopy Knockout</a><a class="stage-jump" href="#banyan-pine">03 · Banyan & Pine</a><a class="stage-jump" href="#evergreen-final">04 · Grand Final</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="stage-summary" class="my-5 grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <div class="custom-card !mb-0 !p-4"><div class="section-kicker">Teams registered</div><div id="tourney-team-count" class="mt-2 text-3xl font-black text-white">—</div><div id="tourney-team-target" class="mt-1 text-[11px] text-slate-400">Configured capacity</div></div>
+        <div class="custom-card !mb-0 !p-4"><div class="section-kicker">League matches</div><div id="tourney-league-count" class="mt-2 text-3xl font-black text-white">—</div><div class="mt-1 text-[11px] text-slate-400">Fixture plan / published</div></div>
+        <div class="custom-card !mb-0 !p-4"><div class="section-kicker">League matchdays</div><div id="tourney-days-count" class="mt-2 text-3xl font-black text-white">—</div><div class="mt-1 text-[11px] text-slate-400">Four matches per day by default</div></div>
+        <div class="custom-card !mb-0 !p-4"><div class="section-kicker">Format</div><div class="mt-2 text-2xl font-black text-white">BO3</div><div class="mt-1 text-[11px] text-slate-400">Canopy Knockout / Evergreen Final</div></div>
+      </section>
+
+      <section id="grove-league" class="stage-anchor custom-card !p-4 sm:!p-6">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div><div class="section-kicker">Stage 01 · League phase</div><h2 class="glow-title mt-1 text-2xl font-black text-white">Grove League</h2><p class="mt-1 text-xs text-slate-400">Amazon Grove and Sundarbans Grove · +3 win · +1 draw · RD tie-break</p></div>
+          <span class="cs-pill">60 default matches · 15 days</span>
+        </div>
+        <div class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div class="rounded-2xl border border-emerald-400/20 bg-emerald-950/20 p-4"><div class="section-kicker">Group A</div><h3 class="mt-1 text-lg font-black text-white">Amazon Grove</h3><div id="league-group-a" class="mt-3 space-y-2"><div class="empty-state">Loading group standings…</div></div></div>
+          <div class="rounded-2xl border border-emerald-400/20 bg-emerald-950/20 p-4"><div class="section-kicker">Group B</div><h3 class="mt-1 text-lg font-black text-white">Sundarbans Grove</h3><div id="league-group-b" class="mt-3 space-y-2"><div class="empty-state">Loading group standings…</div></div></div>
+        </div>
+        <div class="mt-6 flex flex-wrap items-end justify-between gap-3"><div><h3 class="text-lg font-black text-white">Matchday schedule</h3><p id="league-schedule-note" class="mt-1 text-xs text-slate-400">Schedule will load from published fixtures.</p></div><span id="league-schedule-status" class="cs-pill">Schedule preview</span></div>
+        <div id="league-schedule" class="mt-4 space-y-5"><div class="empty-state">Waiting for team and fixture data…</div></div>
+      </section>
+
+      <section id="canopy-knockout" class="stage-anchor custom-card mt-5 !p-4 sm:!p-6">
+        <div class="flex flex-wrap items-start justify-between gap-3"><div><div class="section-kicker">Stage 02 · Elimination phase</div><h2 class="glow-title mt-1 text-2xl font-black text-white">Canopy Knockout</h2><p class="mt-1 text-xs text-slate-400">16 qualifiers · 8 best-of-three matches · 2 matches per day · 4 days</p></div><span id="knockout-qualifier-count" class="cs-pill">16 slots</span></div>
+        <div id="knockout-matches" class="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2"><div class="empty-state md:col-span-2">Knockout fixtures will appear when qualifiers are available.</div></div>
+      </section>
+
+      <section id="banyan-pine" class="stage-anchor custom-card mt-5 !p-4 sm:!p-6">
+        <div><div class="section-kicker">Stage 03 · Championship playoffs</div><h2 class="glow-title mt-1 text-2xl font-black text-white">Banyan & Pine Playoffs</h2><p class="mt-1 text-xs text-slate-400">Eight advancing teams split into the two playoff groups before semifinals and group finals.</p></div>
+        <div class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div class="rounded-2xl border border-amber-300/20 bg-amber-300/5 p-4"><div class="section-kicker !text-amber-300">Ranks 1–4</div><h3 class="mt-1 text-lg font-black text-white">Group Banyan</h3><div id="banyan-group" class="mt-3 space-y-2"><div class="empty-state">Playoff seeds pending.</div></div></div>
+          <div class="rounded-2xl border border-sky-300/20 bg-sky-300/5 p-4"><div class="section-kicker !text-sky-300">Ranks 5–8</div><h3 class="mt-1 text-lg font-black text-white">Group Pine</h3><div id="pine-group" class="mt-3 space-y-2"><div class="empty-state">Playoff seeds pending.</div></div></div>
+        </div>
+        <div class="mt-6"><h3 class="text-lg font-black text-white">Semifinals</h3><p class="mt-1 text-xs text-slate-400">Cross-group seed matchups; published results replace the provisional bracket automatically.</p><div id="playoff-semifinals" class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2"><div class="empty-state md:col-span-2">Semifinal bracket pending.</div></div></div>
+        <div class="mt-6"><h3 class="text-lg font-black text-white">Group Finals</h3><div id="playoff-finals" class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2"><div class="empty-state md:col-span-2">Finals pending.</div></div></div>
+      </section>
+
+      <section id="evergreen-final" class="stage-anchor custom-card champion-card mt-5 !p-4 sm:!p-6">
+        <div class="flex flex-wrap items-center justify-between gap-3"><div><div class="section-kicker !text-amber-300">Grand Final · Season 6 title match</div><h2 class="mt-1 text-2xl font-black text-white sm:text-3xl">Evergreen Grand Final</h2><p class="mt-1 text-xs text-slate-300">W_A vs W_B · Best of three</p></div><i class="fas fa-crown text-4xl text-amber-300"></i></div>
+        <div id="grand-final-match" class="mt-5"><div class="empty-state">The Evergreen Grand Final matchup will be announced after the playoff finals.</div></div>
+      </section>
+
+      <footer class="mt-8 border-t border-white/10 py-5 text-center text-[11px] text-slate-500"><div class="font-bold text-slate-300">SRP-ESPORTS · Season 6 — Save Trees</div><div class="mt-1">Fixture previews are clearly marked until an administrator publishes the official schedule.</div></footer>
+    </main>
+  </div>
+  <nav id="mobile-bottom-nav" class="mobile-bottom-nav md:hidden" aria-label="Mobile navigation"></nav>
+  <div id="social-links" class="socials" aria-label="SRP social links"></div>
+  <div id="srp-match-modal" class="modal-overlay fixed inset-0 z-[260] hidden items-center justify-center p-3 sm:p-5" role="dialog" aria-modal="true" aria-labelledby="match-modal-title" onclick="if(event.target===this) SRPTournament.closeMatchModal()">
+    <div class="custom-card modal-content my-auto max-h-[92vh] w-full max-w-2xl overflow-y-auto !m-0 !p-4 sm:!p-6"><div class="flex items-start justify-between gap-3"><div><div class="section-kicker">Official match report</div><h2 id="match-modal-title" class="mt-1 text-xl font-black text-white">Match details</h2></div><button class="rounded-lg bg-white/5 px-3 py-2 text-slate-300 hover:text-white" type="button" onclick="SRPTournament.closeMatchModal()" aria-label="Close match details"><i class="fas fa-times"></i></button></div><div id="match-modal-content" class="mt-4"></div></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="./js/firebase.js"></script>
+  <script src="./js/tournament.js"></script>
+  <script>
+    (function () {
+      const themeSelect = document.getElementById('theme-select');
+      const allowed = ['save-trees', 'midnight-blue', 'crimson-void', 'cyber-emerald', 'save-our-oceans'];
+      function applyTheme() {
+        const saved = localStorage.getItem('srp_s6_theme_override');
+        document.body.setAttribute('data-theme', saved && allowed.includes(saved) ? saved : (window.SRP?.settings?.theme || 'save-trees'));
+        if (themeSelect) themeSelect.value = saved || '';
+      }
+      themeSelect?.addEventListener('change', function () { if (themeSelect.value && allowed.includes(themeSelect.value)) localStorage.setItem('srp_s6_theme_override', themeSelect.value); else localStorage.removeItem('srp_s6_theme_override'); applyTheme(); });
+      window.addEventListener('storage', function (event) { if (event.key === 'srp_s6_theme_override') applyTheme(); });
+      const sharedDrawerToggle = window.toggleMobileDrawer;
+      window.toggleMobileDrawer = function () {
+        if (typeof sharedDrawerToggle === 'function') sharedDrawerToggle();
+        const sidebar = document.getElementById('app-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        const closed = sidebar?.classList.contains('-translate-x-full');
+        backdrop?.classList.toggle('active', !closed && window.innerWidth < 768);
+      };
+      initSrpCore('tournament');
+      onSrpDataUpdate(function () { applyTheme(); SRPTournament.renderSocialLinks(); SRPTournament.renderTournament(); });
+      SRPTournament.renderTournament();
+      applyTheme();
+    })();
+  </script>
+</body>
+</html>

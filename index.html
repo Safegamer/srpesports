@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#052e1e">
+  <meta name="description" content="SRP-ESPORTS Season 6 — Save Trees. Official Free Fire Clash Squad tournament leaderboard, scoreboards, teams and player profiles.">
+  <meta name="color-scheme" content="dark">
+  <title>SRP-ESPORTS Season 6 | Leaderboard</title>
+  <link rel="manifest" href="./app.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="./css/theme.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { color-scheme: dark; }
+    html { scroll-behavior: smooth; }
+    body { min-height: 100vh; }
+    .app-sidebar { width: 16rem; }
+    .page-main { min-width: 0; }
+    .hero-forest { background: radial-gradient(circle at 85% 18%, rgba(74,222,128,.22), transparent 34%), linear-gradient(125deg, rgba(6,45,29,.94), rgba(2,12,8,.78)); }
+    .stat-card { min-height: 112px; }
+    .section-kicker { color: var(--theme-accent-text); font-size: .68rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+    .table-wrap { overflow-x: auto; scrollbar-width: thin; }
+    .table-wrap table { min-width: 620px; width: 100%; border-collapse: separate; border-spacing: 0 6px; }
+    .table-wrap th { padding: 8px 10px; color: #94a3b8; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+    .table-wrap td { padding: 11px 10px; font-size: 12px; white-space: nowrap; }
+    .table-wrap tbody tr td:first-child { border-radius: 10px 0 0 10px; }
+    .table-wrap tbody tr td:last-child { border-radius: 0 10px 10px 0; }
+    .empty-state { border: 1px dashed rgba(148,163,184,.22); border-radius: 14px; padding: 24px 14px; color: #94a3b8; text-align: center; }
+    .sidebar-backdrop { display: none; }
+    @media (max-width: 767px) {
+      .app-sidebar { transition: transform .28s cubic-bezier(.22,1,.36,1); }
+      .sidebar-backdrop.active { display: block; position: fixed; inset: 0; z-index: 39; background: rgba(0,0,0,.65); backdrop-filter: blur(3px); }
+    }
+  </style>
+</head>
+<body data-theme="save-trees">
+  <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="toggleMobileDrawer()" aria-hidden="true"></div>
+  <aside id="app-sidebar" class="app-sidebar fixed inset-y-0 left-0 z-50 p-5 overflow-y-auto -translate-x-full md:translate-x-0">
+    <div class="text-sm text-slate-400">Loading navigation…</div>
+  </aside>
+
+  <div class="page-main min-h-screen md:ml-64">
+    <header class="sticky top-0 z-30 border-b border-white/10 bg-black/35 backdrop-blur-xl">
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div class="flex min-w-0 items-center gap-3">
+          <button type="button" onclick="toggleMobileDrawer()" class="md:hidden rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-200" aria-label="Open navigation"><i class="fas fa-bars"></i></button>
+          <div class="min-w-0">
+            <div class="text-[10px] font-black uppercase tracking-[.22em] text-emerald-300">Official tournament portal</div>
+            <div class="truncate text-sm font-extrabold text-white sm:text-base">SRP-ESPORTS <span class="text-emerald-300">/ Season 6</span></div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <label for="theme-select" class="sr-only">Colour theme</label>
+          <select id="theme-select" class="custom-select !w-auto !max-w-[138px] !py-2 !px-2 text-[11px]" aria-label="Choose site theme">
+            <option value="">Season default</option>
+            <option value="save-trees">Save Trees</option>
+            <option value="midnight-blue">Midnight Blue</option>
+            <option value="crimson-void">Crimson Void</option>
+            <option value="cyber-emerald">Cyber Emerald</option>
+            <option value="save-our-oceans">Save Our Oceans</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-7xl px-4 pb-28 pt-5 sm:px-6 md:pb-12 md:pt-8">
+      <div id="live-stream-slot"></div>
+
+      <section class="hero-forest custom-card relative overflow-hidden !mb-5 !p-5 sm:!p-8">
+        <div class="pointer-events-none absolute -right-7 -top-8 text-[150px] text-emerald-300/10"><i class="fas fa-leaf"></i></div>
+        <div class="relative z-10 max-w-3xl">
+          <div class="mb-3 flex flex-wrap items-center gap-2">
+            <span class="cs-pill"><i class="fas fa-seedling"></i> Save Trees Edition</span>
+            <span class="text-[10px] font-bold uppercase tracking-[.18em] text-emerald-200/80">Free Fire Clash Squad</span>
+          </div>
+          <h1 class="glow-title brand-text text-3xl font-black leading-tight sm:text-5xl">SEASON 6<br class="sm:hidden"> LEADERBOARD</h1>
+          <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">Every round counts. Follow the Grove League, track your squad, and see who rises through the canopy.</p>
+          <div class="mt-5 flex flex-wrap gap-2">
+            <a href="tournament.html" class="custom-btn"><i class="fas fa-sitemap"></i> Tournament format</a>
+            <a href="players.html" class="custom-btn secondary"><i class="fas fa-users"></i> Player stats</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="announcement-slot" class="hidden custom-card !mb-5 !border-amber-300/30 !bg-amber-300/5" aria-live="polite"></section>
+
+      <section class="mb-6 grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <article class="custom-card stat-card !mb-0 !p-4">
+          <div class="flex items-center justify-between"><span class="section-kicker">Registered teams</span><i class="fas fa-shield-halved text-emerald-300"></i></div>
+          <div id="stat-teams" class="mt-3 text-3xl font-black text-white">—</div>
+          <div id="stat-team-target" class="mt-1 text-[11px] text-slate-400">Season capacity</div>
+        </article>
+        <article class="custom-card stat-card !mb-0 !p-4">
+          <div class="flex items-center justify-between"><span class="section-kicker">Matches played</span><i class="fas fa-crosshairs text-emerald-300"></i></div>
+          <div id="stat-matches" class="mt-3 text-3xl font-black text-white">—</div>
+          <div class="mt-1 text-[11px] text-slate-400">Recorded scoreboards</div>
+        </article>
+        <article class="custom-card stat-card !mb-0 !p-4">
+          <div class="flex items-center justify-between"><span class="section-kicker">Players</span><i class="fas fa-user-group text-emerald-300"></i></div>
+          <div id="stat-players" class="mt-3 text-3xl font-black text-white">—</div>
+          <div class="mt-1 text-[11px] text-slate-400">Starters and substitutes</div>
+        </article>
+        <article class="custom-card stat-card !mb-0 !p-4">
+          <div class="flex items-center justify-between"><span class="section-kicker">Prize pool</span><i class="fas fa-trophy text-amber-300"></i></div>
+          <div id="stat-prize" class="mt-3 truncate text-2xl font-black text-white">—</div>
+          <div class="mt-1 text-[11px] text-slate-400">Season reward pool</div>
+        </article>
+      </section>
+
+      <section class="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(300px,.8fr)]">
+        <article class="custom-card !mb-0 !p-4 sm:!p-5">
+          <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div><div class="section-kicker">Grove League · Stage 1</div><h2 class="glow-title mt-1 text-xl font-black text-white">Overall standings</h2><p class="mt-1 text-xs text-slate-400">Win +3 · Draw +1 · No deductions · RD breaks ties</p></div>
+            <a href="tournament.html#grove-league" class="text-xs font-bold text-emerald-300 hover:text-white">Full schedule <i class="fas fa-arrow-right ml-1"></i></a>
+          </div>
+          <div class="mb-3 flex flex-wrap items-center gap-2">
+            <input id="home-standings-search" class="custom-input !max-w-xs !py-2 text-xs" type="search" placeholder="Search team name…" autocomplete="off">
+            <span class="text-[10px] text-slate-500">Tap a team to open its roster and form.</span>
+          </div>
+          <div class="table-wrap">
+            <table aria-label="Season 6 overall standings">
+              <thead><tr><th class="text-left">#</th><th class="text-left">Team</th><th>M</th><th>W</th><th>D</th><th>L</th><th>RD</th><th>PTS</th><th>Form</th></tr></thead>
+              <tbody id="home-standings-body"><tr><td colspan="9"><div class="empty-state">Connecting to the live leaderboard…</div></td></tr></tbody>
+            </table>
+          </div>
+          <div class="mt-3 flex flex-wrap gap-4 text-[10px] text-slate-500"><span><i class="fas fa-medal text-amber-300 mr-1"></i>Top 3 positions</span><span><i class="fas fa-ban text-red-400 mr-1"></i>Disqualified teams rank last</span></div>
+        </article>
+
+        <div class="space-y-5">
+          <article class="custom-card !mb-0 !p-4 sm:!p-5">
+            <div class="section-kicker">Amazon Grove</div><h2 class="mt-1 text-lg font-black text-white">Group A</h2>
+            <div id="group-a-table" class="mt-3 space-y-2"><div class="empty-state">Waiting for team data…</div></div>
+          </article>
+          <article class="custom-card !mb-0 !p-4 sm:!p-5">
+            <div class="section-kicker">Sundarbans Grove</div><h2 class="mt-1 text-lg font-black text-white">Group B</h2>
+            <div id="group-b-table" class="mt-3 space-y-2"><div class="empty-state">Waiting for team data…</div></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="custom-card mt-5 !p-4 sm:!p-5">
+        <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div><div class="section-kicker">Match centre</div><h2 class="glow-title mt-1 text-xl font-black text-white">Latest scoreboards</h2><p class="mt-1 text-xs text-slate-400">Select a match for map, player statistics and VOD / proof link.</p></div>
+          <span id="match-centre-count" class="cs-pill">0 scoreboards</span>
+        </div>
+        <div id="recent-match-grid" class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div class="empty-state md:col-span-2 xl:col-span-3">No scoreboards have been published yet.</div>
+        </div>
+      </section>
+
+      <footer class="mt-8 border-t border-white/10 py-5 text-center text-[11px] text-slate-500">
+        <div class="font-bold text-slate-300">SRP-ESPORTS · Season 6 — Save Trees</div>
+        <div class="mt-1">Official tournament information is updated from the live tournament database.</div>
+      </footer>
+    </main>
+  </div>
+
+  <nav id="mobile-bottom-nav" class="mobile-bottom-nav md:hidden" aria-label="Mobile navigation"></nav>
+  <div id="social-links" class="socials" aria-label="SRP social links"></div>
+  <div id="srp-match-modal" class="modal-overlay fixed inset-0 z-[260] hidden items-center justify-center p-3 sm:p-5" role="dialog" aria-modal="true" aria-labelledby="match-modal-title" onclick="if(event.target===this) SRPTournament.closeMatchModal()">
+    <div class="custom-card modal-content my-auto max-h-[92vh] w-full max-w-2xl overflow-y-auto !m-0 !p-4 sm:!p-6">
+      <div class="flex items-start justify-between gap-3"><div><div class="section-kicker">Official match report</div><h2 id="match-modal-title" class="mt-1 text-xl font-black text-white">Match details</h2></div><button class="rounded-lg bg-white/5 px-3 py-2 text-slate-300 hover:text-white" type="button" onclick="SRPTournament.closeMatchModal()" aria-label="Close match details"><i class="fas fa-times"></i></button></div>
+      <div id="match-modal-content" class="mt-4"></div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="./js/firebase.js"></script>
+  <script src="./js/tournament.js"></script>
+  <script>
+    (function () {
+      const themeSelect = document.getElementById('theme-select');
+      const allowed = ['save-trees', 'midnight-blue', 'crimson-void', 'cyber-emerald', 'save-our-oceans'];
+      function applyTheme() {
+        const saved = localStorage.getItem('srp_s6_theme_override');
+        if (saved && allowed.includes(saved)) document.body.setAttribute('data-theme', saved);
+        else document.body.setAttribute('data-theme', window.SRP?.settings?.theme || 'save-trees');
+        if (themeSelect) themeSelect.value = saved || '';
+      }
+      themeSelect?.addEventListener('change', function () {
+        const value = themeSelect.value;
+        if (value && allowed.includes(value)) localStorage.setItem('srp_s6_theme_override', value);
+        else localStorage.removeItem('srp_s6_theme_override');
+        applyTheme();
+      });
+      window.addEventListener('storage', function (event) { if (event.key === 'srp_s6_theme_override') applyTheme(); });
+      const sharedDrawerToggle = window.toggleMobileDrawer;
+      window.toggleMobileDrawer = function () {
+        if (typeof sharedDrawerToggle === 'function') sharedDrawerToggle();
+        const sidebar = document.getElementById('app-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        const closed = sidebar?.classList.contains('-translate-x-full');
+        backdrop?.classList.toggle('active', !closed && window.innerWidth < 768);
+      };
+      initSrpCore('index');
+      onSrpDataUpdate(function () { applyTheme(); SRPTournament.renderSocialLinks(); SRPTournament.renderHome(); });
+      document.getElementById('home-standings-search').addEventListener('input', SRPTournament.filterHomeStandings);
+      SRPTournament.renderHome();
+      applyTheme();
+    })();
+  </script>
+</body>
+</html>

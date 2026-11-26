@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#052e1e">
+  <meta name="color-scheme" content="dark">
+  <link rel="manifest" href="./app.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="./css/theme.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    .app-sidebar { width: 16rem; }
+    .section-kicker { color: var(--theme-accent-text); font-size: .68rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+    .empty-state { border: 1px dashed rgba(148,163,184,.22); border-radius: 14px; padding: 24px 14px; color: #94a3b8; text-align: center; }
+    .info-tile { border: 1px solid var(--theme-card-border); background: rgba(255,255,255,.025); border-radius: 15px; padding: 16px; }
+    .rule-copy { color: #cbd5e1; font-size: .875rem; line-height: 1.7; white-space: pre-line; }
+    .field-label { display: block; margin-bottom: 6px; color: #cbd5e1; font-size: .75rem; font-weight: 700; }
+    .field-help { margin-top: 5px; color: #94a3b8; font-size: .68rem; }
+    .player-field-grid { display: grid; grid-template-columns: minmax(0,1fr); gap: 10px; }
+    @media (min-width: 640px) { .player-field-grid { grid-template-columns: 1.1fr 1fr .8fr; } }
+    .sidebar-backdrop { display: none; }
+    @media (max-width: 767px) {
+      .app-sidebar { transition: transform .28s cubic-bezier(.22,1,.36,1); }
+      .sidebar-backdrop.active { display: block; position: fixed; inset: 0; z-index: 39; background: rgba(0,0,0,.65); backdrop-filter: blur(3px); }
+    }
+  </style>
+  <meta name="description" content="SRP-ESPORTS Season 6 — Rules & Prize.">
+  <title>SRP-ESPORTS Season 6 | Rules & Prize</title>
+</head>
+<body data-theme="save-trees" data-srp-page="rules">
+  <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="toggleMobileDrawer()" aria-hidden="true"></div>
+  <aside id="app-sidebar" class="app-sidebar fixed inset-y-0 left-0 z-50 p-5 overflow-y-auto -translate-x-full md:translate-x-0"><div class="text-sm text-slate-400">Loading navigation…</div></aside>
+  <div class="min-h-screen md:ml-64">
+    <header class="sticky top-0 z-30 border-b border-white/10 bg-black/35 backdrop-blur-xl"><div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+      <div class="flex min-w-0 items-center gap-3"><button type="button" onclick="toggleMobileDrawer()" class="md:hidden rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-200" aria-label="Open navigation"><i class="fas fa-bars"></i></button><div class="min-w-0"><div class="text-[10px] font-black uppercase tracking-[.22em] text-emerald-300">Season handbook</div><div class="truncate text-sm font-extrabold text-white sm:text-base">Rules & Prize <span class="text-emerald-300">/ Season 6</span></div></div></div>
+      <select id="theme-select" class="custom-select !w-auto !max-w-[138px] !py-2 !px-2 text-[11px]" aria-label="Choose site theme"><option value="">Season default</option><option value="save-trees">Save Trees</option><option value="midnight-blue">Midnight Blue</option><option value="crimson-void">Crimson Void</option><option value="cyber-emerald">Cyber Emerald</option><option value="save-our-oceans">Save Our Oceans</option></select>
+    </div></header>
+    <main class="mx-auto max-w-7xl px-4 pb-28 pt-5 sm:px-6 md:pb-12 md:pt-8">
+      <div id="live-stream-slot"></div>
+      
+      <section class="custom-card relative overflow-hidden !p-5 sm:!p-8">
+        <div class="pointer-events-none absolute -right-4 -top-8 text-[145px] text-emerald-300/10"><i class="fas fa-scale-balanced"></i></div>
+        <div class="relative z-10"><div class="section-kicker">Official competition handbook</div><h1 class="brand-text mt-2 text-3xl font-black sm:text-5xl">RULES & PRIZE</h1><p class="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Season 6 format, scoring framework, roster limits and match operations. Any room-specific or event-specific instruction will be published by tournament administrators before the affected match.</p>
+        <div class="mt-4 flex flex-wrap gap-2"><span class="cs-pill">Free Fire · Clash Squad</span><span class="cs-pill">Season 6 · Save Trees</span><span id="rules-prize-pill" class="cs-pill">Prize pool · TBA</span></div></div>
+      </section>
+      <section class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <article class="info-tile"><div class="section-kicker">Team lineup</div><div class="mt-2 text-2xl font-black text-white">4 + 2</div><p class="mt-1 text-xs text-slate-400">Four starters and up to two substitutes by default. The configured season limit applies.</p></article>
+        <article class="info-tile"><div class="section-kicker">Win points</div><div class="mt-2 text-2xl font-black text-emerald-300">+3</div><p class="mt-1 text-xs text-slate-400">A win earns three points.</p></article>
+        <article class="info-tile"><div class="section-kicker">Draw points</div><div class="mt-2 text-2xl font-black text-sky-300">+1</div><p class="mt-1 text-xs text-slate-400">A draw earns one point. No ordinary loss deduction.</p></article>
+        <article class="info-tile"><div class="section-kicker">Maps</div><div class="mt-2 text-sm font-black leading-6 text-white">Bermuda · Purgatory · Kalahari · Alpine · NeXTerra · Solara</div><p class="mt-1 text-xs text-slate-400">The map for each match is shown on its official fixture.</p></article>
+      </section>
+      <section class="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <article class="custom-card !mb-0 !p-5"><div class="section-kicker">Competition format</div><h2 class="mt-1 text-xl font-black text-white">Four stages to the title</h2>
+          <div class="mt-4 space-y-3">
+            <div class="info-tile"><div class="flex items-center justify-between gap-2"><b class="text-white">Stage 1 · Grove League</b><span class="cs-pill">60 matches default</span></div><p class="mt-2 text-xs leading-5 text-slate-400">Amazon Grove (Group A) and Sundarbans Grove (Group B). The default season blueprint has 24 teams, five matches per team and four matches per day across 15 days.</p></div>
+            <div class="info-tile"><div class="flex items-center justify-between gap-2"><b class="text-white">Stage 2 · Canopy Knockout</b><span class="cs-pill">16 → 8</span></div><p class="mt-2 text-xs leading-5 text-slate-400">Sixteen qualifiers compete in eight best-of-three series, with the default plan scheduling two series per day over four days.</p></div>
+            <div class="info-tile"><div class="flex items-center justify-between gap-2"><b class="text-white">Stage 3 · Banyan & Pine Playoffs</b><span class="cs-pill">8 teams</span></div><p class="mt-2 text-xs leading-5 text-slate-400">Eight teams are split into Banyan (ranks 1–4) and Pine (ranks 5–8), then progress through semifinals and group finals.</p></div>
+            <div class="info-tile"><div class="flex items-center justify-between gap-2"><b class="text-white">Stage 4 · Evergreen Grand Final</b><span class="cs-pill">BO3</span></div><p class="mt-2 text-xs leading-5 text-slate-400">The Banyan and Pine group champions meet in a best-of-three title match.</p></div>
+          </div>
+        </article>
+        <article class="custom-card !mb-0 !p-5"><div class="section-kicker">Standings & integrity</div><h2 class="mt-1 text-xl font-black text-white">How the table is calculated</h2>
+          <div class="mt-4 space-y-3 text-sm leading-6 text-slate-300">
+            <p><b class="text-white">Points:</b> +3 for a win, +1 for a draw and 0 for a loss.</p>
+            <p><b class="text-white">Round difference (RD):</b> the team’s scored rounds minus conceded rounds across recorded matches.</p>
+            <p><b class="text-white">Ranking:</b> points first, then RD, then team name as the stable final ordering.</p>
+            <p><b class="text-white">Disqualification:</b> a disqualified team is moved below eligible teams and visibly marked in the standings. The admin-published reason is shown where available.</p>
+            <p><b class="text-white">Official results:</b> only scoreboards published to the tournament database count toward the public standings and player statistics.</p>
+            <p><b class="text-white">Proof / VOD:</b> administrators may attach a match proof or VOD link to an official result.</p>
+          </div>
+          <div class="mt-5 rounded-xl border border-amber-300/20 bg-amber-300/5 p-4"><div class="flex items-center gap-2 text-sm font-black text-amber-200"><i class="fas fa-circle-info"></i> Match-day instructions</div><p class="mt-2 text-xs leading-5 text-slate-300">Room ID, password, match start time, map selection and any match-specific instructions are communicated through official SRP channels. Do not rely on unofficial messages.</p></div>
+        </article>
+      </section>
+      <section class="custom-card mt-5 !p-5"><div class="section-kicker">Administrator-published additions</div><h2 class="mt-1 text-xl font-black text-white">Latest official rules & notices</h2><div id="published-rules" class="mt-4"><div class="empty-state">No additional rule notice has been published yet. The core season format above is available now.</div></div><p id="rules-updated" class="mt-3 text-[10px] text-slate-500"></p></section>
+      <section class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[.025] p-4"><div><div class="font-black text-white">Ready to follow the competition?</div><p class="mt-1 text-xs text-slate-400">See published fixtures, standings and player performance.</p></div><div class="flex flex-wrap gap-2"><a class="custom-btn" href="tournament.html">Tournament <i class="fas fa-arrow-right"></i></a><a class="custom-btn secondary" href="register.html">Team registration</a></div></section>
+
+      <footer class="mt-8 border-t border-white/10 py-5 text-center text-[11px] text-slate-500"><div class="font-bold text-slate-300">SRP-ESPORTS · Season 6 — Save Trees</div><div class="mt-1">Official updates are published through the tournament portal.</div></footer>
+    </main>
+  </div>
+  <nav id="mobile-bottom-nav" class="mobile-bottom-nav md:hidden" aria-label="Mobile navigation"></nav>
+  <div id="social-links" class="socials" aria-label="SRP social links"></div>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="./js/firebase.js"></script>
+  <script src="./js/secondary-pages.js"></script>
+  <script>initSecondaryPage('rules');</script>
+  
+</body>
+</html>
