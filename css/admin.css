@@ -34,7 +34,7 @@
     .sidebar-user{padding:12px;border:1px solid var(--theme-card-border);border-radius:13px;background:var(--theme-card-bg)}
     .role-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border-radius:7px;background:var(--theme-badge-bg);border:1px solid var(--theme-badge-border);color:var(--theme-badge-text);font-size:8px;font-weight:1000;letter-spacing:.1em;text-transform:uppercase}
     .main-area{min-height:100vh;margin-left:var(--admin-sidebar);padding:0 28px 50px;min-width:0}
-    .topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:13px;padding:16px 18px 14px;margin:0 -18px 24px;background:linear-gradient(110deg,rgba(5,46,30,.98),rgba(3,35,23,.98));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(110,231,183,.24);box-shadow:0 8px 24px rgba(2,20,12,.18)}
+    .topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:13px;padding:16px 28px 14px;margin:0 -28px 24px;background:linear-gradient(110deg,rgba(5,46,30,.91),rgba(3,35,23,.91));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(110,231,183,.2);box-shadow:0 12px 30px rgba(1,12,7,.2)}
     .topbar-left{display:flex;align-items:center;gap:12px;min-width:0}
     .topbar-title{font-size:18px;font-weight:1000;letter-spacing:-.02em}
     .topbar-sub{margin-top:3px;color:#7f8c9c;font-size:9px;letter-spacing:.08em}
@@ -111,5 +111,30 @@
     .toast.error{border-color:rgba(248,113,113,.35);background:#2a0e13}
     .mobile-backdrop{display:none}
     @media(max-width:1050px){.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.content-grid{grid-template-columns:1fr}}
-    @media(max-width:760px){:root{--admin-sidebar:260px}.sidebar{transform:translateX(-105%)}.sidebar.open{transform:translateX(0)}.mobile-backdrop.open{display:block;position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.62);backdrop-filter:blur(2px)}.main-area{margin-left:0;padding:0 15px 38px}.icon-action{display:grid}.topbar{padding:13px 15px;margin:0 -15px 24px}.topbar-title{font-size:15px}.topbar-sub{font-size:8px}.page-heading{font-size:24px}.hero-card{padding:21px}.topbar-actions .quiet-action span{display:inline}}
-    @media(max-width:480px){.auth-card{padding:25px 21px}.stat-grid{gap:8px}.stat-card{padding:12px}.stat-number{font-size:23px}.quick-grid{grid-template-columns:1fr}.form-grid,.permission-grid{grid-template-columns:1fr}.form-row.full{grid-column:auto}.topbar{align-items:flex-start;flex-wrap:wrap}.topbar-actions{width:100%;justify-content:flex-end;gap:7px}.quiet-action,.danger-action{padding:9px}.section-heading{margin-bottom:14px}}
+    @media(max-width:760px){:root{--admin-sidebar:260px}.sidebar{transform:translateX(-105%)}.sidebar.open{transform:translateX(0)}.mobile-backdrop.open{display:block;position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.62);backdrop-filter:blur(2px)}.main-area{margin-left:0;padding:0 15px 38px}.icon-action{display:grid}.topbar{padding:13px 0}.topbar-title{font-size:15px}.topbar-sub{font-size:8px}.page-heading{font-size:24px}.hero-card{padding:21px}.topbar-actions .quiet-action span{display:none}}
+    @media(max-width:480px){.auth-card{padding:25px 21px}.stat-grid{gap:8px}.stat-card{padding:12px}.stat-number{font-size:23px}.quick-grid{grid-template-columns:1fr}.form-grid,.permission-grid{grid-template-columns:1fr}.form-row.full{grid-column:auto}.topbar-actions{gap:5px}.quiet-action,.danger-action{padding:9px}.section-heading{margin-bottom:14px}}
+
+    /* Save Trees glass finish and consistent responsive admin surfaces. */
+    .admin-shell{background:radial-gradient(ellipse at 75% 0%,rgba(16,112,67,.17),transparent 40%),radial-gradient(ellipse at 12% 38%,rgba(34,197,94,.07),transparent 30%)}
+    .sidebar,.auth-card,.panel-card,.stat-card,.sidebar-user,.modal-card{border-color:rgba(110,231,183,.19);background:rgba(4,25,17,.76);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 18px 48px rgba(0,10,5,.2)}
+    .sidebar{background:rgba(3,22,15,.88)}
+    .auth-card{background:rgba(4,27,18,.82);box-shadow:0 28px 90px rgba(0,10,5,.44)}
+    .panel-card,.stat-card{transition:transform .28s cubic-bezier(.2,.75,.25,1),border-color .28s ease,box-shadow .28s ease,background .28s ease}
+    .panel-card:hover,.stat-card:hover{border-color:rgba(110,231,183,.3);box-shadow:0 20px 52px rgba(0,10,5,.26)}
+    .hero-card{background:radial-gradient(circle at 88% 10%,rgba(74,222,128,.23),transparent 36%),linear-gradient(125deg,rgba(6,56,35,.88),rgba(2,20,13,.82));box-shadow:0 20px 56px rgba(0,10,5,.24)}
+    .quick-link,.mini-action,.quiet-action,.danger-action,.icon-action,.primary-action,.side-link{transition:transform .22s cubic-bezier(.2,.75,.25,1),border-color .22s ease,background .22s ease,color .22s ease,box-shadow .22s ease}
+    .quick-link:hover,.mini-action:hover{transform:translateY(-2px)}
+    .primary-action:hover,.quiet-action:hover,.danger-action:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(34,197,94,.16)}
+    .admin-field,.admin-select,.admin-textarea,.search-field{transition:border-color .2s ease,box-shadow .2s ease,background .2s ease}
+    .admin-field:focus,.admin-select:focus,.admin-textarea:focus,.search-field:focus{background:rgba(2,18,12,.88)}
+    .setting-toggle{min-height:58px;padding:12px 14px;border:1px solid rgba(110,231,183,.15);border-radius:12px;background:rgba(16,185,129,.055);cursor:pointer}
+    .setting-toggle input{width:18px;height:18px;flex:0 0 auto;accent-color:#22c55e}
+    .setting-toggle span{display:grid;gap:4px}
+    .setting-toggle strong{color:#e9fff0;font-size:11px;font-weight:900}
+    .setting-toggle small{color:#91aa9b;font-size:9px;line-height:1.45}
+    .modal-backdrop{background:rgba(1,10,6,.66);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+    .modal-card{background:rgba(3,24,16,.93);box-shadow:0 30px 100px rgba(0,8,4,.58)}
+    :where(button,a,input,select,textarea):focus-visible{outline:2px solid rgba(74,222,128,.85);outline-offset:3px}
+    @media(max-width:760px){.topbar{margin:0 -15px 24px;padding:13px 15px}.topbar-actions .quiet-action span{display:inline}}
+    @media(max-width:480px){.topbar{align-items:flex-start;flex-wrap:wrap}.topbar-actions{width:100%;justify-content:flex-end;gap:7px}.quiet-action,.danger-action{padding:9px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
