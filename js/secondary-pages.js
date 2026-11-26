@@ -152,7 +152,7 @@
       console.error('Team registration failed:', error);
       status.hidden = false; status.className = 'registration-message error';
       const messages = {
-        'permission-denied': 'The token is invalid or has already been used. Check it with your tournament contact.',
+        'permission-denied': 'The token may be invalid or used, or the registration rules may not be published yet. Contact the tournament administrator.',
         'failed-precondition': 'Registration is closed right now.',
         'resource-exhausted': 'All team places are full.',
         'not-found': 'That registration token is invalid or has already been used.',
