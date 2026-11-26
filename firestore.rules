@@ -608,7 +608,8 @@ service cloud.firestore {
     }
   }
 })
-        && settingsBefore.registrationOpen == true || settingsBefore.registration.open == true
+        && (settingsBefore.get('registrationOpen', false) == true
+          || settingsBefore.get('registration', {}).get('open', false) == true)
         && settingsAfter.lastRegistrationId == applicationId
         && settingsAfter.registrationReservedCount == settingsBefore.get('registrationReservedCount', 0) + 1
         && settingsAfter.registrationReservedCount <= settingsAfter.get('totalTeams', 24)
