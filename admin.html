@@ -106,6 +106,12 @@
         <div class="panel-card table-card"><div class="table-wrap"><table class="admin-table"><thead><tr><th>Team</th><th>Group</th><th>Status</th><th>Roster</th><th style="text-align:right">Actions</th></tr></thead><tbody id="teams-body"></tbody></table></div></div>
       </section>
 
+      <section class="admin-page" id="page-applications">
+        <div class="section-heading"><div><div class="eyebrow">Master review</div><h1 class="page-heading">Team Applications</h1><p class="page-description">Review captain details, player devices and optional player photos. Approving creates the team and roster.</p></div><button class="quiet-action" data-refresh="applications"><i class="fa-solid fa-rotate"></i> Refresh</button></div>
+        <div class="note-box" style="margin-bottom:14px">Applications and photos stay private. A token is returned to unused status if you reject an application.</div>
+        <div class="panel-card table-card"><div class="table-wrap"><table class="admin-table"><thead><tr><th>Team</th><th>Captain</th><th>Players</th><th>Submitted</th><th>Status</th><th style="text-align:right">Review</th></tr></thead><tbody id="applications-body"></tbody></table></div></div>
+      </section>
+
       <section class="admin-page" id="page-players">
         <div class="section-heading"><div><div class="eyebrow">Tournament management</div><h1 class="page-heading">Players</h1><p class="page-description">Manage player IGN, UID, device, role, team assignment and substitute status.</p></div><button class="primary-action" id="add-player-button"><i class="fa-solid fa-plus"></i> Add player</button></div>
         <div class="data-toolbar"><input class="search-field" id="player-search" placeholder="Search IGN, UID or team..."><button class="quiet-action" data-refresh="players"><i class="fa-solid fa-rotate"></i> Refresh</button></div>
