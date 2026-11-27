@@ -669,7 +669,7 @@ function renderMaintenanceMode() {
     screen.setAttribute('role', 'alertdialog');
     screen.setAttribute('aria-modal', 'true');
     screen.setAttribute('aria-labelledby', 'srp-maintenance-title');
-    screen.innerHTML = '<section class="srp-maintenance-card"><div class="srp-maintenance-mark" aria-hidden="true">SRP</div><div class="srp-maintenance-kicker">SRP-ESPORTS · SEASON 6</div><h1 id="srp-maintenance-title">We’ll be back soon</h1><p id="srp-maintenance-notice"></p><div class="srp-maintenance-foot"><span class="srp-maintenance-dot"></span> The tournament site is temporarily paused.</div></section>';
+    screen.innerHTML = '<section class="srp-maintenance-card"><div class="srp-maintenance-mark" aria-hidden="true">SRP</div><div class="srp-maintenance-kicker">SRP-ESPORTS · SEASON 6</div><h1 id="srp-maintenance-title">We’ll be back soon</h1><p id="srp-maintenance-notice"></p><a class="srp-maintenance-admin-link" href="./admin.html">Admin Panel Login</a><div class="srp-maintenance-foot"><span class="srp-maintenance-dot"></span> The tournament site is temporarily paused.</div></section>';
     document.body.appendChild(screen);
   }
   const notice = String(SRP.settings.maintenanceNotice || '').trim() || 'We’re making a few updates. Please check back soon.';
