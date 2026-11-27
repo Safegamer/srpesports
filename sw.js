@@ -1,4 +1,4 @@
-const CACHE_NAME = 'srp-esports-s6-admin-v12';
+const CACHE_NAME = 'srp-esports-s6-admin-v13';
 const APP_SHELL = [
   './', './index.html', './tournament.html', './players.html',
   './rules.html', './save-trees.html', './register.html', './register-success.html',
